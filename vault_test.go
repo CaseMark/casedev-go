@@ -172,12 +172,10 @@ func TestVaultConfirmUploadWithOptionalParams(t *testing.T) {
 		"id",
 		"objectId",
 		githubcomcasemarkcasedevgo.VaultConfirmUploadParams{
-			Body: githubcomcasemarkcasedevgo.VaultConfirmUploadParamsBodyObject{
-				SizeBytes:    githubcomcasemarkcasedevgo.F(int64(1)),
-				Success:      githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultConfirmUploadParamsBodyObjectSuccessTrue),
-				ErrorCode:    githubcomcasemarkcasedevgo.F("errorCode"),
-				ErrorMessage: githubcomcasemarkcasedevgo.F("errorMessage"),
-				Etag:         githubcomcasemarkcasedevgo.F("etag"),
+			Body: githubcomcasemarkcasedevgo.VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess{
+				SizeBytes: githubcomcasemarkcasedevgo.F(int64(1)),
+				Success:   githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccessTrue),
+				Etag:      githubcomcasemarkcasedevgo.F("etag"),
 			},
 		},
 	)
