@@ -859,14 +859,15 @@ func (r VaultConfirmUploadParams) MarshalJSON() (data []byte, err error) {
 }
 
 type VaultConfirmUploadParamsBody struct {
+	// Whether the upload succeeded
 	Success param.Field[VaultConfirmUploadParamsBodySuccess] `json:"success,required"`
-	// Client-side error code (required when success=false)
+	// Client-side error code
 	ErrorCode param.Field[string] `json:"errorCode"`
-	// Client-side error message (required when success=false)
+	// Client-side error message
 	ErrorMessage param.Field[string] `json:"errorMessage"`
 	// S3 ETag for the uploaded object (optional if client cannot access ETag header)
 	Etag param.Field[string] `json:"etag"`
-	// Uploaded file size in bytes (required when success=true)
+	// Uploaded file size in bytes
 	SizeBytes param.Field[int64] `json:"sizeBytes"`
 }
 
@@ -876,44 +877,76 @@ func (r VaultConfirmUploadParamsBody) MarshalJSON() (data []byte, err error) {
 
 func (r VaultConfirmUploadParamsBody) implementsVaultConfirmUploadParamsBodyUnion() {}
 
-// Satisfied by [VaultConfirmUploadParamsBodyObject],
-// [VaultConfirmUploadParamsBodyObject], [VaultConfirmUploadParamsBody].
+// Satisfied by [VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess],
+// [VaultConfirmUploadParamsBodyVaultConfirmUploadFailure],
+// [VaultConfirmUploadParamsBody].
 type VaultConfirmUploadParamsBodyUnion interface {
 	implementsVaultConfirmUploadParamsBodyUnion()
 }
 
-type VaultConfirmUploadParamsBodyObject struct {
-	// Uploaded file size in bytes (required when success=true)
-	SizeBytes param.Field[int64]                                     `json:"sizeBytes,required"`
-	Success   param.Field[VaultConfirmUploadParamsBodyObjectSuccess] `json:"success,required"`
-	// Client-side error code (required when success=false)
-	ErrorCode param.Field[string] `json:"errorCode"`
-	// Client-side error message (required when success=false)
-	ErrorMessage param.Field[string] `json:"errorMessage"`
+type VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess struct {
+	// Uploaded file size in bytes
+	SizeBytes param.Field[int64] `json:"sizeBytes,required"`
+	// Whether the upload succeeded
+	Success param.Field[VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess] `json:"success,required"`
 	// S3 ETag for the uploaded object (optional if client cannot access ETag header)
 	Etag param.Field[string] `json:"etag"`
 }
 
-func (r VaultConfirmUploadParamsBodyObject) MarshalJSON() (data []byte, err error) {
+func (r VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-func (r VaultConfirmUploadParamsBodyObject) implementsVaultConfirmUploadParamsBodyUnion() {}
+func (r VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess) implementsVaultConfirmUploadParamsBodyUnion() {
+}
 
-type VaultConfirmUploadParamsBodyObjectSuccess bool
+// Whether the upload succeeded
+type VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess bool
 
 const (
-	VaultConfirmUploadParamsBodyObjectSuccessTrue VaultConfirmUploadParamsBodyObjectSuccess = true
+	VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccessTrue VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess = true
 )
 
-func (r VaultConfirmUploadParamsBodyObjectSuccess) IsKnown() bool {
+func (r VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess) IsKnown() bool {
 	switch r {
-	case VaultConfirmUploadParamsBodyObjectSuccessTrue:
+	case VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccessTrue:
 		return true
 	}
 	return false
 }
 
+type VaultConfirmUploadParamsBodyVaultConfirmUploadFailure struct {
+	// Client-side error code
+	ErrorCode param.Field[string] `json:"errorCode,required"`
+	// Client-side error message
+	ErrorMessage param.Field[string] `json:"errorMessage,required"`
+	// Whether the upload succeeded
+	Success param.Field[VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess] `json:"success,required"`
+}
+
+func (r VaultConfirmUploadParamsBodyVaultConfirmUploadFailure) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r VaultConfirmUploadParamsBodyVaultConfirmUploadFailure) implementsVaultConfirmUploadParamsBodyUnion() {
+}
+
+// Whether the upload succeeded
+type VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess bool
+
+const (
+	VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccessFalse VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess = false
+)
+
+func (r VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess) IsKnown() bool {
+	switch r {
+	case VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccessFalse:
+		return true
+	}
+	return false
+}
+
+// Whether the upload succeeded
 type VaultConfirmUploadParamsBodySuccess bool
 
 const (
