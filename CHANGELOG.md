@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.2 (2026-02-20)
+
+Full Changelog: [v0.2.1...v0.2.2](https://github.com/CaseMark/casedev-go/compare/v0.2.1...v0.2.2)
+
+### Bug Fixes
+
+* allow canceling a request while it is waiting to retry ([2d51cab](https://github.com/CaseMark/casedev-go/commit/2d51cabaac79c4a3164f9e5622188059f15e2a63))
+
+
+### Chores
+
+* **internal:** remove mock server code ([7eda4bf](https://github.com/CaseMark/casedev-go/commit/7eda4bf3102be26ebf63b2d5922039718c63c15f))
+* update mock server docs ([6b3cfb0](https://github.com/CaseMark/casedev-go/commit/6b3cfb0a9846066aef84aa5ad651c631760fa1bc))
+
 ## 0.2.1 (2026-02-20)
 
 Full Changelog: [v0.2.0...v0.2.1](https://github.com/CaseMark/casedev-go/compare/v0.2.0...v0.2.1)

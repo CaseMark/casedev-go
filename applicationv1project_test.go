@@ -14,7 +14,7 @@ import (
 )
 
 func TestApplicationV1ProjectNewWithOptionalParams(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -52,7 +52,7 @@ func TestApplicationV1ProjectNewWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1ProjectGet(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -75,7 +75,7 @@ func TestApplicationV1ProjectGet(t *testing.T) {
 }
 
 func TestApplicationV1ProjectList(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -98,7 +98,7 @@ func TestApplicationV1ProjectList(t *testing.T) {
 }
 
 func TestApplicationV1ProjectDeleteWithOptionalParams(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -127,7 +127,7 @@ func TestApplicationV1ProjectDeleteWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1ProjectNewDeploymentWithOptionalParams(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -161,7 +161,7 @@ func TestApplicationV1ProjectNewDeploymentWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1ProjectNewDomainWithOptionalParams(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -191,7 +191,7 @@ func TestApplicationV1ProjectNewDomainWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1ProjectNewEnvWithOptionalParams(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -224,7 +224,7 @@ func TestApplicationV1ProjectNewEnvWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1ProjectDeleteDomain(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -251,7 +251,7 @@ func TestApplicationV1ProjectDeleteDomain(t *testing.T) {
 }
 
 func TestApplicationV1ProjectDeleteEnv(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -278,7 +278,7 @@ func TestApplicationV1ProjectDeleteEnv(t *testing.T) {
 }
 
 func TestApplicationV1ProjectGetRuntimeLogsWithOptionalParams(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -307,7 +307,7 @@ func TestApplicationV1ProjectGetRuntimeLogsWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1ProjectListDeploymentsWithOptionalParams(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -338,7 +338,7 @@ func TestApplicationV1ProjectListDeploymentsWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1ProjectListDomains(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -361,7 +361,7 @@ func TestApplicationV1ProjectListDomains(t *testing.T) {
 }
 
 func TestApplicationV1ProjectListEnvWithOptionalParams(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
