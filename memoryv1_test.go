@@ -14,7 +14,6 @@ import (
 )
 
 func TestMemoryV1NewWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -60,7 +59,6 @@ func TestMemoryV1NewWithOptionalParams(t *testing.T) {
 }
 
 func TestMemoryV1Get(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -83,7 +81,6 @@ func TestMemoryV1Get(t *testing.T) {
 }
 
 func TestMemoryV1ListWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -122,7 +119,6 @@ func TestMemoryV1ListWithOptionalParams(t *testing.T) {
 }
 
 func TestMemoryV1Delete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -145,7 +141,6 @@ func TestMemoryV1Delete(t *testing.T) {
 }
 
 func TestMemoryV1DeleteAllWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -181,7 +176,6 @@ func TestMemoryV1DeleteAllWithOptionalParams(t *testing.T) {
 }
 
 func TestMemoryV1SearchWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
