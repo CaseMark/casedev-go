@@ -15,7 +15,6 @@ import (
 )
 
 func TestVaultNewWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -48,7 +47,6 @@ func TestVaultNewWithOptionalParams(t *testing.T) {
 }
 
 func TestVaultGet(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -71,7 +69,6 @@ func TestVaultGet(t *testing.T) {
 }
 
 func TestVaultUpdateWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -103,7 +100,6 @@ func TestVaultUpdateWithOptionalParams(t *testing.T) {
 }
 
 func TestVaultList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -126,7 +122,6 @@ func TestVaultList(t *testing.T) {
 }
 
 func TestVaultDeleteWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -155,7 +150,6 @@ func TestVaultDeleteWithOptionalParams(t *testing.T) {
 }
 
 func TestVaultConfirmUploadWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -189,7 +183,6 @@ func TestVaultConfirmUploadWithOptionalParams(t *testing.T) {
 }
 
 func TestVaultIngest(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -216,7 +209,6 @@ func TestVaultIngest(t *testing.T) {
 }
 
 func TestVaultSearchWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -250,7 +242,6 @@ func TestVaultSearchWithOptionalParams(t *testing.T) {
 }
 
 func TestVaultUploadWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL

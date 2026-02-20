@@ -112,6 +112,17 @@ func (r *LegalV1Service) Similar(ctx context.Context, body LegalV1SimilarParams,
 	return
 }
 
+// Look up trademark status and details from the USPTO Trademark Status & Document
+// Retrieval (TSDR) system. Supports lookup by serial number or registration
+// number. Returns mark text, status, owner, goods/services, Nice classification,
+// filing/registration dates, and more.
+func (r *LegalV1Service) TrademarkSearch(ctx context.Context, body LegalV1TrademarkSearchParams, opts ...option.RequestOption) (res *LegalV1TrademarkSearchResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "legal/v1/trademark-search"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
 // Validates legal citations against authoritative case law sources (CourtListener
 // database of ~10M cases). Returns verification status and case metadata for each
 // citation found in the input text. Accepts either a single citation or a full
@@ -798,6 +809,116 @@ func (r legalV1SimilarResponseSimilarSourceJSON) RawJSON() string {
 	return r.raw
 }
 
+type LegalV1TrademarkSearchResponse struct {
+	// Attorney of record
+	Attorney string `json:"attorney,nullable"`
+	// Date the application was filed
+	FilingDate time.Time `json:"filingDate,nullable" format:"date"`
+	// Goods and services descriptions with class numbers
+	GoodsAndServices []LegalV1TrademarkSearchResponseGoodsAndService `json:"goodsAndServices"`
+	// URL to the mark image on USPTO CDN
+	ImageURL string `json:"imageUrl,nullable"`
+	// The text of the trademark
+	MarkText string `json:"markText,nullable"`
+	// Type of mark (e.g. "Standard Character Mark", "Design Mark")
+	MarkType string `json:"markType,nullable"`
+	// Nice classification class numbers
+	NiceClasses []int64 `json:"niceClasses"`
+	// Current owner/applicant information
+	Owner LegalV1TrademarkSearchResponseOwner `json:"owner,nullable"`
+	// Date the mark was registered
+	RegistrationDate time.Time `json:"registrationDate,nullable" format:"date"`
+	// USPTO registration number (if registered)
+	RegistrationNumber string `json:"registrationNumber,nullable"`
+	// USPTO serial number
+	SerialNumber string `json:"serialNumber"`
+	// Current status (e.g. "Registered", "Pending", "Abandoned", "Cancelled")
+	Status string `json:"status,nullable"`
+	// Date of most recent status update
+	StatusDate time.Time `json:"statusDate,nullable" format:"date"`
+	// Canonical TSDR link for this mark
+	UsptoURL string                             `json:"usptoUrl"`
+	JSON     legalV1TrademarkSearchResponseJSON `json:"-"`
+}
+
+// legalV1TrademarkSearchResponseJSON contains the JSON metadata for the struct
+// [LegalV1TrademarkSearchResponse]
+type legalV1TrademarkSearchResponseJSON struct {
+	Attorney           apijson.Field
+	FilingDate         apijson.Field
+	GoodsAndServices   apijson.Field
+	ImageURL           apijson.Field
+	MarkText           apijson.Field
+	MarkType           apijson.Field
+	NiceClasses        apijson.Field
+	Owner              apijson.Field
+	RegistrationDate   apijson.Field
+	RegistrationNumber apijson.Field
+	SerialNumber       apijson.Field
+	Status             apijson.Field
+	StatusDate         apijson.Field
+	UsptoURL           apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
+}
+
+func (r *LegalV1TrademarkSearchResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1TrademarkSearchResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1TrademarkSearchResponseGoodsAndService struct {
+	ClassNumber string                                            `json:"classNumber,nullable"`
+	Description string                                            `json:"description,nullable"`
+	JSON        legalV1TrademarkSearchResponseGoodsAndServiceJSON `json:"-"`
+}
+
+// legalV1TrademarkSearchResponseGoodsAndServiceJSON contains the JSON metadata for
+// the struct [LegalV1TrademarkSearchResponseGoodsAndService]
+type legalV1TrademarkSearchResponseGoodsAndServiceJSON struct {
+	ClassNumber apijson.Field
+	Description apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LegalV1TrademarkSearchResponseGoodsAndService) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1TrademarkSearchResponseGoodsAndServiceJSON) RawJSON() string {
+	return r.raw
+}
+
+// Current owner/applicant information
+type LegalV1TrademarkSearchResponseOwner struct {
+	Address    string                                  `json:"address,nullable"`
+	EntityType string                                  `json:"entityType,nullable"`
+	Name       string                                  `json:"name,nullable"`
+	JSON       legalV1TrademarkSearchResponseOwnerJSON `json:"-"`
+}
+
+// legalV1TrademarkSearchResponseOwnerJSON contains the JSON metadata for the
+// struct [LegalV1TrademarkSearchResponseOwner]
+type legalV1TrademarkSearchResponseOwnerJSON struct {
+	Address     apijson.Field
+	EntityType  apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LegalV1TrademarkSearchResponseOwner) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1TrademarkSearchResponseOwnerJSON) RawJSON() string {
+	return r.raw
+}
+
 type LegalV1VerifyResponse struct {
 	Citations []LegalV1VerifyResponseCitation `json:"citations"`
 	Summary   LegalV1VerifyResponseSummary    `json:"summary"`
@@ -1181,6 +1302,19 @@ type LegalV1SimilarParams struct {
 }
 
 func (r LegalV1SimilarParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type LegalV1TrademarkSearchParams struct {
+	// USPTO registration number (e.g. "6123456"). Provide either serialNumber or
+	// registrationNumber.
+	RegistrationNumber param.Field[string] `json:"registrationNumber"`
+	// USPTO serial number (e.g. "97123456"). Provide either serialNumber or
+	// registrationNumber.
+	SerialNumber param.Field[string] `json:"serialNumber"`
+}
+
+func (r LegalV1TrademarkSearchParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

@@ -15,7 +15,6 @@ import (
 )
 
 func TestLegalV1FindWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -42,7 +41,6 @@ func TestLegalV1FindWithOptionalParams(t *testing.T) {
 }
 
 func TestLegalV1GetCitations(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -67,7 +65,6 @@ func TestLegalV1GetCitations(t *testing.T) {
 }
 
 func TestLegalV1GetCitationsFromURL(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -92,7 +89,6 @@ func TestLegalV1GetCitationsFromURL(t *testing.T) {
 }
 
 func TestLegalV1GetFullTextWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -120,7 +116,6 @@ func TestLegalV1GetFullTextWithOptionalParams(t *testing.T) {
 }
 
 func TestLegalV1ListJurisdictions(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -145,7 +140,6 @@ func TestLegalV1ListJurisdictions(t *testing.T) {
 }
 
 func TestLegalV1PatentSearchWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -182,7 +176,6 @@ func TestLegalV1PatentSearchWithOptionalParams(t *testing.T) {
 }
 
 func TestLegalV1ResearchWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -210,7 +203,6 @@ func TestLegalV1ResearchWithOptionalParams(t *testing.T) {
 }
 
 func TestLegalV1SimilarWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -237,8 +229,32 @@ func TestLegalV1SimilarWithOptionalParams(t *testing.T) {
 	}
 }
 
+func TestLegalV1TrademarkSearchWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Legal.V1.TrademarkSearch(context.TODO(), githubcomcasemarkcasedevgo.LegalV1TrademarkSearchParams{
+		RegistrationNumber: githubcomcasemarkcasedevgo.F("registrationNumber"),
+		SerialNumber:       githubcomcasemarkcasedevgo.F("serialNumber"),
+	})
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestLegalV1Verify(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL

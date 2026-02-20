@@ -14,7 +14,6 @@ import (
 )
 
 func TestApplicationV1DeploymentNewWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -41,7 +40,6 @@ func TestApplicationV1DeploymentNewWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1DeploymentGetWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -71,7 +69,6 @@ func TestApplicationV1DeploymentGetWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1DeploymentListWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -99,7 +96,6 @@ func TestApplicationV1DeploymentListWithOptionalParams(t *testing.T) {
 }
 
 func TestApplicationV1DeploymentCancel(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -128,7 +124,6 @@ func TestApplicationV1DeploymentCancel(t *testing.T) {
 }
 
 func TestApplicationV1DeploymentNewFromFiles(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -151,7 +146,6 @@ func TestApplicationV1DeploymentNewFromFiles(t *testing.T) {
 }
 
 func TestApplicationV1DeploymentGetLogs(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -180,7 +174,6 @@ func TestApplicationV1DeploymentGetLogs(t *testing.T) {
 }
 
 func TestApplicationV1DeploymentGetStatus(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -203,7 +196,6 @@ func TestApplicationV1DeploymentGetStatus(t *testing.T) {
 }
 
 func TestApplicationV1DeploymentStreamWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
