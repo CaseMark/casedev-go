@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"slices"
@@ -127,8 +126,9 @@ func (r *VaultObjectService) NewPresignedURL(ctx context.Context, id string, obj
 // stream with appropriate headers for file download. Useful for retrieving
 // contracts, depositions, case files, and other legal documents stored in your
 // vault.
-func (r *VaultObjectService) Download(ctx context.Context, id string, objectID string, opts ...option.RequestOption) (res *io.Reader, err error) {
+func (r *VaultObjectService) Download(ctx context.Context, id string, objectID string, opts ...option.RequestOption) (res *http.Response, err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/octet-stream")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return
