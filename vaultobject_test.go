@@ -3,8 +3,12 @@
 package githubcomcasemarkcasedevgo_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -14,7 +18,6 @@ import (
 )
 
 func TestVaultObjectGet(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -41,7 +44,6 @@ func TestVaultObjectGet(t *testing.T) {
 }
 
 func TestVaultObjectUpdateWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -73,7 +75,6 @@ func TestVaultObjectUpdateWithOptionalParams(t *testing.T) {
 }
 
 func TestVaultObjectList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -96,7 +97,6 @@ func TestVaultObjectList(t *testing.T) {
 }
 
 func TestVaultObjectDeleteWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -126,7 +126,6 @@ func TestVaultObjectDeleteWithOptionalParams(t *testing.T) {
 }
 
 func TestVaultObjectNewPresignedURLWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -159,19 +158,17 @@ func TestVaultObjectNewPresignedURLWithOptionalParams(t *testing.T) {
 }
 
 func TestVaultObjectDownload(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		w.Write([]byte("abc"))
+	}))
+	defer server.Close()
+	baseURL := server.URL
 	client := githubcomcasemarkcasedevgo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Objects.Download(
+	resp, err := client.Vault.Objects.Download(
 		context.TODO(),
 		"id",
 		"objectId",
@@ -183,10 +180,22 @@ func TestVaultObjectDownload(t *testing.T) {
 		}
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
+	defer resp.Body.Close()
+
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+	if !bytes.Equal(b, []byte("abc")) {
+		t.Fatalf("return value not %s: %s", "abc", b)
+	}
 }
 
 func TestVaultObjectGetOcrWordsWithOptionalParams(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -218,7 +227,6 @@ func TestVaultObjectGetOcrWordsWithOptionalParams(t *testing.T) {
 }
 
 func TestVaultObjectGetSummarizeJob(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -246,7 +254,6 @@ func TestVaultObjectGetSummarizeJob(t *testing.T) {
 }
 
 func TestVaultObjectGetText(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL

@@ -24,7 +24,6 @@ func TestUsage(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	t.Skip("Mock server tests are disabled")
 	response, err := client.Llm.V1.Chat.NewCompletion(context.TODO(), githubcomcasemarkcasedevgo.LlmV1ChatNewCompletionParams{
 		Messages: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.LlmV1ChatNewCompletionParamsMessage{{
 			Role:    githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LlmV1ChatNewCompletionParamsMessagesRoleUser),
