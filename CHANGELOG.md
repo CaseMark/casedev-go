@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1 (2026-02-23)
+
+Full Changelog: [v0.3.0...v0.3.1](https://github.com/CaseMark/casedev-go/compare/v0.3.0...v0.3.1)
+
+### Chores
+
+* replace PR open Slack alert with CI failure alert ([4205ab2](https://github.com/CaseMark/casedev-go/commit/4205ab250582b99f7abffc25518cee593d00c9d6))
+
 ## 0.3.0 (2026-02-21)
 
 Full Changelog: [v0.2.2...v0.3.0](https://github.com/CaseMark/casedev-go/compare/v0.2.2...v0.3.0)
