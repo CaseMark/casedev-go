@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2 (2026-02-23)
+
+Full Changelog: [v0.3.1...v0.3.2](https://github.com/CaseMark/casedev-go/compare/v0.3.1...v0.3.2)
+
+### Bug Fixes
+
+* only alert Slack on CI failure for main branch ([ce98e09](https://github.com/CaseMark/casedev-go/commit/ce98e096e5680a073d374ace1f833a693ba367a8))
+
 ## 0.3.1 (2026-02-23)
 
 Full Changelog: [v0.3.0...v0.3.1](https://github.com/CaseMark/casedev-go/compare/v0.3.0...v0.3.1)
