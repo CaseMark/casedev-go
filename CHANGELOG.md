@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.3 (2026-02-23)
+
+Full Changelog: [v0.3.2...v0.3.3](https://github.com/CaseMark/casedev-go/compare/v0.3.2...v0.3.3)
+
+### Bug Fixes
+
+* only alert on CI failure for PRs targeting main ([9e073b4](https://github.com/CaseMark/casedev-go/commit/9e073b4b29ee43604bc03b28968fbedc4b7b9a76))
+
 ## 0.3.2 (2026-02-23)
 
 Full Changelog: [v0.3.1...v0.3.2](https://github.com/CaseMark/casedev-go/compare/v0.3.1...v0.3.2)
