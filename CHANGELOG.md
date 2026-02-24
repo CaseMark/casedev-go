@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.4 (2026-02-24)
+
+Full Changelog: [v0.3.3...v0.3.4](https://github.com/CaseMark/casedev-go/compare/v0.3.3...v0.3.4)
+
+### Bug Fixes
+
+* prevent duplicate Slack alerts from release-please branches ([e69a96b](https://github.com/CaseMark/casedev-go/commit/e69a96b90c94ea35731802e7b9e32df3dc95c6b1))
+
 ## 0.3.3 (2026-02-23)
 
 Full Changelog: [v0.3.2...v0.3.3](https://github.com/CaseMark/casedev-go/compare/v0.3.2...v0.3.3)
