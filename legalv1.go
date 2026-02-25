@@ -221,7 +221,7 @@ func (r legalV1GetCitationsResponseJSON) RawJSON() string {
 
 type LegalV1GetCitationsResponseCitation struct {
 	// Structured Bluebook components. Null if citation format is not recognized.
-	Components LegalV1GetCitationsResponseCitationsComponents `json:"components,nullable"`
+	Components LegalV1GetCitationsResponseCitationsComponents `json:"components" api:"nullable"`
 	// Whether citation was found in CourtListener database
 	Found bool `json:"found"`
 	// Normalized citation string
@@ -463,15 +463,15 @@ func (r legalV1GetCitationsFromURLResponseCitationsStatuteJSON) RawJSON() string
 
 type LegalV1GetFullTextResponse struct {
 	// Author or court
-	Author string `json:"author,nullable"`
+	Author string `json:"author" api:"nullable"`
 	// Total characters in text
 	CharacterCount int64 `json:"characterCount"`
 	// Highlighted relevant passages
 	Highlights []string `json:"highlights"`
 	// Publication date
-	PublishedDate string `json:"publishedDate,nullable"`
+	PublishedDate string `json:"publishedDate" api:"nullable"`
 	// AI-generated summary
-	Summary string `json:"summary,nullable"`
+	Summary string `json:"summary" api:"nullable"`
 	// Full document text
 	Text string `json:"text"`
 	// Document title
@@ -542,7 +542,7 @@ type LegalV1ListJurisdictionsResponseJurisdiction struct {
 	// Full jurisdiction name
 	Name string `json:"name"`
 	// State abbreviation (if applicable)
-	State string                                           `json:"state,nullable"`
+	State string                                           `json:"state" api:"nullable"`
 	JSON  legalV1ListJurisdictionsResponseJurisdictionJSON `json:"-"`
 }
 
@@ -625,15 +625,15 @@ type LegalV1PatentSearchResponseResult struct {
 	// List of assignee/owner names
 	Assignees []string `json:"assignees"`
 	// Entity status (e.g. "Small Entity", "Micro Entity")
-	EntityStatus string `json:"entityStatus,nullable"`
+	EntityStatus string `json:"entityStatus" api:"nullable"`
 	// Date the application was filed
-	FilingDate time.Time `json:"filingDate,nullable" format:"date"`
+	FilingDate time.Time `json:"filingDate" api:"nullable" format:"date"`
 	// Date the patent was granted
-	GrantDate time.Time `json:"grantDate,nullable" format:"date"`
+	GrantDate time.Time `json:"grantDate" api:"nullable" format:"date"`
 	// List of inventor names
 	Inventors []string `json:"inventors"`
 	// Granted patent number (if granted)
-	PatentNumber string `json:"patentNumber,nullable"`
+	PatentNumber string `json:"patentNumber" api:"nullable"`
 	// Current application status (e.g. "Patented Case", "Pending")
 	Status string `json:"status"`
 	// Invention title
@@ -668,7 +668,7 @@ func (r legalV1PatentSearchResponseResultJSON) RawJSON() string {
 
 type LegalV1ResearchResponse struct {
 	// Additional queries used
-	AdditionalQueries []string                           `json:"additionalQueries,nullable"`
+	AdditionalQueries []string                           `json:"additionalQueries" api:"nullable"`
 	Candidates        []LegalV1ResearchResponseCandidate `json:"candidates"`
 	// Number of candidates found
 	Found int64 `json:"found"`
@@ -709,7 +709,7 @@ type LegalV1ResearchResponseCandidate struct {
 	// Highlighted relevant passages
 	Highlights []string `json:"highlights"`
 	// Publication date
-	PublishedDate string `json:"publishedDate,nullable"`
+	PublishedDate string `json:"publishedDate" api:"nullable"`
 	// Text excerpt from the document
 	Snippet string `json:"snippet"`
 	// Domain of the source
@@ -777,7 +777,7 @@ func (r legalV1SimilarResponseJSON) RawJSON() string {
 
 type LegalV1SimilarResponseSimilarSource struct {
 	// Publication date
-	PublishedDate string `json:"publishedDate,nullable"`
+	PublishedDate string `json:"publishedDate" api:"nullable"`
 	// Text excerpt from the document
 	Snippet string `json:"snippet"`
 	// Domain of the source
@@ -811,31 +811,31 @@ func (r legalV1SimilarResponseSimilarSourceJSON) RawJSON() string {
 
 type LegalV1TrademarkSearchResponse struct {
 	// Attorney of record
-	Attorney string `json:"attorney,nullable"`
+	Attorney string `json:"attorney" api:"nullable"`
 	// Date the application was filed
-	FilingDate time.Time `json:"filingDate,nullable" format:"date"`
+	FilingDate time.Time `json:"filingDate" api:"nullable" format:"date"`
 	// Goods and services descriptions with class numbers
 	GoodsAndServices []LegalV1TrademarkSearchResponseGoodsAndService `json:"goodsAndServices"`
 	// URL to the mark image on USPTO CDN
-	ImageURL string `json:"imageUrl,nullable"`
+	ImageURL string `json:"imageUrl" api:"nullable"`
 	// The text of the trademark
-	MarkText string `json:"markText,nullable"`
+	MarkText string `json:"markText" api:"nullable"`
 	// Type of mark (e.g. "Standard Character Mark", "Design Mark")
-	MarkType string `json:"markType,nullable"`
+	MarkType string `json:"markType" api:"nullable"`
 	// Nice classification class numbers
 	NiceClasses []int64 `json:"niceClasses"`
 	// Current owner/applicant information
-	Owner LegalV1TrademarkSearchResponseOwner `json:"owner,nullable"`
+	Owner LegalV1TrademarkSearchResponseOwner `json:"owner" api:"nullable"`
 	// Date the mark was registered
-	RegistrationDate time.Time `json:"registrationDate,nullable" format:"date"`
+	RegistrationDate time.Time `json:"registrationDate" api:"nullable" format:"date"`
 	// USPTO registration number (if registered)
-	RegistrationNumber string `json:"registrationNumber,nullable"`
+	RegistrationNumber string `json:"registrationNumber" api:"nullable"`
 	// USPTO serial number
 	SerialNumber string `json:"serialNumber"`
 	// Current status (e.g. "Registered", "Pending", "Abandoned", "Cancelled")
-	Status string `json:"status,nullable"`
+	Status string `json:"status" api:"nullable"`
 	// Date of most recent status update
-	StatusDate time.Time `json:"statusDate,nullable" format:"date"`
+	StatusDate time.Time `json:"statusDate" api:"nullable" format:"date"`
 	// Canonical TSDR link for this mark
 	UsptoURL string                             `json:"usptoUrl"`
 	JSON     legalV1TrademarkSearchResponseJSON `json:"-"`
@@ -871,8 +871,8 @@ func (r legalV1TrademarkSearchResponseJSON) RawJSON() string {
 }
 
 type LegalV1TrademarkSearchResponseGoodsAndService struct {
-	ClassNumber string                                            `json:"classNumber,nullable"`
-	Description string                                            `json:"description,nullable"`
+	ClassNumber string                                            `json:"classNumber" api:"nullable"`
+	Description string                                            `json:"description" api:"nullable"`
 	JSON        legalV1TrademarkSearchResponseGoodsAndServiceJSON `json:"-"`
 }
 
@@ -895,9 +895,9 @@ func (r legalV1TrademarkSearchResponseGoodsAndServiceJSON) RawJSON() string {
 
 // Current owner/applicant information
 type LegalV1TrademarkSearchResponseOwner struct {
-	Address    string                                  `json:"address,nullable"`
-	EntityType string                                  `json:"entityType,nullable"`
-	Name       string                                  `json:"name,nullable"`
+	Address    string                                  `json:"address" api:"nullable"`
+	EntityType string                                  `json:"entityType" api:"nullable"`
+	Name       string                                  `json:"name" api:"nullable"`
 	JSON       legalV1TrademarkSearchResponseOwnerJSON `json:"-"`
 }
 
@@ -1134,7 +1134,7 @@ func (r legalV1VerifyResponseSummaryJSON) RawJSON() string {
 
 type LegalV1FindParams struct {
 	// Search query (e.g., "fair use copyright", "Miranda rights")
-	Query param.Field[string] `json:"query,required"`
+	Query param.Field[string] `json:"query" api:"required"`
 	// Optional jurisdiction ID from resolveJurisdiction (e.g., "california",
 	// "us-federal")
 	Jurisdiction param.Field[string] `json:"jurisdiction"`
@@ -1149,7 +1149,7 @@ func (r LegalV1FindParams) MarshalJSON() (data []byte, err error) {
 type LegalV1GetCitationsParams struct {
 	// Text containing citations to extract. Can be a single citation (e.g., "531 U.S.
 	// 98") or a full document with multiple citations.
-	Text param.Field[string] `json:"text,required"`
+	Text param.Field[string] `json:"text" api:"required"`
 }
 
 func (r LegalV1GetCitationsParams) MarshalJSON() (data []byte, err error) {
@@ -1158,7 +1158,7 @@ func (r LegalV1GetCitationsParams) MarshalJSON() (data []byte, err error) {
 
 type LegalV1GetCitationsFromURLParams struct {
 	// URL of the legal document to extract citations from
-	URL param.Field[string] `json:"url,required" format:"uri"`
+	URL param.Field[string] `json:"url" api:"required" format:"uri"`
 }
 
 func (r LegalV1GetCitationsFromURLParams) MarshalJSON() (data []byte, err error) {
@@ -1167,7 +1167,7 @@ func (r LegalV1GetCitationsFromURLParams) MarshalJSON() (data []byte, err error)
 
 type LegalV1GetFullTextParams struct {
 	// URL of the verified legal document
-	URL param.Field[string] `json:"url,required" format:"uri"`
+	URL param.Field[string] `json:"url" api:"required" format:"uri"`
 	// Optional query to extract relevant highlights (e.g., "What is the holding?")
 	HighlightQuery param.Field[string] `json:"highlightQuery"`
 	// Maximum characters to return (default: 10000, max: 50000)
@@ -1182,7 +1182,7 @@ func (r LegalV1GetFullTextParams) MarshalJSON() (data []byte, err error) {
 
 type LegalV1ListJurisdictionsParams struct {
 	// Jurisdiction name (e.g., "California", "US Federal", "NY")
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 }
 
 func (r LegalV1ListJurisdictionsParams) MarshalJSON() (data []byte, err error) {
@@ -1192,7 +1192,7 @@ func (r LegalV1ListJurisdictionsParams) MarshalJSON() (data []byte, err error) {
 type LegalV1PatentSearchParams struct {
 	// Free-text search across all patent fields, or field-specific query (e.g.
 	// "applicationMetaData.patentNumber:11234567"). Supports AND, OR, NOT operators.
-	Query param.Field[string] `json:"query,required"`
+	Query param.Field[string] `json:"query" api:"required"`
 	// Filter by application status (e.g. "Patented Case", "Abandoned", "Pending")
 	ApplicationStatus param.Field[string] `json:"applicationStatus"`
 	// Filter by application type
@@ -1276,7 +1276,7 @@ func (r LegalV1PatentSearchParamsSortOrder) IsKnown() bool {
 
 type LegalV1ResearchParams struct {
 	// Primary search query
-	Query param.Field[string] `json:"query,required"`
+	Query param.Field[string] `json:"query" api:"required"`
 	// Additional query variations to search (e.g., different phrasings of the legal
 	// issue)
 	AdditionalQueries param.Field[[]string] `json:"additionalQueries"`
@@ -1292,7 +1292,7 @@ func (r LegalV1ResearchParams) MarshalJSON() (data []byte, err error) {
 
 type LegalV1SimilarParams struct {
 	// URL of a legal document to find similar sources for
-	URL param.Field[string] `json:"url,required" format:"uri"`
+	URL param.Field[string] `json:"url" api:"required" format:"uri"`
 	// Optional jurisdiction ID to filter results
 	Jurisdiction param.Field[string] `json:"jurisdiction"`
 	// Number of results 1-25 (default: 10)
@@ -1321,7 +1321,7 @@ func (r LegalV1TrademarkSearchParams) MarshalJSON() (data []byte, err error) {
 type LegalV1VerifyParams struct {
 	// Text containing citations to verify. Can be a single citation (e.g., "531 U.S.
 	// 98") or a full document with multiple citations.
-	Text param.Field[string] `json:"text,required"`
+	Text param.Field[string] `json:"text" api:"required"`
 }
 
 func (r LegalV1VerifyParams) MarshalJSON() (data []byte, err error) {

@@ -165,21 +165,21 @@ func (r vaultGraphragInitResponseJSON) RawJSON() string {
 
 type VaultGraphragProcessObjectResponse struct {
 	// Number of communities detected
-	Communities int64 `json:"communities,required"`
+	Communities int64 `json:"communities" api:"required"`
 	// Number of entities extracted
-	Entities int64 `json:"entities,required"`
+	Entities int64 `json:"entities" api:"required"`
 	// ID of the indexed object
-	ObjectID string `json:"objectId,required"`
+	ObjectID string `json:"objectId" api:"required"`
 	// Number of relationships extracted
-	Relationships int64 `json:"relationships,required"`
+	Relationships int64 `json:"relationships" api:"required"`
 	// Extraction statistics
-	Stats VaultGraphragProcessObjectResponseStats `json:"stats,required"`
+	Stats VaultGraphragProcessObjectResponseStats `json:"stats" api:"required"`
 	// Status from GraphRAG service
-	Status string `json:"status,required"`
+	Status string `json:"status" api:"required"`
 	// Whether indexing completed successfully
-	Success bool `json:"success,required"`
+	Success bool `json:"success" api:"required"`
 	// ID of the vault
-	VaultID string                                 `json:"vaultId,required"`
+	VaultID string                                 `json:"vaultId" api:"required"`
 	JSON    vaultGraphragProcessObjectResponseJSON `json:"-"`
 }
 

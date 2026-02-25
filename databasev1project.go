@@ -135,21 +135,21 @@ func (r *DatabaseV1ProjectService) ListBranches(ctx context.Context, id string, 
 
 type DatabaseV1ProjectNewResponse struct {
 	// Project ID
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Project creation timestamp
-	CreatedAt time.Time `json:"createdAt,required" format:"date-time"`
+	CreatedAt time.Time `json:"createdAt" api:"required" format:"date-time"`
 	// Default 'main' branch details
-	DefaultBranch DatabaseV1ProjectNewResponseDefaultBranch `json:"defaultBranch,required"`
+	DefaultBranch DatabaseV1ProjectNewResponseDefaultBranch `json:"defaultBranch" api:"required"`
 	// Project name
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// PostgreSQL major version
-	PgVersion int64 `json:"pgVersion,required"`
+	PgVersion int64 `json:"pgVersion" api:"required"`
 	// AWS region
-	Region string `json:"region,required"`
+	Region string `json:"region" api:"required"`
 	// Project status
-	Status DatabaseV1ProjectNewResponseStatus `json:"status,required"`
+	Status DatabaseV1ProjectNewResponseStatus `json:"status" api:"required"`
 	// Project description
-	Description string                           `json:"description,nullable"`
+	Description string                           `json:"description" api:"nullable"`
 	JSON        databaseV1ProjectNewResponseJSON `json:"-"`
 }
 
@@ -221,33 +221,33 @@ func (r DatabaseV1ProjectNewResponseStatus) IsKnown() bool {
 
 type DatabaseV1ProjectGetResponse struct {
 	// Project ID
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// All branches in this project
-	Branches []DatabaseV1ProjectGetResponseBranch `json:"branches,required"`
+	Branches []DatabaseV1ProjectGetResponseBranch `json:"branches" api:"required"`
 	// Total compute time consumed in seconds
-	ComputeTimeSeconds float64 `json:"computeTimeSeconds,required"`
+	ComputeTimeSeconds float64 `json:"computeTimeSeconds" api:"required"`
 	// Database connection hostname (masked for security)
-	ConnectionHost string `json:"connectionHost,required"`
+	ConnectionHost string `json:"connectionHost" api:"required"`
 	// Project creation timestamp
-	CreatedAt time.Time `json:"createdAt,required" format:"date-time"`
+	CreatedAt time.Time `json:"createdAt" api:"required" format:"date-time"`
 	// Databases in the default branch
-	Databases []DatabaseV1ProjectGetResponseDatabase `json:"databases,required"`
+	Databases []DatabaseV1ProjectGetResponseDatabase `json:"databases" api:"required"`
 	// Linked deployments using this database
-	LinkedDeployments []DatabaseV1ProjectGetResponseLinkedDeployment `json:"linkedDeployments,required"`
+	LinkedDeployments []DatabaseV1ProjectGetResponseLinkedDeployment `json:"linkedDeployments" api:"required"`
 	// Project name
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// PostgreSQL major version
-	PgVersion int64 `json:"pgVersion,required"`
+	PgVersion int64 `json:"pgVersion" api:"required"`
 	// AWS region
-	Region string `json:"region,required"`
+	Region string `json:"region" api:"required"`
 	// Project status
-	Status DatabaseV1ProjectGetResponseStatus `json:"status,required"`
+	Status DatabaseV1ProjectGetResponseStatus `json:"status" api:"required"`
 	// Current storage usage in bytes
-	StorageSizeBytes float64 `json:"storageSizeBytes,required"`
+	StorageSizeBytes float64 `json:"storageSizeBytes" api:"required"`
 	// Project last update timestamp
-	UpdatedAt time.Time `json:"updatedAt,required" format:"date-time"`
+	UpdatedAt time.Time `json:"updatedAt" api:"required" format:"date-time"`
 	// Project description
-	Description string                           `json:"description,nullable"`
+	Description string                           `json:"description" api:"nullable"`
 	JSON        databaseV1ProjectGetResponseJSON `json:"-"`
 }
 
@@ -410,7 +410,7 @@ func (r DatabaseV1ProjectGetResponseStatus) IsKnown() bool {
 }
 
 type DatabaseV1ProjectListResponse struct {
-	Projects []DatabaseV1ProjectListResponseProject `json:"projects,required"`
+	Projects []DatabaseV1ProjectListResponseProject `json:"projects" api:"required"`
 	JSON     databaseV1ProjectListResponseJSON      `json:"-"`
 }
 
@@ -438,7 +438,7 @@ type DatabaseV1ProjectListResponseProject struct {
 	// Project creation timestamp
 	CreatedAt time.Time `json:"createdAt" format:"date-time"`
 	// Project description
-	Description string `json:"description,nullable"`
+	Description string `json:"description" api:"nullable"`
 	// Linked application deployments using this database
 	LinkedDeployments []DatabaseV1ProjectListResponseProjectsLinkedDeployment `json:"linkedDeployments"`
 	// Project name
@@ -548,9 +548,9 @@ func (r DatabaseV1ProjectListResponseProjectsStatus) IsKnown() bool {
 
 type DatabaseV1ProjectDeleteResponse struct {
 	// Confirmation message
-	Message string `json:"message,required"`
+	Message string `json:"message" api:"required"`
 	// Deletion success indicator
-	Success bool                                `json:"success,required"`
+	Success bool                                `json:"success" api:"required"`
 	JSON    databaseV1ProjectDeleteResponseJSON `json:"-"`
 }
 
@@ -573,17 +573,17 @@ func (r databaseV1ProjectDeleteResponseJSON) RawJSON() string {
 
 type DatabaseV1ProjectNewBranchResponse struct {
 	// Branch ID
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Branch creation timestamp
-	CreatedAt time.Time `json:"createdAt,required" format:"date-time"`
+	CreatedAt time.Time `json:"createdAt" api:"required" format:"date-time"`
 	// Whether this is the default branch (always false for new branches)
-	IsDefault bool `json:"isDefault,required"`
+	IsDefault bool `json:"isDefault" api:"required"`
 	// Branch name
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// Parent branch ID
-	ParentBranchID string `json:"parentBranchId,required,nullable"`
+	ParentBranchID string `json:"parentBranchId" api:"required,nullable"`
 	// Branch status
-	Status string                                 `json:"status,required"`
+	Status string                                 `json:"status" api:"required"`
 	JSON   databaseV1ProjectNewBranchResponseJSON `json:"-"`
 }
 
@@ -610,11 +610,11 @@ func (r databaseV1ProjectNewBranchResponseJSON) RawJSON() string {
 
 type DatabaseV1ProjectGetConnectionResponse struct {
 	// Branch name for this connection
-	Branch string `json:"branch,required"`
+	Branch string `json:"branch" api:"required"`
 	// PostgreSQL connection string (includes credentials)
-	ConnectionUri string `json:"connectionUri,required" format:"uri"`
+	ConnectionUri string `json:"connectionUri" api:"required" format:"uri"`
 	// Whether this is a pooled connection
-	Pooled bool                                       `json:"pooled,required"`
+	Pooled bool                                       `json:"pooled" api:"required"`
 	JSON   databaseV1ProjectGetConnectionResponseJSON `json:"-"`
 }
 
@@ -637,7 +637,7 @@ func (r databaseV1ProjectGetConnectionResponseJSON) RawJSON() string {
 }
 
 type DatabaseV1ProjectListBranchesResponse struct {
-	Branches []DatabaseV1ProjectListBranchesResponseBranch `json:"branches,required"`
+	Branches []DatabaseV1ProjectListBranchesResponseBranch `json:"branches" api:"required"`
 	JSON     databaseV1ProjectListBranchesResponseJSON     `json:"-"`
 }
 
@@ -667,7 +667,7 @@ type DatabaseV1ProjectListBranchesResponseBranch struct {
 	// Branch name
 	Name string `json:"name"`
 	// Parent branch ID (null for default branch)
-	ParentBranchID string `json:"parentBranchId,nullable"`
+	ParentBranchID string `json:"parentBranchId" api:"nullable"`
 	// Branch status
 	Status string `json:"status"`
 	// Branch last update timestamp
@@ -699,7 +699,7 @@ func (r databaseV1ProjectListBranchesResponseBranchJSON) RawJSON() string {
 
 type DatabaseV1ProjectNewParams struct {
 	// Project name (letters, numbers, hyphens, underscores only)
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 	// Optional project description
 	Description param.Field[string] `json:"description"`
 	// AWS region for database deployment
@@ -734,7 +734,7 @@ func (r DatabaseV1ProjectNewParamsRegion) IsKnown() bool {
 
 type DatabaseV1ProjectNewBranchParams struct {
 	// Branch name (letters, numbers, hyphens, underscores only)
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 	// Parent branch ID to clone from (defaults to main branch)
 	ParentBranchID param.Field[string] `json:"parentBranchId"`
 }

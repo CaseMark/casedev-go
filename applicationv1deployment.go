@@ -130,7 +130,7 @@ func (r *ApplicationV1DeploymentService) Stream(ctx context.Context, id string, 
 
 type ApplicationV1DeploymentNewParams struct {
 	// Project ID
-	ProjectID param.Field[string] `json:"projectId,required"`
+	ProjectID param.Field[string] `json:"projectId" api:"required"`
 	// Git ref (branch, tag, or commit) to deploy
 	Ref param.Field[string] `json:"ref"`
 	// Deployment target
@@ -159,7 +159,7 @@ func (r ApplicationV1DeploymentNewParamsTarget) IsKnown() bool {
 
 type ApplicationV1DeploymentGetParams struct {
 	// Project ID (for authorization)
-	ProjectID param.Field[string] `query:"projectId,required"`
+	ProjectID param.Field[string] `query:"projectId" api:"required"`
 	// Include build logs
 	IncludeLogs param.Field[bool] `query:"includeLogs"`
 }
@@ -175,7 +175,7 @@ func (r ApplicationV1DeploymentGetParams) URLQuery() (v url.Values) {
 
 type ApplicationV1DeploymentListParams struct {
 	// Project ID
-	ProjectID param.Field[string] `query:"projectId,required"`
+	ProjectID param.Field[string] `query:"projectId" api:"required"`
 	// Maximum number of deployments to return
 	Limit param.Field[float64] `query:"limit"`
 	// Filter by deployment state
@@ -211,7 +211,7 @@ func (r ApplicationV1DeploymentListParamsTarget) IsKnown() bool {
 
 type ApplicationV1DeploymentCancelParams struct {
 	// Project ID (for authorization)
-	ProjectID param.Field[string] `json:"projectId,required"`
+	ProjectID param.Field[string] `json:"projectId" api:"required"`
 }
 
 func (r ApplicationV1DeploymentCancelParams) MarshalJSON() (data []byte, err error) {
@@ -220,7 +220,7 @@ func (r ApplicationV1DeploymentCancelParams) MarshalJSON() (data []byte, err err
 
 type ApplicationV1DeploymentGetLogsParams struct {
 	// Project ID (for authorization)
-	ProjectID param.Field[string] `query:"projectId,required"`
+	ProjectID param.Field[string] `query:"projectId" api:"required"`
 }
 
 // URLQuery serializes [ApplicationV1DeploymentGetLogsParams]'s query parameters as
@@ -234,7 +234,7 @@ func (r ApplicationV1DeploymentGetLogsParams) URLQuery() (v url.Values) {
 
 type ApplicationV1DeploymentStreamParams struct {
 	// Project ID (for authorization)
-	ProjectID param.Field[string] `query:"projectId,required"`
+	ProjectID param.Field[string] `query:"projectId" api:"required"`
 	// Resume stream from this index (for reconnection)
 	StartIndex param.Field[float64] `query:"startIndex"`
 }

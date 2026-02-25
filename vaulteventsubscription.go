@@ -115,7 +115,7 @@ func (r *VaultEventSubscriptionService) Test(ctx context.Context, id string, sub
 }
 
 type VaultEventSubscriptionNewParams struct {
-	CallbackURL   param.Field[string]   `json:"callbackUrl,required" format:"uri"`
+	CallbackURL   param.Field[string]   `json:"callbackUrl" api:"required" format:"uri"`
 	EventTypes    param.Field[[]string] `json:"eventTypes"`
 	ObjectIDs     param.Field[[]string] `json:"objectIds"`
 	SigningSecret param.Field[string]   `json:"signingSecret"`

@@ -553,7 +553,7 @@ func (r searchV1SimilarResponseResultJSON) RawJSON() string {
 
 type SearchV1AnswerParams struct {
 	// The question or topic to research and answer
-	Query param.Field[string] `json:"query,required"`
+	Query param.Field[string] `json:"query" api:"required"`
 	// Exclude these domains from search
 	ExcludeDomains param.Field[[]string] `json:"excludeDomains"`
 	// Only search within these domains
@@ -600,7 +600,7 @@ func (r SearchV1AnswerParamsSearchType) IsKnown() bool {
 
 type SearchV1ContentsParams struct {
 	// Array of URLs to scrape and extract content from
-	URLs param.Field[[]string] `json:"urls,required" format:"uri"`
+	URLs param.Field[[]string] `json:"urls" api:"required" format:"uri"`
 	// Context to guide content extraction and summarization
 	Context param.Field[string] `json:"context"`
 	// Additional extraction options
@@ -627,7 +627,7 @@ func (r SearchV1ContentsParams) MarshalJSON() (data []byte, err error) {
 
 type SearchV1ResearchParams struct {
 	// Research instructions or query
-	Instructions param.Field[string] `json:"instructions,required"`
+	Instructions param.Field[string] `json:"instructions" api:"required"`
 	// Research quality level - fast (quick), normal (balanced), pro (comprehensive)
 	Model param.Field[SearchV1ResearchParamsModel] `json:"model"`
 	// Optional JSON schema to structure the research output
@@ -675,7 +675,7 @@ func (r SearchV1GetResearchParams) URLQuery() (v url.Values) {
 
 type SearchV1SearchParams struct {
 	// Primary search query
-	Query param.Field[string] `json:"query,required"`
+	Query param.Field[string] `json:"query" api:"required"`
 	// Additional related search queries to enhance results
 	AdditionalQueries param.Field[[]string] `json:"additionalQueries"`
 	// Category filter for search results
@@ -727,7 +727,7 @@ func (r SearchV1SearchParamsType) IsKnown() bool {
 
 type SearchV1SimilarParams struct {
 	// The URL to find similar content for
-	URL param.Field[string] `json:"url,required" format:"uri"`
+	URL param.Field[string] `json:"url" api:"required" format:"uri"`
 	// Additional content to consider for similarity matching
 	Contents param.Field[string] `json:"contents"`
 	// Only include pages crawled before this date

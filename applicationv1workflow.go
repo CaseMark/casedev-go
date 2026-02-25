@@ -50,7 +50,7 @@ func (r *ApplicationV1WorkflowService) GetStatus(ctx context.Context, id string,
 
 type ApplicationV1WorkflowGetStatusParams struct {
 	// Project ID (for authorization)
-	ProjectID param.Field[string] `query:"projectId,required"`
+	ProjectID param.Field[string] `query:"projectId" api:"required"`
 }
 
 // URLQuery serializes [ApplicationV1WorkflowGetStatusParams]'s query parameters as

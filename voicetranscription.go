@@ -129,9 +129,9 @@ func (r VoiceTranscriptionNewResponseStatus) IsKnown() bool {
 
 type VoiceTranscriptionGetResponse struct {
 	// Unique transcription job ID
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Current status of the transcription job
-	Status VoiceTranscriptionGetResponseStatus `json:"status,required"`
+	Status VoiceTranscriptionGetResponseStatus `json:"status" api:"required"`
 	// Duration of the audio file in seconds
 	AudioDuration float64 `json:"audio_duration"`
 	// Overall confidence score (0-100)

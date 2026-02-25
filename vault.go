@@ -189,13 +189,13 @@ type VaultNewResponse struct {
 	// S3 bucket name for document storage
 	FilesBucket string `json:"filesBucket"`
 	// Vector search index name. Null for storage-only vaults.
-	IndexName string `json:"indexName,nullable"`
+	IndexName string `json:"indexName" api:"nullable"`
 	// Vault display name
 	Name string `json:"name"`
 	// AWS region for storage
 	Region string `json:"region"`
 	// S3 bucket name for vector embeddings. Null for storage-only vaults.
-	VectorBucket string               `json:"vectorBucket,nullable"`
+	VectorBucket string               `json:"vectorBucket" api:"nullable"`
 	JSON         vaultNewResponseJSON `json:"-"`
 }
 
@@ -225,15 +225,15 @@ func (r vaultNewResponseJSON) RawJSON() string {
 
 type VaultGetResponse struct {
 	// Vault identifier
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Vault creation timestamp
-	CreatedAt time.Time `json:"createdAt,required" format:"date-time"`
+	CreatedAt time.Time `json:"createdAt" api:"required" format:"date-time"`
 	// S3 bucket for document storage
-	FilesBucket string `json:"filesBucket,required"`
+	FilesBucket string `json:"filesBucket" api:"required"`
 	// Vault name
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// AWS region
-	Region string `json:"region,required"`
+	Region string `json:"region" api:"required"`
 	// Document chunking strategy configuration
 	ChunkStrategy VaultGetResponseChunkStrategy `json:"chunkStrategy"`
 	// Vault description
@@ -255,7 +255,7 @@ type VaultGetResponse struct {
 	// Last update timestamp
 	UpdatedAt time.Time `json:"updatedAt" format:"date-time"`
 	// S3 bucket for vector embeddings
-	VectorBucket string               `json:"vectorBucket,nullable"`
+	VectorBucket string               `json:"vectorBucket" api:"nullable"`
 	JSON         vaultGetResponseJSON `json:"-"`
 }
 
@@ -330,7 +330,7 @@ type VaultUpdateResponse struct {
 	// Vault creation timestamp
 	CreatedAt time.Time `json:"createdAt" format:"date-time"`
 	// Vault description
-	Description string `json:"description,nullable"`
+	Description string `json:"description" api:"nullable"`
 	// Whether GraphRAG is enabled for future uploads
 	EnableGraph bool `json:"enableGraph"`
 	// S3 bucket for document storage
@@ -354,7 +354,7 @@ type VaultUpdateResponse struct {
 	// Last update timestamp
 	UpdatedAt time.Time `json:"updatedAt" format:"date-time"`
 	// S3 bucket for vector embeddings
-	VectorBucket string                  `json:"vectorBucket,nullable"`
+	VectorBucket string                  `json:"vectorBucket" api:"nullable"`
 	JSON         vaultUpdateResponseJSON `json:"-"`
 }
 
@@ -553,16 +553,16 @@ func (r VaultConfirmUploadResponseStatus) IsKnown() bool {
 type VaultIngestResponse struct {
 	// Always false - GraphRAG must be triggered separately via POST
 	// /vault/:id/graphrag/:objectId
-	EnableGraphRag bool `json:"enableGraphRAG,required"`
+	EnableGraphRag bool `json:"enableGraphRAG" api:"required"`
 	// Human-readable status message
-	Message string `json:"message,required"`
+	Message string `json:"message" api:"required"`
 	// ID of the vault object being processed
-	ObjectID string `json:"objectId,required"`
+	ObjectID string `json:"objectId" api:"required"`
 	// Current ingestion status. 'stored' for file types without text extraction (no
 	// chunks/vectors created).
-	Status VaultIngestResponseStatus `json:"status,required"`
+	Status VaultIngestResponseStatus `json:"status" api:"required"`
 	// Workflow run ID for tracking progress. Null for file types that skip processing.
-	WorkflowID string                  `json:"workflowId,required,nullable"`
+	WorkflowID string                  `json:"workflowId" api:"required,nullable"`
 	JSON       vaultIngestResponseJSON `json:"-"`
 }
 
@@ -648,10 +648,10 @@ type VaultSearchResponseChunk struct {
 	ObjectID string `json:"object_id"`
 	// PDF page number where the chunk ends (1-indexed). Null for non-PDF documents or
 	// documents ingested before page tracking was added.
-	PageEnd int64 `json:"page_end,nullable"`
+	PageEnd int64 `json:"page_end" api:"nullable"`
 	// PDF page number where the chunk begins (1-indexed). Null for non-PDF documents
 	// or documents ingested before page tracking was added.
-	PageStart int64 `json:"page_start,nullable"`
+	PageStart int64 `json:"page_start" api:"nullable"`
 	// Relevance score (deprecated, use distance or hybridScore)
 	Score float64 `json:"score"`
 	// Source identifier (deprecated, use object_id)
@@ -661,11 +661,11 @@ type VaultSearchResponseChunk struct {
 	// Ending word index (0-based) in the OCR word list. Use with GET
 	// /vault/:id/objects/:objectId/ocr-words to retrieve bounding boxes for
 	// highlighting.
-	WordEndIndex int64 `json:"word_end_index,nullable"`
+	WordEndIndex int64 `json:"word_end_index" api:"nullable"`
 	// Starting word index (0-based) in the OCR word list. Use with GET
 	// /vault/:id/objects/:objectId/ocr-words to retrieve bounding boxes for
 	// highlighting.
-	WordStartIndex int64                        `json:"word_start_index,nullable"`
+	WordStartIndex int64                        `json:"word_start_index" api:"nullable"`
 	JSON           vaultSearchResponseChunkJSON `json:"-"`
 }
 
@@ -736,11 +736,11 @@ type VaultUploadResponse struct {
 	ExpiresIn    float64                         `json:"expiresIn"`
 	Instructions VaultUploadResponseInstructions `json:"instructions"`
 	// Next API endpoint to call for processing
-	NextStep string `json:"next_step,nullable"`
+	NextStep string `json:"next_step" api:"nullable"`
 	// Unique identifier for the uploaded object
 	ObjectID string `json:"objectId"`
 	// Folder path for hierarchy if provided
-	Path string `json:"path,nullable"`
+	Path string `json:"path" api:"nullable"`
 	// S3 object key for the file
 	S3Key string `json:"s3Key"`
 	// Presigned URL for uploading the file
@@ -799,7 +799,7 @@ func (r vaultUploadResponseInstructionsJSON) RawJSON() string {
 
 type VaultNewParams struct {
 	// Display name for the vault
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 	// Optional description of the vault's purpose
 	Description param.Field[string] `json:"description"`
 	// Enable knowledge graph for entity relationship mapping. Only applies when
@@ -851,7 +851,7 @@ func (r VaultDeleteParams) URLQuery() (v url.Values) {
 }
 
 type VaultConfirmUploadParams struct {
-	Body VaultConfirmUploadParamsBodyUnion `json:"body,required"`
+	Body VaultConfirmUploadParamsBodyUnion `json:"body" api:"required"`
 }
 
 func (r VaultConfirmUploadParams) MarshalJSON() (data []byte, err error) {
@@ -860,7 +860,7 @@ func (r VaultConfirmUploadParams) MarshalJSON() (data []byte, err error) {
 
 type VaultConfirmUploadParamsBody struct {
 	// Whether the upload succeeded
-	Success param.Field[VaultConfirmUploadParamsBodySuccess] `json:"success,required"`
+	Success param.Field[VaultConfirmUploadParamsBodySuccess] `json:"success" api:"required"`
 	// Client-side error code
 	ErrorCode param.Field[string] `json:"errorCode"`
 	// Client-side error message
@@ -886,9 +886,9 @@ type VaultConfirmUploadParamsBodyUnion interface {
 
 type VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess struct {
 	// Uploaded file size in bytes
-	SizeBytes param.Field[int64] `json:"sizeBytes,required"`
+	SizeBytes param.Field[int64] `json:"sizeBytes" api:"required"`
 	// Whether the upload succeeded
-	Success param.Field[VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess] `json:"success,required"`
+	Success param.Field[VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess] `json:"success" api:"required"`
 	// S3 ETag for the uploaded object (optional if client cannot access ETag header)
 	Etag param.Field[string] `json:"etag"`
 }
@@ -917,11 +917,11 @@ func (r VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess) IsKnown() 
 
 type VaultConfirmUploadParamsBodyVaultConfirmUploadFailure struct {
 	// Client-side error code
-	ErrorCode param.Field[string] `json:"errorCode,required"`
+	ErrorCode param.Field[string] `json:"errorCode" api:"required"`
 	// Client-side error message
-	ErrorMessage param.Field[string] `json:"errorMessage,required"`
+	ErrorMessage param.Field[string] `json:"errorMessage" api:"required"`
 	// Whether the upload succeeded
-	Success param.Field[VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess] `json:"success,required"`
+	Success param.Field[VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess] `json:"success" api:"required"`
 }
 
 func (r VaultConfirmUploadParamsBodyVaultConfirmUploadFailure) MarshalJSON() (data []byte, err error) {
@@ -964,7 +964,7 @@ func (r VaultConfirmUploadParamsBodySuccess) IsKnown() bool {
 
 type VaultSearchParams struct {
 	// Search query or question to find relevant documents
-	Query param.Field[string] `json:"query,required"`
+	Query param.Field[string] `json:"query" api:"required"`
 	// Filters to narrow search results to specific documents
 	Filters param.Field[VaultSearchParamsFilters] `json:"filters"`
 	// Search method: 'global' for comprehensive questions, 'entity' for specific
@@ -1026,9 +1026,9 @@ func (r VaultSearchParamsMethod) IsKnown() bool {
 
 type VaultUploadParams struct {
 	// MIME type of the file (e.g., application/pdf, image/jpeg)
-	ContentType param.Field[string] `json:"contentType,required"`
+	ContentType param.Field[string] `json:"contentType" api:"required"`
 	// Name of the file to upload
-	Filename param.Field[string] `json:"filename,required"`
+	Filename param.Field[string] `json:"filename" api:"required"`
 	// Whether to automatically process and index the file for search
 	AutoIndex param.Field[bool] `json:"auto_index"`
 	// Additional metadata to associate with the file

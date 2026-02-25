@@ -91,15 +91,15 @@ func (r *AgentV1AgentService) Delete(ctx context.Context, id string, opts ...opt
 type AgentV1AgentNewResponse struct {
 	ID            string                      `json:"id"`
 	CreatedAt     time.Time                   `json:"createdAt" format:"date-time"`
-	Description   string                      `json:"description,nullable"`
-	DisabledTools []string                    `json:"disabledTools,nullable"`
-	EnabledTools  []string                    `json:"enabledTools,nullable"`
+	Description   string                      `json:"description" api:"nullable"`
+	DisabledTools []string                    `json:"disabledTools" api:"nullable"`
+	EnabledTools  []string                    `json:"enabledTools" api:"nullable"`
 	Instructions  string                      `json:"instructions"`
 	Model         string                      `json:"model"`
 	Name          string                      `json:"name"`
-	Sandbox       interface{}                 `json:"sandbox,nullable"`
+	Sandbox       interface{}                 `json:"sandbox" api:"nullable"`
 	UpdatedAt     time.Time                   `json:"updatedAt" format:"date-time"`
-	VaultIDs      []string                    `json:"vaultIds,nullable"`
+	VaultIDs      []string                    `json:"vaultIds" api:"nullable"`
 	JSON          agentV1AgentNewResponseJSON `json:"-"`
 }
 
@@ -132,16 +132,16 @@ func (r agentV1AgentNewResponseJSON) RawJSON() string {
 type AgentV1AgentGetResponse struct {
 	ID            string                      `json:"id"`
 	CreatedAt     time.Time                   `json:"createdAt" format:"date-time"`
-	Description   string                      `json:"description,nullable"`
-	DisabledTools []string                    `json:"disabledTools,nullable"`
-	EnabledTools  []string                    `json:"enabledTools,nullable"`
+	Description   string                      `json:"description" api:"nullable"`
+	DisabledTools []string                    `json:"disabledTools" api:"nullable"`
+	EnabledTools  []string                    `json:"enabledTools" api:"nullable"`
 	Instructions  string                      `json:"instructions"`
 	IsActive      bool                        `json:"isActive"`
 	Model         string                      `json:"model"`
 	Name          string                      `json:"name"`
-	Sandbox       interface{}                 `json:"sandbox,nullable"`
+	Sandbox       interface{}                 `json:"sandbox" api:"nullable"`
 	UpdatedAt     time.Time                   `json:"updatedAt" format:"date-time"`
-	VaultIDs      []string                    `json:"vaultIds,nullable"`
+	VaultIDs      []string                    `json:"vaultIds" api:"nullable"`
 	JSON          agentV1AgentGetResponseJSON `json:"-"`
 }
 
@@ -175,16 +175,16 @@ func (r agentV1AgentGetResponseJSON) RawJSON() string {
 type AgentV1AgentUpdateResponse struct {
 	ID            string                         `json:"id"`
 	CreatedAt     time.Time                      `json:"createdAt" format:"date-time"`
-	Description   string                         `json:"description,nullable"`
-	DisabledTools []string                       `json:"disabledTools,nullable"`
-	EnabledTools  []string                       `json:"enabledTools,nullable"`
+	Description   string                         `json:"description" api:"nullable"`
+	DisabledTools []string                       `json:"disabledTools" api:"nullable"`
+	EnabledTools  []string                       `json:"enabledTools" api:"nullable"`
 	Instructions  string                         `json:"instructions"`
 	IsActive      bool                           `json:"isActive"`
 	Model         string                         `json:"model"`
 	Name          string                         `json:"name"`
-	Sandbox       interface{}                    `json:"sandbox,nullable"`
+	Sandbox       interface{}                    `json:"sandbox" api:"nullable"`
 	UpdatedAt     time.Time                      `json:"updatedAt" format:"date-time"`
-	VaultIDs      []string                       `json:"vaultIds,nullable"`
+	VaultIDs      []string                       `json:"vaultIds" api:"nullable"`
 	JSON          agentV1AgentUpdateResponseJSON `json:"-"`
 }
 
@@ -239,12 +239,12 @@ func (r agentV1AgentListResponseJSON) RawJSON() string {
 type AgentV1AgentListResponseAgent struct {
 	ID          string                            `json:"id"`
 	CreatedAt   time.Time                         `json:"createdAt" format:"date-time"`
-	Description string                            `json:"description,nullable"`
+	Description string                            `json:"description" api:"nullable"`
 	IsActive    bool                              `json:"isActive"`
 	Model       string                            `json:"model"`
 	Name        string                            `json:"name"`
 	UpdatedAt   time.Time                         `json:"updatedAt" format:"date-time"`
-	VaultIDs    []string                          `json:"vaultIds,nullable"`
+	VaultIDs    []string                          `json:"vaultIds" api:"nullable"`
 	JSON        agentV1AgentListResponseAgentJSON `json:"-"`
 }
 
@@ -294,9 +294,9 @@ func (r agentV1AgentDeleteResponseJSON) RawJSON() string {
 
 type AgentV1AgentNewParams struct {
 	// System instructions that define agent behavior
-	Instructions param.Field[string] `json:"instructions,required"`
+	Instructions param.Field[string] `json:"instructions" api:"required"`
 	// Display name for the agent
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 	// Optional description of the agent
 	Description param.Field[string] `json:"description"`
 	// Denylist of tools the agent cannot use

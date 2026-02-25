@@ -44,8 +44,8 @@ func (r *ComputeV1InstanceTypeService) List(ctx context.Context, opts ...option.
 
 type ComputeV1InstanceTypeListResponse struct {
 	// Total number of instance types
-	Count         int64                                           `json:"count,required"`
-	InstanceTypes []ComputeV1InstanceTypeListResponseInstanceType `json:"instanceTypes,required"`
+	Count         int64                                           `json:"count" api:"required"`
+	InstanceTypes []ComputeV1InstanceTypeListResponseInstanceType `json:"instanceTypes" api:"required"`
 	JSON          computeV1InstanceTypeListResponseJSON           `json:"-"`
 }
 
