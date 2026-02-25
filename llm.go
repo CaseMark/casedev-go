@@ -52,7 +52,7 @@ func (r *LlmService) GetConfig(ctx context.Context, opts ...option.RequestOption
 }
 
 type LlmGetConfigResponse struct {
-	Models []LlmGetConfigResponseModel `json:"models,required"`
+	Models []LlmGetConfigResponseModel `json:"models" api:"required"`
 	JSON   llmGetConfigResponseJSON    `json:"-"`
 }
 
@@ -74,11 +74,11 @@ func (r llmGetConfigResponseJSON) RawJSON() string {
 
 type LlmGetConfigResponseModel struct {
 	// Unique model identifier
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Type of model (e.g., language, embedding)
-	ModelType string `json:"modelType,required"`
+	ModelType string `json:"modelType" api:"required"`
 	// Human-readable model name
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// Model description and capabilities
 	Description string `json:"description"`
 	// Pricing information for the model

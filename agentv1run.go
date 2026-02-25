@@ -237,18 +237,18 @@ func (r AgentV1RunExecResponseStatus) IsKnown() bool {
 type AgentV1RunGetDetailsResponse struct {
 	ID          string    `json:"id"`
 	AgentID     string    `json:"agentId"`
-	CompletedAt time.Time `json:"completedAt,nullable" format:"date-time"`
+	CompletedAt time.Time `json:"completedAt" api:"nullable" format:"date-time"`
 	CreatedAt   time.Time `json:"createdAt" format:"date-time"`
-	Guidance    string    `json:"guidance,nullable"`
-	Model       string    `json:"model,nullable"`
+	Guidance    string    `json:"guidance" api:"nullable"`
+	Model       string    `json:"model" api:"nullable"`
 	Prompt      string    `json:"prompt"`
 	// Final output from the agent
-	Result    AgentV1RunGetDetailsResponseResult `json:"result,nullable"`
-	StartedAt time.Time                          `json:"startedAt,nullable" format:"date-time"`
+	Result    AgentV1RunGetDetailsResponseResult `json:"result" api:"nullable"`
+	StartedAt time.Time                          `json:"startedAt" api:"nullable" format:"date-time"`
 	Status    AgentV1RunGetDetailsResponseStatus `json:"status"`
 	Steps     []AgentV1RunGetDetailsResponseStep `json:"steps"`
 	// Token usage statistics
-	Usage AgentV1RunGetDetailsResponseUsage `json:"usage,nullable"`
+	Usage AgentV1RunGetDetailsResponseUsage `json:"usage" api:"nullable"`
 	JSON  agentV1RunGetDetailsResponseJSON  `json:"-"`
 }
 
@@ -282,7 +282,7 @@ func (r agentV1RunGetDetailsResponseJSON) RawJSON() string {
 // Final output from the agent
 type AgentV1RunGetDetailsResponseResult struct {
 	// Sandbox execution logs (OpenCode server + runner script)
-	Logs   AgentV1RunGetDetailsResponseResultLogs `json:"logs,nullable"`
+	Logs   AgentV1RunGetDetailsResponseResultLogs `json:"logs" api:"nullable"`
 	Output string                                 `json:"output"`
 	JSON   agentV1RunGetDetailsResponseResultJSON `json:"-"`
 }
@@ -350,11 +350,11 @@ func (r AgentV1RunGetDetailsResponseStatus) IsKnown() bool {
 
 type AgentV1RunGetDetailsResponseStep struct {
 	ID         string                                `json:"id"`
-	Content    string                                `json:"content,nullable"`
-	DurationMs int64                                 `json:"durationMs,nullable"`
+	Content    string                                `json:"content" api:"nullable"`
+	DurationMs int64                                 `json:"durationMs" api:"nullable"`
 	Timestamp  time.Time                             `json:"timestamp" format:"date-time"`
 	ToolInput  interface{}                           `json:"toolInput"`
-	ToolName   string                                `json:"toolName,nullable"`
+	ToolName   string                                `json:"toolName" api:"nullable"`
 	ToolOutput interface{}                           `json:"toolOutput"`
 	Type       AgentV1RunGetDetailsResponseStepsType `json:"type"`
 	JSON       agentV1RunGetDetailsResponseStepJSON  `json:"-"`
@@ -432,10 +432,10 @@ func (r agentV1RunGetDetailsResponseUsageJSON) RawJSON() string {
 
 type AgentV1RunGetStatusResponse struct {
 	ID          string    `json:"id"`
-	CompletedAt time.Time `json:"completedAt,nullable" format:"date-time"`
+	CompletedAt time.Time `json:"completedAt" api:"nullable" format:"date-time"`
 	// Elapsed time in milliseconds
-	DurationMs int64                             `json:"durationMs,nullable"`
-	StartedAt  time.Time                         `json:"startedAt,nullable" format:"date-time"`
+	DurationMs int64                             `json:"durationMs" api:"nullable"`
+	StartedAt  time.Time                         `json:"startedAt" api:"nullable" format:"date-time"`
 	Status     AgentV1RunGetStatusResponseStatus `json:"status"`
 	JSON       agentV1RunGetStatusResponseJSON   `json:"-"`
 }
@@ -503,9 +503,9 @@ func (r agentV1RunWatchResponseJSON) RawJSON() string {
 
 type AgentV1RunNewParams struct {
 	// ID of the agent to run
-	AgentID param.Field[string] `json:"agentId,required"`
+	AgentID param.Field[string] `json:"agentId" api:"required"`
 	// Task prompt for the agent
-	Prompt param.Field[string] `json:"prompt,required"`
+	Prompt param.Field[string] `json:"prompt" api:"required"`
 	// Additional guidance for this run
 	Guidance param.Field[string] `json:"guidance"`
 	// Override the agent default model for this run
@@ -518,7 +518,7 @@ func (r AgentV1RunNewParams) MarshalJSON() (data []byte, err error) {
 
 type AgentV1RunWatchParams struct {
 	// HTTPS URL to receive completion callback
-	CallbackURL param.Field[string] `json:"callbackUrl,required" format:"uri"`
+	CallbackURL param.Field[string] `json:"callbackUrl" api:"required" format:"uri"`
 }
 
 func (r AgentV1RunWatchParams) MarshalJSON() (data []byte, err error) {

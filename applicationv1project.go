@@ -294,9 +294,9 @@ func (r applicationV1ProjectListResponseProjectsDomainJSON) RawJSON() string {
 
 type ApplicationV1ProjectNewParams struct {
 	// GitHub repository URL or "owner/repo"
-	GitRepo param.Field[string] `json:"gitRepo,required"`
+	GitRepo param.Field[string] `json:"gitRepo" api:"required"`
 	// Project name
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 	// Custom build command
 	BuildCommand param.Field[string] `json:"buildCommand"`
 	// Environment variables to set on the project
@@ -319,11 +319,11 @@ func (r ApplicationV1ProjectNewParams) MarshalJSON() (data []byte, err error) {
 
 type ApplicationV1ProjectNewParamsEnvironmentVariable struct {
 	// Environment variable name
-	Key param.Field[string] `json:"key,required"`
+	Key param.Field[string] `json:"key" api:"required"`
 	// Deployment targets for this variable
-	Target param.Field[[]ApplicationV1ProjectNewParamsEnvironmentVariablesTarget] `json:"target,required"`
+	Target param.Field[[]ApplicationV1ProjectNewParamsEnvironmentVariablesTarget] `json:"target" api:"required"`
 	// Environment variable value
-	Value param.Field[string] `json:"value,required"`
+	Value param.Field[string] `json:"value" api:"required"`
 	// Variable type
 	Type param.Field[ApplicationV1ProjectNewParamsEnvironmentVariablesType] `json:"type"`
 }
@@ -390,11 +390,11 @@ func (r ApplicationV1ProjectNewDeploymentParams) MarshalJSON() (data []byte, err
 
 type ApplicationV1ProjectNewDeploymentParamsEnvironmentVariable struct {
 	// Environment variable name
-	Key param.Field[string] `json:"key,required"`
+	Key param.Field[string] `json:"key" api:"required"`
 	// Deployment targets for this variable
-	Target param.Field[[]ApplicationV1ProjectNewDeploymentParamsEnvironmentVariablesTarget] `json:"target,required"`
+	Target param.Field[[]ApplicationV1ProjectNewDeploymentParamsEnvironmentVariablesTarget] `json:"target" api:"required"`
 	// Environment variable value
-	Value param.Field[string] `json:"value,required"`
+	Value param.Field[string] `json:"value" api:"required"`
 	// Variable type
 	Type param.Field[ApplicationV1ProjectNewDeploymentParamsEnvironmentVariablesType] `json:"type"`
 }
@@ -438,7 +438,7 @@ func (r ApplicationV1ProjectNewDeploymentParamsEnvironmentVariablesType) IsKnown
 
 type ApplicationV1ProjectNewDomainParams struct {
 	// Domain name to add
-	Domain param.Field[string] `json:"domain,required"`
+	Domain param.Field[string] `json:"domain" api:"required"`
 	// Git branch to associate with this domain
 	GitBranch param.Field[string] `json:"gitBranch"`
 }
@@ -449,11 +449,11 @@ func (r ApplicationV1ProjectNewDomainParams) MarshalJSON() (data []byte, err err
 
 type ApplicationV1ProjectNewEnvParams struct {
 	// Environment variable name
-	Key param.Field[string] `json:"key,required"`
+	Key param.Field[string] `json:"key" api:"required"`
 	// Deployment targets for this variable
-	Target param.Field[[]ApplicationV1ProjectNewEnvParamsTarget] `json:"target,required"`
+	Target param.Field[[]ApplicationV1ProjectNewEnvParamsTarget] `json:"target" api:"required"`
 	// Environment variable value
-	Value param.Field[string] `json:"value,required"`
+	Value param.Field[string] `json:"value" api:"required"`
 	// Specific git branch (for preview deployments)
 	GitBranch param.Field[string] `json:"gitBranch"`
 	// Variable type

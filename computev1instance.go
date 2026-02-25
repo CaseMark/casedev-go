@@ -87,7 +87,7 @@ func (r *ComputeV1InstanceService) Delete(ctx context.Context, id string, opts .
 
 type ComputeV1InstanceNewResponse struct {
 	ID                  string                           `json:"id"`
-	AutoShutdownMinutes int64                            `json:"autoShutdownMinutes,nullable"`
+	AutoShutdownMinutes int64                            `json:"autoShutdownMinutes" api:"nullable"`
 	CreatedAt           string                           `json:"createdAt"`
 	GPU                 string                           `json:"gpu"`
 	InstanceType        string                           `json:"instanceType"`
@@ -130,21 +130,21 @@ func (r computeV1InstanceNewResponseJSON) RawJSON() string {
 
 type ComputeV1InstanceGetResponse struct {
 	ID                    string                           `json:"id"`
-	AutoShutdownMinutes   int64                            `json:"autoShutdownMinutes,nullable"`
+	AutoShutdownMinutes   int64                            `json:"autoShutdownMinutes" api:"nullable"`
 	CreatedAt             string                           `json:"createdAt"`
 	CurrentCost           string                           `json:"currentCost"`
 	CurrentRuntimeSeconds int64                            `json:"currentRuntimeSeconds"`
 	GPU                   string                           `json:"gpu"`
 	InstanceType          string                           `json:"instanceType"`
-	IP                    string                           `json:"ip,nullable"`
+	IP                    string                           `json:"ip" api:"nullable"`
 	Name                  string                           `json:"name"`
 	PricePerHour          string                           `json:"pricePerHour"`
 	Region                string                           `json:"region"`
 	Specs                 interface{}                      `json:"specs"`
-	SSH                   ComputeV1InstanceGetResponseSSH  `json:"ssh,nullable"`
-	StartedAt             string                           `json:"startedAt,nullable"`
+	SSH                   ComputeV1InstanceGetResponseSSH  `json:"ssh" api:"nullable"`
+	StartedAt             string                           `json:"startedAt" api:"nullable"`
 	Status                string                           `json:"status"`
-	VaultMounts           interface{}                      `json:"vaultMounts,nullable"`
+	VaultMounts           interface{}                      `json:"vaultMounts" api:"nullable"`
 	JSON                  computeV1InstanceGetResponseJSON `json:"-"`
 }
 
@@ -233,15 +233,15 @@ func (r computeV1InstanceListResponseJSON) RawJSON() string {
 
 type ComputeV1InstanceListResponseInstance struct {
 	ID                  string                                       `json:"id"`
-	AutoShutdownMinutes int64                                        `json:"autoShutdownMinutes,nullable"`
+	AutoShutdownMinutes int64                                        `json:"autoShutdownMinutes" api:"nullable"`
 	CreatedAt           time.Time                                    `json:"createdAt" format:"date-time"`
 	GPU                 string                                       `json:"gpu"`
 	InstanceType        string                                       `json:"instanceType"`
-	IP                  string                                       `json:"ip,nullable"`
+	IP                  string                                       `json:"ip" api:"nullable"`
 	Name                string                                       `json:"name"`
 	PricePerHour        string                                       `json:"pricePerHour"`
 	Region              string                                       `json:"region"`
-	StartedAt           time.Time                                    `json:"startedAt,nullable" format:"date-time"`
+	StartedAt           time.Time                                    `json:"startedAt" api:"nullable" format:"date-time"`
 	Status              ComputeV1InstanceListResponseInstancesStatus `json:"status"`
 	TotalCost           string                                       `json:"totalCost"`
 	TotalRuntimeSeconds int64                                        `json:"totalRuntimeSeconds"`
@@ -328,11 +328,11 @@ func (r computeV1InstanceDeleteResponseJSON) RawJSON() string {
 
 type ComputeV1InstanceNewParams struct {
 	// GPU type (e.g., 'gpu_1x_h100_sxm5')
-	InstanceType param.Field[string] `json:"instanceType,required"`
+	InstanceType param.Field[string] `json:"instanceType" api:"required"`
 	// Instance name
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 	// Region (e.g., 'us-west-1')
-	Region param.Field[string] `json:"region,required"`
+	Region param.Field[string] `json:"region" api:"required"`
 	// Auto-shutdown timer (null = never)
 	AutoShutdownMinutes param.Field[int64] `json:"autoShutdownMinutes"`
 	// Vault IDs to mount

@@ -330,7 +330,7 @@ func (r computeV1SecretUpdateGroupResponseJSON) RawJSON() string {
 type ComputeV1SecretNewParams struct {
 	// Unique name for the secret group. Must contain only letters, numbers, hyphens,
 	// and underscores.
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 	// Optional description of the secret group's purpose
 	Description param.Field[string] `json:"description"`
 	// Environment name where the secret group will be created. Uses default
@@ -390,7 +390,7 @@ func (r ComputeV1SecretGetGroupParams) URLQuery() (v url.Values) {
 
 type ComputeV1SecretUpdateGroupParams struct {
 	// Key-value pairs of secrets to set
-	Secrets param.Field[map[string]string] `json:"secrets,required"`
+	Secrets param.Field[map[string]string] `json:"secrets" api:"required"`
 	// Environment name (optional, uses default if not specified)
 	Env param.Field[string] `json:"env"`
 }

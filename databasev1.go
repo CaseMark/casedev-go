@@ -144,7 +144,7 @@ type DatabaseV1GetUsageResponseProject struct {
 	Costs           DatabaseV1GetUsageResponseProjectsCosts `json:"costs"`
 	LastUpdated     time.Time                               `json:"lastUpdated" format:"date-time"`
 	ProjectID       string                                  `json:"projectId"`
-	ProjectName     string                                  `json:"projectName,nullable"`
+	ProjectName     string                                  `json:"projectName" api:"nullable"`
 	StorageGBMonths float64                                 `json:"storageGbMonths"`
 	TransferGB      float64                                 `json:"transferGb"`
 	JSON            databaseV1GetUsageResponseProjectJSON   `json:"-"`

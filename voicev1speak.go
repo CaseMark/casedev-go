@@ -45,7 +45,7 @@ func (r *VoiceV1SpeakService) New(ctx context.Context, body VoiceV1SpeakNewParam
 
 type VoiceV1SpeakNewParams struct {
 	// Text to convert to speech
-	Text param.Field[string] `json:"text,required"`
+	Text param.Field[string] `json:"text" api:"required"`
 	// Apply automatic text normalization
 	ApplyTextNormalization param.Field[bool] `json:"apply_text_normalization"`
 	// Enable request logging

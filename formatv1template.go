@@ -214,11 +214,11 @@ func (r formatV1TemplateListResponseTemplateJSON) RawJSON() string {
 
 type FormatV1TemplateNewParams struct {
 	// Template content with {{variable}} placeholders
-	Content param.Field[string] `json:"content,required"`
+	Content param.Field[string] `json:"content" api:"required"`
 	// Template name
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 	// Template type
-	Type param.Field[FormatV1TemplateNewParamsType] `json:"type,required"`
+	Type param.Field[FormatV1TemplateNewParamsType] `json:"type" api:"required"`
 	// Template description
 	Description param.Field[string] `json:"description"`
 	// CSS styles for the template

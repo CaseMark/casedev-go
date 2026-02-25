@@ -413,7 +413,7 @@ func (r memoryV1SearchResponseResultsTagsJSON) RawJSON() string {
 
 type MemoryV1NewParams struct {
 	// Conversation messages to extract memories from
-	Messages param.Field[[]MemoryV1NewParamsMessage] `json:"messages,required"`
+	Messages param.Field[[]MemoryV1NewParamsMessage] `json:"messages" api:"required"`
 	// Custom category (e.g., "fact", "preference", "deadline")
 	Category param.Field[string] `json:"category"`
 	// Optional custom prompt for fact extraction
@@ -454,9 +454,9 @@ func (r MemoryV1NewParams) MarshalJSON() (data []byte, err error) {
 
 type MemoryV1NewParamsMessage struct {
 	// Message content
-	Content param.Field[string] `json:"content,required"`
+	Content param.Field[string] `json:"content" api:"required"`
 	// Message role
-	Role param.Field[MemoryV1NewParamsMessagesRole] `json:"role,required"`
+	Role param.Field[MemoryV1NewParamsMessagesRole] `json:"role" api:"required"`
 }
 
 func (r MemoryV1NewParamsMessage) MarshalJSON() (data []byte, err error) {
@@ -559,7 +559,7 @@ func (r MemoryV1DeleteAllParams) URLQuery() (v url.Values) {
 
 type MemoryV1SearchParams struct {
 	// Search query for semantic matching
-	Query param.Field[string] `json:"query,required"`
+	Query param.Field[string] `json:"query" api:"required"`
 	// Filter by category
 	Category param.Field[string] `json:"category"`
 	// Filter by tag_1
