@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.5 (2026-02-25)
+
+Full Changelog: [v0.3.4...v0.3.5](https://github.com/CaseMark/casedev-go/compare/v0.3.4...v0.3.5)
+
+### Chores
+
+* **internal:** move custom custom `json` tags to `api` ([ea01e54](https://github.com/CaseMark/casedev-go/commit/ea01e540dd4d5d0f69ed071aede788830ed8f3fc))
+
 ## 0.3.4 (2026-02-24)
 
 Full Changelog: [v0.3.3...v0.3.4](https://github.com/CaseMark/casedev-go/compare/v0.3.3...v0.3.4)
