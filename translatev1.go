@@ -272,7 +272,7 @@ func (r translateV1TranslateResponseDataTranslationJSON) RawJSON() string {
 type TranslateV1DetectParams struct {
 	// Text to detect language for. Can be a single string or an array for batch
 	// detection.
-	Q param.Field[TranslateV1DetectParamsQUnion] `json:"q,required"`
+	Q param.Field[TranslateV1DetectParamsQUnion] `json:"q" api:"required"`
 }
 
 func (r TranslateV1DetectParams) MarshalJSON() (data []byte, err error) {
@@ -326,9 +326,9 @@ func (r TranslateV1ListLanguagesParamsModel) IsKnown() bool {
 
 type TranslateV1TranslateParams struct {
 	// Text to translate. Can be a single string or an array for batch translation.
-	Q param.Field[TranslateV1TranslateParamsQUnion] `json:"q,required"`
+	Q param.Field[TranslateV1TranslateParamsQUnion] `json:"q" api:"required"`
 	// Target language code (ISO 639-1)
-	Target param.Field[string] `json:"target,required"`
+	Target param.Field[string] `json:"target" api:"required"`
 	// Format of the source text. Use 'html' to preserve HTML tags.
 	Format param.Field[TranslateV1TranslateParamsFormat] `json:"format"`
 	// Translation model. 'nmt' (Neural Machine Translation) is recommended for

@@ -55,9 +55,9 @@ func (r *SuperdocV1Service) Convert(ctx context.Context, body SuperdocV1ConvertP
 
 type SuperdocV1AnnotateParams struct {
 	// Document source - provide either URL or base64
-	Document param.Field[SuperdocV1AnnotateParamsDocument] `json:"document,required"`
+	Document param.Field[SuperdocV1AnnotateParamsDocument] `json:"document" api:"required"`
 	// Fields to populate in the template
-	Fields param.Field[[]SuperdocV1AnnotateParamsField] `json:"fields,required"`
+	Fields param.Field[[]SuperdocV1AnnotateParamsField] `json:"fields" api:"required"`
 	// Output format for the annotated document
 	OutputFormat param.Field[SuperdocV1AnnotateParamsOutputFormat] `json:"output_format"`
 }
@@ -80,9 +80,9 @@ func (r SuperdocV1AnnotateParamsDocument) MarshalJSON() (data []byte, err error)
 
 type SuperdocV1AnnotateParamsField struct {
 	// Field data type
-	Type param.Field[SuperdocV1AnnotateParamsFieldsType] `json:"type,required"`
+	Type param.Field[SuperdocV1AnnotateParamsFieldsType] `json:"type" api:"required"`
 	// Value to populate
-	Value param.Field[SuperdocV1AnnotateParamsFieldsValueUnion] `json:"value,required"`
+	Value param.Field[SuperdocV1AnnotateParamsFieldsValueUnion] `json:"value" api:"required"`
 	// Target field ID (for single field)
 	ID param.Field[string] `json:"id"`
 	// Target field group (for multiple fields with same tag)
@@ -150,7 +150,7 @@ func (r SuperdocV1AnnotateParamsOutputFormat) IsKnown() bool {
 
 type SuperdocV1ConvertParams struct {
 	// Source format of the document
-	From param.Field[SuperdocV1ConvertParamsFrom] `json:"from,required"`
+	From param.Field[SuperdocV1ConvertParamsFrom] `json:"from" api:"required"`
 	// Base64-encoded document content
 	DocumentBase64 param.Field[string] `json:"document_base64"`
 	// URL to the document to convert

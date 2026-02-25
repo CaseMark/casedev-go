@@ -54,15 +54,15 @@ func (r *PrivilegeV1Service) Detect(ctx context.Context, body PrivilegeV1DetectP
 }
 
 type PrivilegeV1DetectResponse struct {
-	Categories []PrivilegeV1DetectResponseCategory `json:"categories,required"`
+	Categories []PrivilegeV1DetectResponseCategory `json:"categories" api:"required"`
 	// Overall confidence score (0-1)
-	Confidence float64 `json:"confidence,required"`
+	Confidence float64 `json:"confidence" api:"required"`
 	// Policy-friendly explanation for privilege log
-	PolicyRationale string `json:"policy_rationale,required"`
+	PolicyRationale string `json:"policy_rationale" api:"required"`
 	// Whether any privilege was detected
-	Privileged bool `json:"privileged,required"`
+	Privileged bool `json:"privileged" api:"required"`
 	// Recommended action for discovery
-	Recommendation PrivilegeV1DetectResponseRecommendation `json:"recommendation,required"`
+	Recommendation PrivilegeV1DetectResponseRecommendation `json:"recommendation" api:"required"`
 	JSON           privilegeV1DetectResponseJSON           `json:"-"`
 }
 

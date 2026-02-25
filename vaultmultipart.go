@@ -104,8 +104,8 @@ func (r vaultMultipartGetPartURLsResponseURLJSON) RawJSON() string {
 }
 
 type VaultMultipartAbortParams struct {
-	ObjectID param.Field[string] `json:"objectId,required"`
-	UploadID param.Field[string] `json:"uploadId,required"`
+	ObjectID param.Field[string] `json:"objectId" api:"required"`
+	UploadID param.Field[string] `json:"uploadId" api:"required"`
 }
 
 func (r VaultMultipartAbortParams) MarshalJSON() (data []byte, err error) {
@@ -113,9 +113,9 @@ func (r VaultMultipartAbortParams) MarshalJSON() (data []byte, err error) {
 }
 
 type VaultMultipartGetPartURLsParams struct {
-	ObjectID param.Field[string]                                `json:"objectId,required"`
-	Parts    param.Field[[]VaultMultipartGetPartURLsParamsPart] `json:"parts,required"`
-	UploadID param.Field[string]                                `json:"uploadId,required"`
+	ObjectID param.Field[string]                                `json:"objectId" api:"required"`
+	Parts    param.Field[[]VaultMultipartGetPartURLsParamsPart] `json:"parts" api:"required"`
+	UploadID param.Field[string]                                `json:"uploadId" api:"required"`
 }
 
 func (r VaultMultipartGetPartURLsParams) MarshalJSON() (data []byte, err error) {
@@ -123,9 +123,9 @@ func (r VaultMultipartGetPartURLsParams) MarshalJSON() (data []byte, err error) 
 }
 
 type VaultMultipartGetPartURLsParamsPart struct {
-	PartNumber param.Field[int64] `json:"partNumber,required"`
+	PartNumber param.Field[int64] `json:"partNumber" api:"required"`
 	// Part size in bytes (min 5MB except final part, max 5GB).
-	SizeBytes param.Field[int64] `json:"sizeBytes,required"`
+	SizeBytes param.Field[int64] `json:"sizeBytes" api:"required"`
 }
 
 func (r VaultMultipartGetPartURLsParamsPart) MarshalJSON() (data []byte, err error) {

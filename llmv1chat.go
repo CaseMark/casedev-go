@@ -155,7 +155,7 @@ func (r llmV1ChatNewCompletionResponseUsageJSON) RawJSON() string {
 
 type LlmV1ChatNewCompletionParams struct {
 	// List of messages comprising the conversation
-	Messages param.Field[[]LlmV1ChatNewCompletionParamsMessage] `json:"messages,required"`
+	Messages param.Field[[]LlmV1ChatNewCompletionParamsMessage] `json:"messages" api:"required"`
 	// CaseMark-only: when true, allows reasoning fields in responses. Defaults to
 	// false (reasoning is suppressed).
 	CasemarkShowReasoning param.Field[bool] `json:"casemark_show_reasoning"`

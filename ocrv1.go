@@ -75,11 +75,11 @@ func (r *OcrV1Service) Process(ctx context.Context, body OcrV1ProcessParams, opt
 
 type OcrV1GetResponse struct {
 	// OCR job ID
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Job creation timestamp
-	CreatedAt time.Time `json:"created_at,required" format:"date-time"`
+	CreatedAt time.Time `json:"created_at" api:"required" format:"date-time"`
 	// Current job status
-	Status OcrV1GetResponseStatus `json:"status,required"`
+	Status OcrV1GetResponseStatus `json:"status" api:"required"`
 	// Job completion timestamp
 	CompletedAt time.Time `json:"completed_at" format:"date-time"`
 	// Additional processing metadata
@@ -208,7 +208,7 @@ func (r OcrV1DownloadParamsType) IsKnown() bool {
 
 type OcrV1ProcessParams struct {
 	// URL or S3 path to the document to process
-	DocumentURL param.Field[string] `json:"document_url,required"`
+	DocumentURL param.Field[string] `json:"document_url" api:"required"`
 	// URL to receive completion webhook
 	CallbackURL param.Field[string] `json:"callback_url"`
 	// Optional custom document identifier

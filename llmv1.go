@@ -219,9 +219,9 @@ func (r llmV1ListModelsResponseDataPricingJSON) RawJSON() string {
 
 type LlmV1NewEmbeddingParams struct {
 	// Text or array of texts to create embeddings for
-	Input param.Field[LlmV1NewEmbeddingParamsInputUnion] `json:"input,required"`
+	Input param.Field[LlmV1NewEmbeddingParamsInputUnion] `json:"input" api:"required"`
 	// Embedding model to use (e.g., text-embedding-ada-002, text-embedding-3-small)
-	Model param.Field[string] `json:"model,required"`
+	Model param.Field[string] `json:"model" api:"required"`
 	// Number of dimensions for the embeddings (model-specific)
 	Dimensions param.Field[int64] `json:"dimensions"`
 	// Format for returned embeddings

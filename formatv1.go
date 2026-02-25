@@ -47,9 +47,9 @@ func (r *FormatV1Service) NewDocument(ctx context.Context, body FormatV1NewDocum
 
 type FormatV1NewDocumentParams struct {
 	// The source content to format
-	Content param.Field[string] `json:"content,required"`
+	Content param.Field[string] `json:"content" api:"required"`
 	// Desired output format
-	OutputFormat param.Field[FormatV1NewDocumentParamsOutputFormat] `json:"output_format,required"`
+	OutputFormat param.Field[FormatV1NewDocumentParamsOutputFormat] `json:"output_format" api:"required"`
 	// Format of the input content
 	InputFormat param.Field[FormatV1NewDocumentParamsInputFormat] `json:"input_format"`
 	Options     param.Field[FormatV1NewDocumentParamsOptions]     `json:"options"`

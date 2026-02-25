@@ -42,7 +42,7 @@ func (r *SystemService) ListServices(ctx context.Context, opts ...option.Request
 }
 
 type SystemListServicesResponse struct {
-	Services []SystemListServicesResponseService `json:"services,required"`
+	Services []SystemListServicesResponseService `json:"services" api:"required"`
 	JSON     systemListServicesResponseJSON      `json:"-"`
 }
 
@@ -63,12 +63,12 @@ func (r systemListServicesResponseJSON) RawJSON() string {
 }
 
 type SystemListServicesResponseService struct {
-	ID          string                                `json:"id,required"`
-	Description string                                `json:"description,required"`
-	Href        string                                `json:"href,required"`
-	Icon        string                                `json:"icon,required"`
-	Name        string                                `json:"name,required"`
-	Order       int64                                 `json:"order,required"`
+	ID          string                                `json:"id" api:"required"`
+	Description string                                `json:"description" api:"required"`
+	Href        string                                `json:"href" api:"required"`
+	Icon        string                                `json:"icon" api:"required"`
+	Name        string                                `json:"name" api:"required"`
+	Order       int64                                 `json:"order" api:"required"`
 	JSON        systemListServicesResponseServiceJSON `json:"-"`
 }
 

@@ -261,8 +261,8 @@ func (r computeV1EnvironmentListResponseEnvironmentJSON) RawJSON() string {
 }
 
 type ComputeV1EnvironmentDeleteResponse struct {
-	Message string                                 `json:"message,required"`
-	Success bool                                   `json:"success,required"`
+	Message string                                 `json:"message" api:"required"`
+	Success bool                                   `json:"success" api:"required"`
 	JSON    computeV1EnvironmentDeleteResponseJSON `json:"-"`
 }
 
@@ -328,7 +328,7 @@ func (r computeV1EnvironmentSetDefaultResponseJSON) RawJSON() string {
 
 type ComputeV1EnvironmentNewParams struct {
 	// Environment name (alphanumeric, hyphens, and underscores only)
-	Name param.Field[string] `json:"name,required"`
+	Name param.Field[string] `json:"name" api:"required"`
 }
 
 func (r ComputeV1EnvironmentNewParams) MarshalJSON() (data []byte, err error) {

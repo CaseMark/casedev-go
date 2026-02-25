@@ -201,21 +201,21 @@ func (r *VaultObjectService) GetText(ctx context.Context, id string, objectID st
 
 type VaultObjectGetResponse struct {
 	// Object ID
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// MIME type
-	ContentType string `json:"contentType,required"`
+	ContentType string `json:"contentType" api:"required"`
 	// Upload timestamp
-	CreatedAt time.Time `json:"createdAt,required" format:"date-time"`
+	CreatedAt time.Time `json:"createdAt" api:"required" format:"date-time"`
 	// Presigned S3 download URL
-	DownloadURL string `json:"downloadUrl,required"`
+	DownloadURL string `json:"downloadUrl" api:"required"`
 	// URL expiration time in seconds
-	ExpiresIn int64 `json:"expiresIn,required"`
+	ExpiresIn int64 `json:"expiresIn" api:"required"`
 	// Original filename
-	Filename string `json:"filename,required"`
+	Filename string `json:"filename" api:"required"`
 	// Processing status (pending, processing, completed, failed)
-	IngestionStatus string `json:"ingestionStatus,required"`
+	IngestionStatus string `json:"ingestionStatus" api:"required"`
 	// Vault ID
-	VaultID string `json:"vaultId,required"`
+	VaultID string `json:"vaultId" api:"required"`
 	// Number of text chunks created
 	ChunkCount int64 `json:"chunkCount"`
 	// Additional metadata
@@ -223,7 +223,7 @@ type VaultObjectGetResponse struct {
 	// Number of pages (for documents)
 	PageCount int64 `json:"pageCount"`
 	// Optional folder path for hierarchy preservation
-	Path string `json:"path,nullable"`
+	Path string `json:"path" api:"nullable"`
 	// File size in bytes
 	SizeBytes int64 `json:"sizeBytes"`
 	// Length of extracted text
@@ -275,7 +275,7 @@ type VaultObjectUpdateResponse struct {
 	// Full metadata object
 	Metadata interface{} `json:"metadata"`
 	// Folder path for hierarchy preservation
-	Path string `json:"path,nullable"`
+	Path string `json:"path" api:"nullable"`
 	// File size in bytes
 	SizeBytes int64 `json:"sizeBytes"`
 	// Last update timestamp
@@ -311,10 +311,10 @@ func (r vaultObjectUpdateResponseJSON) RawJSON() string {
 
 type VaultObjectListResponse struct {
 	// Total number of objects in the vault
-	Count   float64                         `json:"count,required"`
-	Objects []VaultObjectListResponseObject `json:"objects,required"`
+	Count   float64                         `json:"count" api:"required"`
+	Objects []VaultObjectListResponseObject `json:"objects" api:"required"`
 	// The ID of the vault
-	VaultID string                      `json:"vaultId,required"`
+	VaultID string                      `json:"vaultId" api:"required"`
 	JSON    vaultObjectListResponseJSON `json:"-"`
 }
 
@@ -338,15 +338,15 @@ func (r vaultObjectListResponseJSON) RawJSON() string {
 
 type VaultObjectListResponseObject struct {
 	// Unique object identifier
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// MIME type of the document
-	ContentType string `json:"contentType,required"`
+	ContentType string `json:"contentType" api:"required"`
 	// Document upload timestamp
-	CreatedAt time.Time `json:"createdAt,required" format:"date-time"`
+	CreatedAt time.Time `json:"createdAt" api:"required" format:"date-time"`
 	// Original filename of the uploaded document
-	Filename string `json:"filename,required"`
+	Filename string `json:"filename" api:"required"`
 	// Processing status of the document
-	IngestionStatus string `json:"ingestionStatus,required"`
+	IngestionStatus string `json:"ingestionStatus" api:"required"`
 	// Number of text chunks created for vectorization
 	ChunkCount float64 `json:"chunkCount"`
 	// Processing completion timestamp
@@ -356,7 +356,7 @@ type VaultObjectListResponseObject struct {
 	// Number of pages in the document
 	PageCount float64 `json:"pageCount"`
 	// Optional folder path for hierarchy preservation from source systems
-	Path string `json:"path,nullable"`
+	Path string `json:"path" api:"nullable"`
 	// File size in bytes
 	SizeBytes float64 `json:"sizeBytes"`
 	// Custom tags associated with the document
@@ -588,7 +588,7 @@ type VaultObjectGetOcrWordsResponsePagesWord struct {
 	// Bounding box [x0, y0, x1, y1] normalized to 0-1 range
 	Bbox []float64 `json:"bbox"`
 	// OCR confidence score (0-1)
-	Confidence float64 `json:"confidence,nullable"`
+	Confidence float64 `json:"confidence" api:"nullable"`
 	// The word text
 	Text string `json:"text"`
 	// Global word index across the entire document (0-based)
@@ -617,17 +617,17 @@ func (r vaultObjectGetOcrWordsResponsePagesWordJSON) RawJSON() string {
 
 type VaultObjectGetSummarizeJobResponse struct {
 	// When the job completed
-	CompletedAt time.Time `json:"completedAt,nullable" format:"date-time"`
+	CompletedAt time.Time `json:"completedAt" api:"nullable" format:"date-time"`
 	// When the job was created
 	CreatedAt time.Time `json:"createdAt" format:"date-time"`
 	// Error message (if failed)
-	Error string `json:"error,nullable"`
+	Error string `json:"error" api:"nullable"`
 	// Case.dev job ID
 	JobID string `json:"jobId"`
 	// Filename of the result document (if completed)
-	ResultFilename string `json:"resultFilename,nullable"`
+	ResultFilename string `json:"resultFilename" api:"nullable"`
 	// ID of the result document (if completed)
-	ResultObjectID string `json:"resultObjectId,nullable"`
+	ResultObjectID string `json:"resultObjectId" api:"nullable"`
 	// ID of the source document
 	SourceObjectID string `json:"sourceObjectId"`
 	// Current job status
@@ -680,9 +680,9 @@ func (r VaultObjectGetSummarizeJobResponseStatus) IsKnown() bool {
 }
 
 type VaultObjectGetTextResponse struct {
-	Metadata VaultObjectGetTextResponseMetadata `json:"metadata,required"`
+	Metadata VaultObjectGetTextResponseMetadata `json:"metadata" api:"required"`
 	// Full concatenated text content from all chunks
-	Text string                         `json:"text,required"`
+	Text string                         `json:"text" api:"required"`
 	JSON vaultObjectGetTextResponseJSON `json:"-"`
 }
 
@@ -705,15 +705,15 @@ func (r vaultObjectGetTextResponseJSON) RawJSON() string {
 
 type VaultObjectGetTextResponseMetadata struct {
 	// Number of text chunks the document was split into
-	ChunkCount int64 `json:"chunk_count,required"`
+	ChunkCount int64 `json:"chunk_count" api:"required"`
 	// Original filename of the document
-	Filename string `json:"filename,required"`
+	Filename string `json:"filename" api:"required"`
 	// Total character count of the extracted text
-	Length int64 `json:"length,required"`
+	Length int64 `json:"length" api:"required"`
 	// The object ID
-	ObjectID string `json:"object_id,required"`
+	ObjectID string `json:"object_id" api:"required"`
 	// The vault ID
-	VaultID string `json:"vault_id,required"`
+	VaultID string `json:"vault_id" api:"required"`
 	// When the document processing completed
 	IngestionCompletedAt time.Time                              `json:"ingestion_completed_at" format:"date-time"`
 	JSON                 vaultObjectGetTextResponseMetadataJSON `json:"-"`
