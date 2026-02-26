@@ -36,7 +36,8 @@ func TestAgentV1AgentNewWithOptionalParams(t *testing.T) {
 			CPU:       githubcomcasemarkcasedevgo.F(int64(0)),
 			MemoryMiB: githubcomcasemarkcasedevgo.F(int64(0)),
 		}),
-		VaultIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
+		VaultGroups: githubcomcasemarkcasedevgo.F([]string{"string"}),
+		VaultIDs:    githubcomcasemarkcasedevgo.F([]string{"string"}),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -92,6 +93,7 @@ func TestAgentV1AgentUpdateWithOptionalParams(t *testing.T) {
 			Model:         githubcomcasemarkcasedevgo.F("model"),
 			Name:          githubcomcasemarkcasedevgo.F("name"),
 			Sandbox:       githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
+			VaultGroups:   githubcomcasemarkcasedevgo.F([]string{"string"}),
 			VaultIDs:      githubcomcasemarkcasedevgo.F([]string{"string"}),
 		},
 	)

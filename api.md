@@ -40,6 +40,16 @@ Methods:
 - <code title="get /agent/v1/run/{id}/status">client.Agent.V1.Run.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1RunService.GetStatus">GetStatus</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1RunGetStatusResponse">AgentV1RunGetStatusResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="post /agent/v1/run/{id}/watch">client.Agent.V1.Run.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1RunService.Watch">Watch</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1RunWatchParams">AgentV1RunWatchParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1RunWatchResponse">AgentV1RunWatchResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
+### Execute
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ExecuteNewResponse">AgentV1ExecuteNewResponse</a>
+
+Methods:
+
+- <code title="post /agent/v1/execute">client.Agent.V1.Execute.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ExecuteService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ExecuteNewParams">AgentV1ExecuteNewParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ExecuteNewResponse">AgentV1ExecuteNewResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
 # System
 
 Response Types:
