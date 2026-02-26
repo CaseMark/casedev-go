@@ -113,6 +113,7 @@ type AgentV1RunNewResponse struct {
 	ID        string                      `json:"id"`
 	AgentID   string                      `json:"agentId"`
 	CreatedAt time.Time                   `json:"createdAt" format:"date-time"`
+	ObjectIDs []string                    `json:"objectIds" api:"nullable"`
 	Status    AgentV1RunNewResponseStatus `json:"status"`
 	JSON      agentV1RunNewResponseJSON   `json:"-"`
 }
@@ -123,6 +124,7 @@ type agentV1RunNewResponseJSON struct {
 	ID          apijson.Field
 	AgentID     apijson.Field
 	CreatedAt   apijson.Field
+	ObjectIDs   apijson.Field
 	Status      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -240,8 +242,10 @@ type AgentV1RunGetDetailsResponse struct {
 	CompletedAt time.Time `json:"completedAt" api:"nullable" format:"date-time"`
 	CreatedAt   time.Time `json:"createdAt" format:"date-time"`
 	Guidance    string    `json:"guidance" api:"nullable"`
-	Model       string    `json:"model" api:"nullable"`
-	Prompt      string    `json:"prompt"`
+	// Modal sandbox ID (available once sandbox is created)
+	ModalSandboxID string `json:"modalSandboxId" api:"nullable"`
+	Model          string `json:"model" api:"nullable"`
+	Prompt         string `json:"prompt"`
 	// Final output from the agent
 	Result    AgentV1RunGetDetailsResponseResult `json:"result" api:"nullable"`
 	StartedAt time.Time                          `json:"startedAt" api:"nullable" format:"date-time"`
@@ -249,26 +253,30 @@ type AgentV1RunGetDetailsResponse struct {
 	Steps     []AgentV1RunGetDetailsResponseStep `json:"steps"`
 	// Token usage statistics
 	Usage AgentV1RunGetDetailsResponseUsage `json:"usage" api:"nullable"`
-	JSON  agentV1RunGetDetailsResponseJSON  `json:"-"`
+	// Durable workflow run ID
+	WorkflowID string                           `json:"workflowId" api:"nullable"`
+	JSON       agentV1RunGetDetailsResponseJSON `json:"-"`
 }
 
 // agentV1RunGetDetailsResponseJSON contains the JSON metadata for the struct
 // [AgentV1RunGetDetailsResponse]
 type agentV1RunGetDetailsResponseJSON struct {
-	ID          apijson.Field
-	AgentID     apijson.Field
-	CompletedAt apijson.Field
-	CreatedAt   apijson.Field
-	Guidance    apijson.Field
-	Model       apijson.Field
-	Prompt      apijson.Field
-	Result      apijson.Field
-	StartedAt   apijson.Field
-	Status      apijson.Field
-	Steps       apijson.Field
-	Usage       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	ID             apijson.Field
+	AgentID        apijson.Field
+	CompletedAt    apijson.Field
+	CreatedAt      apijson.Field
+	Guidance       apijson.Field
+	ModalSandboxID apijson.Field
+	Model          apijson.Field
+	Prompt         apijson.Field
+	Result         apijson.Field
+	StartedAt      apijson.Field
+	Status         apijson.Field
+	Steps          apijson.Field
+	Usage          apijson.Field
+	WorkflowID     apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
 }
 
 func (r *AgentV1RunGetDetailsResponse) UnmarshalJSON(data []byte) (err error) {
@@ -510,6 +518,9 @@ type AgentV1RunNewParams struct {
 	Guidance param.Field[string] `json:"guidance"`
 	// Override the agent default model for this run
 	Model param.Field[string] `json:"model"`
+	// Scope this run to specific vault object IDs. The agent will only be able to
+	// access these objects during execution.
+	ObjectIDs param.Field[[]string] `json:"objectIds"`
 }
 
 func (r AgentV1RunNewParams) MarshalJSON() (data []byte, err error) {
