@@ -184,6 +184,7 @@ type AgentV1AgentUpdateResponse struct {
 	Name          string                         `json:"name"`
 	Sandbox       interface{}                    `json:"sandbox" api:"nullable"`
 	UpdatedAt     time.Time                      `json:"updatedAt" format:"date-time"`
+	VaultGroups   []string                       `json:"vaultGroups" api:"nullable"`
 	VaultIDs      []string                       `json:"vaultIds" api:"nullable"`
 	JSON          agentV1AgentUpdateResponseJSON `json:"-"`
 }
@@ -202,6 +203,7 @@ type agentV1AgentUpdateResponseJSON struct {
 	Name          apijson.Field
 	Sandbox       apijson.Field
 	UpdatedAt     apijson.Field
+	VaultGroups   apijson.Field
 	VaultIDs      apijson.Field
 	raw           string
 	ExtraFields   map[string]apijson.Field
@@ -308,6 +310,8 @@ type AgentV1AgentNewParams struct {
 	Model param.Field[string] `json:"model"`
 	// Custom sandbox configuration (cpu, memoryMiB)
 	Sandbox param.Field[AgentV1AgentNewParamsSandbox] `json:"sandbox"`
+	// Restrict agent to vaults within specific vault group IDs
+	VaultGroups param.Field[[]string] `json:"vaultGroups"`
 	// Restrict agent to specific vault IDs
 	VaultIDs param.Field[[]string] `json:"vaultIds"`
 }
@@ -336,6 +340,7 @@ type AgentV1AgentUpdateParams struct {
 	Model         param.Field[string]      `json:"model"`
 	Name          param.Field[string]      `json:"name"`
 	Sandbox       param.Field[interface{}] `json:"sandbox"`
+	VaultGroups   param.Field[[]string]    `json:"vaultGroups"`
 	VaultIDs      param.Field[[]string]    `json:"vaultIds"`
 }
 

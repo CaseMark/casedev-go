@@ -26,10 +26,11 @@ func TestAgentV1RunNewWithOptionalParams(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Agent.V1.Run.New(context.TODO(), githubcomcasemarkcasedevgo.AgentV1RunNewParams{
-		AgentID:  githubcomcasemarkcasedevgo.F("agentId"),
-		Prompt:   githubcomcasemarkcasedevgo.F("prompt"),
-		Guidance: githubcomcasemarkcasedevgo.F("guidance"),
-		Model:    githubcomcasemarkcasedevgo.F("model"),
+		AgentID:   githubcomcasemarkcasedevgo.F("agentId"),
+		Prompt:    githubcomcasemarkcasedevgo.F("prompt"),
+		Guidance:  githubcomcasemarkcasedevgo.F("guidance"),
+		Model:     githubcomcasemarkcasedevgo.F("model"),
+		ObjectIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
