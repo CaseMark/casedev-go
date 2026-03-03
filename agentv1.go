@@ -17,6 +17,7 @@ type AgentV1Service struct {
 	Agents  *AgentV1AgentService
 	Run     *AgentV1RunService
 	Execute *AgentV1ExecuteService
+	Chat    *AgentV1ChatService
 }
 
 // NewAgentV1Service generates a new service that applies the given options to each
@@ -28,5 +29,6 @@ func NewAgentV1Service(opts ...option.RequestOption) (r *AgentV1Service) {
 	r.Agents = NewAgentV1AgentService(opts...)
 	r.Run = NewAgentV1RunService(opts...)
 	r.Execute = NewAgentV1ExecuteService(opts...)
+	r.Chat = NewAgentV1ChatService(opts...)
 	return
 }
