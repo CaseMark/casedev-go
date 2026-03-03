@@ -33,6 +33,15 @@ func NewLegalV1Service(opts ...option.RequestOption) (r *LegalV1Service) {
 	return
 }
 
+// Search federal court dockets or retrieve a specific docket with optional filing
+// entries via CourtListener RECAP data.
+func (r *LegalV1Service) Docket(ctx context.Context, body LegalV1DocketParams, opts ...option.RequestOption) (res *LegalV1DocketResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "legal/v1/docket"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
 // Search for legal sources including cases, statutes, and regulations from
 // authoritative legal databases. Returns ranked candidates. Always verify with
 // legal.verify() before citing.
@@ -69,6 +78,15 @@ func (r *LegalV1Service) GetCitationsFromURL(ctx context.Context, body LegalV1Ge
 func (r *LegalV1Service) GetFullText(ctx context.Context, body LegalV1GetFullTextParams, opts ...option.RequestOption) (res *LegalV1GetFullTextResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/full-text"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Returns CourtListener court IDs and names for docket filtering. Use these IDs in
+// legal.docket() as the court parameter.
+func (r *LegalV1Service) ListCourts(ctx context.Context, body LegalV1ListCourtsParams, opts ...option.RequestOption) (res *LegalV1ListCourtsResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "legal/v1/courts"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
@@ -132,6 +150,203 @@ func (r *LegalV1Service) Verify(ctx context.Context, body LegalV1VerifyParams, o
 	path := "legal/v1/verify"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
+}
+
+type LegalV1DocketResponse struct {
+	// Echo of court filter (search mode only)
+	Court string `json:"court" api:"nullable"`
+	// Echo of date filter
+	DateFiledAfter time.Time `json:"dateFiledAfter" api:"nullable" format:"date"`
+	// Echo of date filter
+	DateFiledBefore time.Time `json:"dateFiledBefore" api:"nullable" format:"date"`
+	// Full docket record (lookup mode)
+	Docket LegalV1DocketResponseDocket `json:"docket" api:"nullable"`
+	// Search results (search mode)
+	Dockets []LegalV1DocketResponseDocket `json:"dockets"`
+	// Docket entries/filings (lookup mode with includeEntries)
+	Entries []LegalV1DocketResponseEntry `json:"entries" api:"nullable"`
+	Found   int64                        `json:"found"`
+	// Whether entries were requested (lookup mode only)
+	IncludeEntries bool `json:"includeEntries"`
+	// Pagination info for entry list (lookup mode with includeEntries)
+	Pagination LegalV1DocketResponsePagination `json:"pagination" api:"nullable"`
+	// Echo of search query (search mode only)
+	Query string                    `json:"query" api:"nullable"`
+	Type  LegalV1DocketResponseType `json:"type"`
+	JSON  legalV1DocketResponseJSON `json:"-"`
+}
+
+// legalV1DocketResponseJSON contains the JSON metadata for the struct
+// [LegalV1DocketResponse]
+type legalV1DocketResponseJSON struct {
+	Court           apijson.Field
+	DateFiledAfter  apijson.Field
+	DateFiledBefore apijson.Field
+	Docket          apijson.Field
+	Dockets         apijson.Field
+	Entries         apijson.Field
+	Found           apijson.Field
+	IncludeEntries  apijson.Field
+	Pagination      apijson.Field
+	Query           apijson.Field
+	Type            apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *LegalV1DocketResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1DocketResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// Full docket record (lookup mode)
+type LegalV1DocketResponseDocket struct {
+	ID             string                          `json:"id"`
+	AssignedTo     string                          `json:"assignedTo" api:"nullable"`
+	CaseName       string                          `json:"caseName" api:"nullable"`
+	Cause          string                          `json:"cause" api:"nullable"`
+	Court          string                          `json:"court" api:"nullable"`
+	CourtID        string                          `json:"courtId" api:"nullable"`
+	DateFiled      time.Time                       `json:"dateFiled" api:"nullable" format:"date"`
+	DateTerminated time.Time                       `json:"dateTerminated" api:"nullable" format:"date"`
+	DocketNumber   string                          `json:"docketNumber" api:"nullable"`
+	NatureOfSuit   string                          `json:"natureOfSuit" api:"nullable"`
+	PacerCaseID    string                          `json:"pacerCaseId" api:"nullable"`
+	Parties        []string                        `json:"parties"`
+	URL            string                          `json:"url"`
+	JSON           legalV1DocketResponseDocketJSON `json:"-"`
+}
+
+// legalV1DocketResponseDocketJSON contains the JSON metadata for the struct
+// [LegalV1DocketResponseDocket]
+type legalV1DocketResponseDocketJSON struct {
+	ID             apijson.Field
+	AssignedTo     apijson.Field
+	CaseName       apijson.Field
+	Cause          apijson.Field
+	Court          apijson.Field
+	CourtID        apijson.Field
+	DateFiled      apijson.Field
+	DateTerminated apijson.Field
+	DocketNumber   apijson.Field
+	NatureOfSuit   apijson.Field
+	PacerCaseID    apijson.Field
+	Parties        apijson.Field
+	URL            apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *LegalV1DocketResponseDocket) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1DocketResponseDocketJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1DocketResponseEntry struct {
+	Date        time.Time                              `json:"date" api:"nullable" format:"date"`
+	Description string                                 `json:"description" api:"nullable"`
+	Documents   []LegalV1DocketResponseEntriesDocument `json:"documents"`
+	EntryNumber int64                                  `json:"entryNumber" api:"nullable"`
+	JSON        legalV1DocketResponseEntryJSON         `json:"-"`
+}
+
+// legalV1DocketResponseEntryJSON contains the JSON metadata for the struct
+// [LegalV1DocketResponseEntry]
+type legalV1DocketResponseEntryJSON struct {
+	Date        apijson.Field
+	Description apijson.Field
+	Documents   apijson.Field
+	EntryNumber apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LegalV1DocketResponseEntry) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1DocketResponseEntryJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1DocketResponseEntriesDocument struct {
+	ID               string                                   `json:"id"`
+	AttachmentNumber int64                                    `json:"attachmentNumber" api:"nullable"`
+	Description      string                                   `json:"description" api:"nullable"`
+	DocumentNumber   string                                   `json:"documentNumber" api:"nullable"`
+	IsAvailable      bool                                     `json:"isAvailable"`
+	PageCount        int64                                    `json:"pageCount" api:"nullable"`
+	PdfURL           string                                   `json:"pdfUrl" api:"nullable"`
+	JSON             legalV1DocketResponseEntriesDocumentJSON `json:"-"`
+}
+
+// legalV1DocketResponseEntriesDocumentJSON contains the JSON metadata for the
+// struct [LegalV1DocketResponseEntriesDocument]
+type legalV1DocketResponseEntriesDocumentJSON struct {
+	ID               apijson.Field
+	AttachmentNumber apijson.Field
+	Description      apijson.Field
+	DocumentNumber   apijson.Field
+	IsAvailable      apijson.Field
+	PageCount        apijson.Field
+	PdfURL           apijson.Field
+	raw              string
+	ExtraFields      map[string]apijson.Field
+}
+
+func (r *LegalV1DocketResponseEntriesDocument) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1DocketResponseEntriesDocumentJSON) RawJSON() string {
+	return r.raw
+}
+
+// Pagination info for entry list (lookup mode with includeEntries)
+type LegalV1DocketResponsePagination struct {
+	Limit    int64                               `json:"limit"`
+	Offset   int64                               `json:"offset"`
+	Returned int64                               `json:"returned"`
+	JSON     legalV1DocketResponsePaginationJSON `json:"-"`
+}
+
+// legalV1DocketResponsePaginationJSON contains the JSON metadata for the struct
+// [LegalV1DocketResponsePagination]
+type legalV1DocketResponsePaginationJSON struct {
+	Limit       apijson.Field
+	Offset      apijson.Field
+	Returned    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LegalV1DocketResponsePagination) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1DocketResponsePaginationJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1DocketResponseType string
+
+const (
+	LegalV1DocketResponseTypeSearch LegalV1DocketResponseType = "search"
+	LegalV1DocketResponseTypeLookup LegalV1DocketResponseType = "lookup"
+)
+
+func (r LegalV1DocketResponseType) IsKnown() bool {
+	switch r {
+	case LegalV1DocketResponseTypeSearch, LegalV1DocketResponseTypeLookup:
+		return true
+	}
+	return false
 }
 
 type LegalV1FindResponse struct {
@@ -501,6 +716,66 @@ func (r *LegalV1GetFullTextResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r legalV1GetFullTextResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1ListCourtsResponse struct {
+	Courts []LegalV1ListCourtsResponseCourt `json:"courts"`
+	Found  int64                            `json:"found"`
+	// Whether results are filtered to in-use courts only
+	InUseOnly    bool                          `json:"inUseOnly"`
+	Jurisdiction string                        `json:"jurisdiction" api:"nullable"`
+	Query        string                        `json:"query" api:"nullable"`
+	JSON         legalV1ListCourtsResponseJSON `json:"-"`
+}
+
+// legalV1ListCourtsResponseJSON contains the JSON metadata for the struct
+// [LegalV1ListCourtsResponse]
+type legalV1ListCourtsResponseJSON struct {
+	Courts       apijson.Field
+	Found        apijson.Field
+	InUseOnly    apijson.Field
+	Jurisdiction apijson.Field
+	Query        apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *LegalV1ListCourtsResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1ListCourtsResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1ListCourtsResponseCourt struct {
+	// CourtListener court slug
+	ID           string                             `json:"id"`
+	FullName     string                             `json:"fullName" api:"nullable"`
+	Jurisdiction string                             `json:"jurisdiction" api:"nullable"`
+	PacerCourtID int64                              `json:"pacerCourtId" api:"nullable"`
+	ShortName    string                             `json:"shortName" api:"nullable"`
+	JSON         legalV1ListCourtsResponseCourtJSON `json:"-"`
+}
+
+// legalV1ListCourtsResponseCourtJSON contains the JSON metadata for the struct
+// [LegalV1ListCourtsResponseCourt]
+type legalV1ListCourtsResponseCourtJSON struct {
+	ID           apijson.Field
+	FullName     apijson.Field
+	Jurisdiction apijson.Field
+	PacerCourtID apijson.Field
+	ShortName    apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *LegalV1ListCourtsResponseCourt) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1ListCourtsResponseCourtJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -1132,6 +1407,51 @@ func (r legalV1VerifyResponseSummaryJSON) RawJSON() string {
 	return r.raw
 }
 
+type LegalV1DocketParams struct {
+	// Search dockets or look up a docket by ID
+	Type param.Field[LegalV1DocketParamsType] `json:"type" api:"required"`
+	// Optional CourtListener court slug (e.g. "nysd", "ca9", "cafc")
+	Court param.Field[string] `json:"court"`
+	// Optional lower bound for filing date (YYYY-MM-DD)
+	DateFiledAfter param.Field[time.Time] `json:"dateFiledAfter" format:"date"`
+	// Optional upper bound for filing date (YYYY-MM-DD)
+	DateFiledBefore param.Field[time.Time] `json:"dateFiledBefore" format:"date"`
+	// CourtListener docket ID (required for lookup)
+	DocketID param.Field[string] `json:"docketId"`
+	// Include docket entries/filings in lookup responses
+	IncludeEntries param.Field[bool] `json:"includeEntries"`
+	// Page size for search results or entry list (default 25 for search, 50 for
+	// lookup)
+	Limit param.Field[int64] `json:"limit"`
+	// Reserved for future PACER live fetch support. Setting true currently
+	// returns 400.
+	Live param.Field[bool] `json:"live"`
+	// Offset for search results or entry list
+	Offset param.Field[int64] `json:"offset"`
+	// Case name or party name search query (required for search)
+	Query param.Field[string] `json:"query"`
+}
+
+func (r LegalV1DocketParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Search dockets or look up a docket by ID
+type LegalV1DocketParamsType string
+
+const (
+	LegalV1DocketParamsTypeSearch LegalV1DocketParamsType = "search"
+	LegalV1DocketParamsTypeLookup LegalV1DocketParamsType = "lookup"
+)
+
+func (r LegalV1DocketParamsType) IsKnown() bool {
+	switch r {
+	case LegalV1DocketParamsTypeSearch, LegalV1DocketParamsTypeLookup:
+		return true
+	}
+	return false
+}
+
 type LegalV1FindParams struct {
 	// Search query (e.g., "fair use copyright", "Miranda rights")
 	Query param.Field[string] `json:"query" api:"required"`
@@ -1177,6 +1497,21 @@ type LegalV1GetFullTextParams struct {
 }
 
 func (r LegalV1GetFullTextParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type LegalV1ListCourtsParams struct {
+	// Only return courts currently in use by CourtListener
+	InUseOnly param.Field[bool] `json:"inUseOnly"`
+	// Optional CourtListener jurisdiction code filter (e.g. FD, F, S)
+	Jurisdiction param.Field[string] `json:"jurisdiction"`
+	Limit        param.Field[int64]  `json:"limit"`
+	Offset       param.Field[int64]  `json:"offset"`
+	// Search by court name or slug (e.g. "Northern District", "nysd", "ca9")
+	Query param.Field[string] `json:"query"`
+}
+
+func (r LegalV1ListCourtsParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

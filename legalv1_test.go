@@ -14,6 +14,39 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+func TestLegalV1DocketWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Legal.V1.Docket(context.TODO(), githubcomcasemarkcasedevgo.LegalV1DocketParams{
+		Type:            githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LegalV1DocketParamsTypeSearch),
+		Court:           githubcomcasemarkcasedevgo.F("court"),
+		DateFiledAfter:  githubcomcasemarkcasedevgo.F(time.Now()),
+		DateFiledBefore: githubcomcasemarkcasedevgo.F(time.Now()),
+		DocketID:        githubcomcasemarkcasedevgo.F("docketId"),
+		IncludeEntries:  githubcomcasemarkcasedevgo.F(true),
+		Limit:           githubcomcasemarkcasedevgo.F(int64(1)),
+		Live:            githubcomcasemarkcasedevgo.F(true),
+		Offset:          githubcomcasemarkcasedevgo.F(int64(0)),
+		Query:           githubcomcasemarkcasedevgo.F("xx"),
+	})
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestLegalV1FindWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -105,6 +138,34 @@ func TestLegalV1GetFullTextWithOptionalParams(t *testing.T) {
 		HighlightQuery: githubcomcasemarkcasedevgo.F("highlightQuery"),
 		MaxCharacters:  githubcomcasemarkcasedevgo.F(int64(1000)),
 		SummaryQuery:   githubcomcasemarkcasedevgo.F("summaryQuery"),
+	})
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestLegalV1ListCourtsWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Legal.V1.ListCourts(context.TODO(), githubcomcasemarkcasedevgo.LegalV1ListCourtsParams{
+		InUseOnly:    githubcomcasemarkcasedevgo.F(true),
+		Jurisdiction: githubcomcasemarkcasedevgo.F("jurisdiction"),
+		Limit:        githubcomcasemarkcasedevgo.F(int64(1)),
+		Offset:       githubcomcasemarkcasedevgo.F(int64(0)),
+		Query:        githubcomcasemarkcasedevgo.F("xx"),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error

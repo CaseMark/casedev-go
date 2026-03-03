@@ -28,6 +28,7 @@ type Client struct {
 	Memory       *MemoryService
 	Ocr          *OcrService
 	Privilege    *PrivilegeService
+	Skills       *SkillService
 	Search       *SearchService
 	Superdoc     *SuperdocService
 	Translate    *TranslateService
@@ -68,6 +69,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Memory = NewMemoryService(opts...)
 	r.Ocr = NewOcrService(opts...)
 	r.Privilege = NewPrivilegeService(opts...)
+	r.Skills = NewSkillService(opts...)
 	r.Search = NewSearchService(opts...)
 	r.Superdoc = NewSuperdocService(opts...)
 	r.Translate = NewTranslateService(opts...)
