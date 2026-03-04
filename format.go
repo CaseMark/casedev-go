@@ -14,7 +14,8 @@ import (
 // the [NewFormatService] method instead.
 type FormatService struct {
 	Options []option.RequestOption
-	V1      *FormatV1Service
+	// Document formatting and template rendering (MD/JSON to PDF/DOCX)
+	V1 *FormatV1Service
 }
 
 // NewFormatService generates a new service that applies the given options to each

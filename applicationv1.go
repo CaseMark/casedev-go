@@ -13,10 +13,12 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewApplicationV1Service] method instead.
 type ApplicationV1Service struct {
-	Options     []option.RequestOption
+	Options []option.RequestOption
+	// Web application deployment management
 	Deployments *ApplicationV1DeploymentService
 	Projects    *ApplicationV1ProjectService
-	Workflows   *ApplicationV1WorkflowService
+	// Web application deployment management
+	Workflows *ApplicationV1WorkflowService
 }
 
 // NewApplicationV1Service generates a new service that applies the given options

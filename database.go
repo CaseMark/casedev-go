@@ -14,7 +14,8 @@ import (
 // the [NewDatabaseService] method instead.
 type DatabaseService struct {
 	Options []option.RequestOption
-	V1      *DatabaseV1Service
+	// Serverless PostgreSQL databases with instant branching
+	V1 *DatabaseV1Service
 }
 
 // NewDatabaseService generates a new service that applies the given options to

@@ -13,7 +13,8 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewVaultEventService] method instead.
 type VaultEventService struct {
-	Options       []option.RequestOption
+	Options []option.RequestOption
+	// Secure document storage with semantic search and GraphRAG
 	Subscriptions *VaultEventSubscriptionService
 }
 

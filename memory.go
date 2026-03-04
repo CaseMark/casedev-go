@@ -14,7 +14,9 @@ import (
 // the [NewMemoryService] method instead.
 type MemoryService struct {
 	Options []option.RequestOption
-	V1      *MemoryV1Service
+	// Persistent memory for AI agents with semantic search and 12 generic indexed tag
+	// fields
+	V1 *MemoryV1Service
 }
 
 // NewMemoryService generates a new service that applies the given options to each

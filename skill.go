@@ -17,6 +17,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Search and read legal AI skills for agents
+//
 // SkillService contains methods and other services that help with interacting with
 // the casedev API.
 //

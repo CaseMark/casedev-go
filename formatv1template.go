@@ -18,6 +18,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Document formatting and template rendering (MD/JSON to PDF/DOCX)
+//
 // FormatV1TemplateService contains methods and other services that help with
 // interacting with the casedev API.
 //

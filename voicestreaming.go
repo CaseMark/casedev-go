@@ -12,6 +12,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Audio transcription and text-to-speech
+//
 // VoiceStreamingService contains methods and other services that help with
 // interacting with the casedev API.
 //

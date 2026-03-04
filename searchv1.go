@@ -18,6 +18,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Web search, AI answers, and deep research
+//
 // SearchV1Service contains methods and other services that help with interacting
 // with the casedev API.
 //

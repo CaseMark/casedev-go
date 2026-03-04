@@ -18,6 +18,9 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Persistent memory for AI agents with semantic search and 12 generic indexed tag
+// fields
+//
 // MemoryV1Service contains methods and other services that help with interacting
 // with the casedev API.
 //
