@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 (2026-03-04)
+
+Full Changelog: [v0.6.1...v0.7.0](https://github.com/CaseMark/casedev-go/compare/v0.6.1...v0.7.0)
+
+### Features
+
+* **api:** api update ([de56832](https://github.com/CaseMark/casedev-go/commit/de568327d0e12cf3b369119fa09d1b1f1098a2ea))
+
 ## 0.6.1 (2026-03-04)
 
 Full Changelog: [v0.6.0...v0.6.1](https://github.com/CaseMark/casedev-go/compare/v0.6.0...v0.6.1)
