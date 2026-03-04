@@ -14,7 +14,8 @@ import (
 // the [NewSuperdocService] method instead.
 type SuperdocService struct {
 	Options []option.RequestOption
-	V1      *SuperdocV1Service
+	// Document conversion and template automation
+	V1 *SuperdocV1Service
 }
 
 // NewSuperdocService generates a new service that applies the given options to

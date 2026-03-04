@@ -16,24 +16,28 @@ import (
 // interacting with the casedev API. You should not instantiate this client
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
-	Options      []option.RequestOption
-	Agent        *AgentService
+	Options []option.RequestOption
+	Agent   *AgentService
+	// Public system metadata and discovery endpoints
 	System       *SystemService
 	Applications *ApplicationService
 	Compute      *ComputeService
 	Database     *DatabaseService
 	Format       *FormatService
 	Legal        *LegalService
-	Llm          *LlmService
-	Memory       *MemoryService
-	Ocr          *OcrService
-	Privilege    *PrivilegeService
-	Skills       *SkillService
-	Search       *SearchService
-	Superdoc     *SuperdocService
-	Translate    *TranslateService
-	Vault        *VaultService
-	Voice        *VoiceService
+	// Access 40+ language models through a unified API
+	Llm       *LlmService
+	Memory    *MemoryService
+	Ocr       *OcrService
+	Privilege *PrivilegeService
+	// Search and read legal AI skills for agents
+	Skills    *SkillService
+	Search    *SearchService
+	Superdoc  *SuperdocService
+	Translate *TranslateService
+	// Secure document storage with semantic search and GraphRAG
+	Vault *VaultService
+	Voice *VoiceService
 }
 
 // DefaultClientOptions read from the environment (CASEDEV_API_KEY,

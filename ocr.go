@@ -14,7 +14,8 @@ import (
 // the [NewOcrService] method instead.
 type OcrService struct {
 	Options []option.RequestOption
-	V1      *OcrV1Service
+	// Extract text from PDFs, images, and scanned documents
+	V1 *OcrV1Service
 }
 
 // NewOcrService generates a new service that applies the given options to each

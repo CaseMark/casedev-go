@@ -15,6 +15,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Audio transcription and text-to-speech
+//
 // VoiceV1Service contains methods and other services that help with interacting
 // with the casedev API.
 //
@@ -23,7 +25,8 @@ import (
 // the [NewVoiceV1Service] method instead.
 type VoiceV1Service struct {
 	Options []option.RequestOption
-	Speak   *VoiceV1SpeakService
+	// Audio transcription and text-to-speech
+	Speak *VoiceV1SpeakService
 }
 
 // NewVoiceV1Service generates a new service that applies the given options to each

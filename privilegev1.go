@@ -13,6 +13,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Privilege detection for e-discovery and litigation workflows
+//
 // PrivilegeV1Service contains methods and other services that help with
 // interacting with the casedev API.
 //

@@ -16,6 +16,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Extract text from PDFs, images, and scanned documents
+//
 // OcrV1Service contains methods and other services that help with interacting with
 // the casedev API.
 //

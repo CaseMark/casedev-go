@@ -15,6 +15,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Serverless GPU and CPU infrastructure
+//
 // ComputeV1Service contains methods and other services that help with interacting
 // with the casedev API.
 //
@@ -22,11 +24,15 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewComputeV1Service] method instead.
 type ComputeV1Service struct {
-	Options       []option.RequestOption
-	Environments  *ComputeV1EnvironmentService
+	Options []option.RequestOption
+	// Serverless GPU and CPU infrastructure
+	Environments *ComputeV1EnvironmentService
+	// Serverless GPU and CPU infrastructure
 	InstanceTypes *ComputeV1InstanceTypeService
-	Instances     *ComputeV1InstanceService
-	Secrets       *ComputeV1SecretService
+	// Serverless GPU and CPU infrastructure
+	Instances *ComputeV1InstanceService
+	// Serverless GPU and CPU infrastructure
+	Secrets *ComputeV1SecretService
 }
 
 // NewComputeV1Service generates a new service that applies the given options to

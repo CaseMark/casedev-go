@@ -13,6 +13,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Access 40+ language models through a unified API
+//
 // LlmV1ChatService contains methods and other services that help with interacting
 // with the casedev API.
 //
