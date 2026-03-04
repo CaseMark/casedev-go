@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1 (2026-03-04)
+
+Full Changelog: [v0.6.0...v0.6.1](https://github.com/CaseMark/casedev-go/compare/v0.6.0...v0.6.1)
+
+### Chores
+
+* **internal:** codegen related update ([c9cfc08](https://github.com/CaseMark/casedev-go/commit/c9cfc080090b05a259505bf4532e2465b3434e1d))
+
 ## 0.6.0 (2026-03-03)
 
 Full Changelog: [v0.5.1...v0.6.0](https://github.com/CaseMark/casedev-go/compare/v0.5.1...v0.6.0)
