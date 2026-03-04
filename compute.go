@@ -14,7 +14,8 @@ import (
 // the [NewComputeService] method instead.
 type ComputeService struct {
 	Options []option.RequestOption
-	V1      *ComputeV1Service
+	// Serverless GPU and CPU infrastructure
+	V1 *ComputeV1Service
 }
 
 // NewComputeService generates a new service that applies the given options to each

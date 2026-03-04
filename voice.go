@@ -13,10 +13,13 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewVoiceService] method instead.
 type VoiceService struct {
-	Options       []option.RequestOption
-	Streaming     *VoiceStreamingService
+	Options []option.RequestOption
+	// Audio transcription and text-to-speech
+	Streaming *VoiceStreamingService
+	// Audio transcription and text-to-speech
 	Transcription *VoiceTranscriptionService
-	V1            *VoiceV1Service
+	// Audio transcription and text-to-speech
+	V1 *VoiceV1Service
 }
 
 // NewVoiceService generates a new service that applies the given options to each

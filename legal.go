@@ -14,7 +14,8 @@ import (
 // the [NewLegalService] method instead.
 type LegalService struct {
 	Options []option.RequestOption
-	V1      *LegalV1Service
+	// Legal research tools including citation verification
+	V1 *LegalV1Service
 }
 
 // NewLegalService generates a new service that applies the given options to each

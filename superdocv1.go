@@ -13,6 +13,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Document conversion and template automation
+//
 // SuperdocV1Service contains methods and other services that help with interacting
 // with the casedev API.
 //

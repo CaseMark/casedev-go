@@ -13,6 +13,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Serverless PostgreSQL databases with instant branching
+//
 // DatabaseV1Service contains methods and other services that help with interacting
 // with the casedev API.
 //
@@ -20,7 +22,8 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewDatabaseV1Service] method instead.
 type DatabaseV1Service struct {
-	Options  []option.RequestOption
+	Options []option.RequestOption
+	// Serverless PostgreSQL databases with instant branching
 	Projects *DatabaseV1ProjectService
 }
 

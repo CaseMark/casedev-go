@@ -18,6 +18,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Secure document storage with semantic search and GraphRAG
+//
 // VaultService contains methods and other services that help with interacting with
 // the casedev API.
 //
@@ -25,12 +27,16 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewVaultService] method instead.
 type VaultService struct {
-	Options   []option.RequestOption
-	Events    *VaultEventService
-	Graphrag  *VaultGraphragService
-	Groups    *VaultGroupService
+	Options []option.RequestOption
+	Events  *VaultEventService
+	// Secure document storage with semantic search and GraphRAG
+	Graphrag *VaultGraphragService
+	// Secure document storage with semantic search and GraphRAG
+	Groups *VaultGroupService
+	// Secure document storage with semantic search and GraphRAG
 	Multipart *VaultMultipartService
-	Objects   *VaultObjectService
+	// Secure document storage with semantic search and GraphRAG
+	Objects *VaultObjectService
 }
 
 // NewVaultService generates a new service that applies the given options to each

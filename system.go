@@ -12,6 +12,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Public system metadata and discovery endpoints
+//
 // SystemService contains methods and other services that help with interacting
 // with the casedev API.
 //

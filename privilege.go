@@ -14,7 +14,8 @@ import (
 // the [NewPrivilegeService] method instead.
 type PrivilegeService struct {
 	Options []option.RequestOption
-	V1      *PrivilegeV1Service
+	// Privilege detection for e-discovery and litigation workflows
+	V1 *PrivilegeV1Service
 }
 
 // NewPrivilegeService generates a new service that applies the given options to

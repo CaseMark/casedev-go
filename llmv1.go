@@ -13,6 +13,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Access 40+ language models through a unified API
+//
 // LlmV1Service contains methods and other services that help with interacting with
 // the casedev API.
 //
@@ -21,7 +23,8 @@ import (
 // the [NewLlmV1Service] method instead.
 type LlmV1Service struct {
 	Options []option.RequestOption
-	Chat    *LlmV1ChatService
+	// Access 40+ language models through a unified API
+	Chat *LlmV1ChatService
 }
 
 // NewLlmV1Service generates a new service that applies the given options to each

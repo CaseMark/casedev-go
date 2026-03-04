@@ -13,6 +13,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Document formatting and template rendering (MD/JSON to PDF/DOCX)
+//
 // FormatV1Service contains methods and other services that help with interacting
 // with the casedev API.
 //
@@ -20,7 +22,8 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewFormatV1Service] method instead.
 type FormatV1Service struct {
-	Options   []option.RequestOption
+	Options []option.RequestOption
+	// Document formatting and template rendering (MD/JSON to PDF/DOCX)
 	Templates *FormatV1TemplateService
 }
 

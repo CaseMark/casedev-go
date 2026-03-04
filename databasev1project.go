@@ -18,6 +18,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Serverless PostgreSQL databases with instant branching
+//
 // DatabaseV1ProjectService contains methods and other services that help with
 // interacting with the casedev API.
 //
