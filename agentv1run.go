@@ -7,13 +7,16 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"slices"
 	"time"
 
 	"github.com/CaseMark/casedev-go/internal/apijson"
+	"github.com/CaseMark/casedev-go/internal/apiquery"
 	"github.com/CaseMark/casedev-go/internal/param"
 	"github.com/CaseMark/casedev-go/internal/requestconfig"
 	"github.com/CaseMark/casedev-go/option"
+	"github.com/CaseMark/casedev-go/packages/ssestream"
 )
 
 // AgentV1RunService contains methods and other services that help with interacting
@@ -55,6 +58,23 @@ func (r *AgentV1RunService) Cancel(ctx context.Context, id string, opts ...optio
 	path := fmt.Sprintf("agent/v1/run/%s/cancel", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
 	return
+}
+
+// Streams real-time run events over SSE. Supports replay using Last-Event-ID.
+func (r *AgentV1RunService) EventsStreaming(ctx context.Context, id string, query AgentV1RunEventsParams, opts ...option.RequestOption) (stream *ssestream.Stream[string]) {
+	var (
+		raw *http.Response
+		err error
+	)
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("agent/v1/run/%s/events", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &raw, opts...)
+	return ssestream.NewStream[string](ssestream.NewDecoder(raw), err)
 }
 
 // Starts execution of a queued run. The agent runs in a durable workflow — poll
@@ -525,6 +545,19 @@ type AgentV1RunNewParams struct {
 
 func (r AgentV1RunNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type AgentV1RunEventsParams struct {
+	// Replay events after this sequence number
+	LastEventID param.Field[int64] `query:"lastEventId"`
+}
+
+// URLQuery serializes [AgentV1RunEventsParams]'s query parameters as `url.Values`.
+func (r AgentV1RunEventsParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type AgentV1RunWatchParams struct {
