@@ -258,6 +258,8 @@ Methods:
 
 Response Types:
 
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#DocketDetail">DocketDetail</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#DocketSearchResult">DocketSearchResult</a>
 - <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#LegalV1DocketResponse">LegalV1DocketResponse</a>
 - <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#LegalV1FindResponse">LegalV1FindResponse</a>
 - <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#LegalV1GetCitationsResponse">LegalV1GetCitationsResponse</a>
