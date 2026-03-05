@@ -287,10 +287,10 @@ func TestContextDeadlineStreaming(t *testing.T) {
 				},
 			}),
 		)
-		stream := client.Agent.V1.Chat.StreamStreaming(
+		stream := client.Agent.V1.Run.EventsStreaming(
 			deadlineCtx,
 			"id",
-			githubcomcasemarkcasedevgo.AgentV1ChatStreamParams{},
+			githubcomcasemarkcasedevgo.AgentV1RunEventsParams{},
 		)
 		for stream.Next() {
 			_ = stream.Current()
@@ -336,10 +336,10 @@ func TestContextDeadlineStreamingWithRequestTimeout(t *testing.T) {
 				},
 			}),
 		)
-		stream := client.Agent.V1.Chat.StreamStreaming(
+		stream := client.Agent.V1.Run.EventsStreaming(
 			context.Background(),
 			"id",
-			githubcomcasemarkcasedevgo.AgentV1ChatStreamParams{},
+			githubcomcasemarkcasedevgo.AgentV1RunEventsParams{},
 			option.WithRequestTimeout((100 * time.Millisecond)),
 		)
 		for stream.Next() {

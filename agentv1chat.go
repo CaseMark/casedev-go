@@ -72,6 +72,24 @@ func (r *AgentV1ChatService) Cancel(ctx context.Context, id string, opts ...opti
 	return
 }
 
+// Streams a single assistant turn as normalized state events with stable turn,
+// message, and part ids.
+func (r *AgentV1ChatService) RespondStreaming(ctx context.Context, id string, body AgentV1ChatRespondParams, opts ...option.RequestOption) (stream *ssestream.Stream[string]) {
+	var (
+		raw *http.Response
+		err error
+	)
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("agent/v1/chat/%s/respond", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &raw, opts...)
+	return ssestream.NewStream[string](ssestream.NewDecoder(raw), err)
+}
+
 // Proxies a message to the OpenCode session bound to this chat.
 func (r *AgentV1ChatService) SendMessage(ctx context.Context, id string, body AgentV1ChatSendMessageParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -194,6 +212,15 @@ type AgentV1ChatNewParams struct {
 
 func (r AgentV1ChatNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type AgentV1ChatRespondParams struct {
+	// OpenCode message payload. Passed through 1:1.
+	Body interface{} `json:"body" api:"required"`
+}
+
+func (r AgentV1ChatRespondParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.Body)
 }
 
 type AgentV1ChatSendMessageParams struct {
