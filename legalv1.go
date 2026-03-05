@@ -154,6 +154,96 @@ func (r *LegalV1Service) Verify(ctx context.Context, body LegalV1VerifyParams, o
 	return
 }
 
+// Full docket record (lookup mode)
+type DocketDetail struct {
+	ID             string           `json:"id"`
+	AssignedTo     string           `json:"assignedTo" api:"nullable"`
+	CaseName       string           `json:"caseName" api:"nullable"`
+	Cause          string           `json:"cause" api:"nullable"`
+	Court          string           `json:"court" api:"nullable"`
+	CourtID        string           `json:"courtId" api:"nullable"`
+	DateFiled      time.Time        `json:"dateFiled" api:"nullable" format:"date"`
+	DateTerminated time.Time        `json:"dateTerminated" api:"nullable" format:"date"`
+	DocketNumber   string           `json:"docketNumber" api:"nullable"`
+	NatureOfSuit   string           `json:"natureOfSuit" api:"nullable"`
+	PacerCaseID    string           `json:"pacerCaseId" api:"nullable"`
+	Parties        []string         `json:"parties"`
+	URL            string           `json:"url"`
+	JSON           docketDetailJSON `json:"-"`
+}
+
+// docketDetailJSON contains the JSON metadata for the struct [DocketDetail]
+type docketDetailJSON struct {
+	ID             apijson.Field
+	AssignedTo     apijson.Field
+	CaseName       apijson.Field
+	Cause          apijson.Field
+	Court          apijson.Field
+	CourtID        apijson.Field
+	DateFiled      apijson.Field
+	DateTerminated apijson.Field
+	DocketNumber   apijson.Field
+	NatureOfSuit   apijson.Field
+	PacerCaseID    apijson.Field
+	Parties        apijson.Field
+	URL            apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *DocketDetail) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r docketDetailJSON) RawJSON() string {
+	return r.raw
+}
+
+type DocketSearchResult struct {
+	ID             string                 `json:"id"`
+	AssignedTo     string                 `json:"assignedTo" api:"nullable"`
+	CaseName       string                 `json:"caseName" api:"nullable"`
+	Cause          string                 `json:"cause" api:"nullable"`
+	Court          string                 `json:"court" api:"nullable"`
+	CourtID        string                 `json:"courtId" api:"nullable"`
+	DateFiled      time.Time              `json:"dateFiled" api:"nullable" format:"date"`
+	DateTerminated time.Time              `json:"dateTerminated" api:"nullable" format:"date"`
+	DocketNumber   string                 `json:"docketNumber" api:"nullable"`
+	NatureOfSuit   string                 `json:"natureOfSuit" api:"nullable"`
+	PacerCaseID    string                 `json:"pacerCaseId" api:"nullable"`
+	Parties        []string               `json:"parties"`
+	URL            string                 `json:"url"`
+	JSON           docketSearchResultJSON `json:"-"`
+}
+
+// docketSearchResultJSON contains the JSON metadata for the struct
+// [DocketSearchResult]
+type docketSearchResultJSON struct {
+	ID             apijson.Field
+	AssignedTo     apijson.Field
+	CaseName       apijson.Field
+	Cause          apijson.Field
+	Court          apijson.Field
+	CourtID        apijson.Field
+	DateFiled      apijson.Field
+	DateTerminated apijson.Field
+	DocketNumber   apijson.Field
+	NatureOfSuit   apijson.Field
+	PacerCaseID    apijson.Field
+	Parties        apijson.Field
+	URL            apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *DocketSearchResult) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r docketSearchResultJSON) RawJSON() string {
+	return r.raw
+}
+
 type LegalV1DocketResponse struct {
 	// Echo of court filter (search mode only)
 	Court string `json:"court" api:"nullable"`
@@ -162,9 +252,9 @@ type LegalV1DocketResponse struct {
 	// Echo of date filter
 	DateFiledBefore time.Time `json:"dateFiledBefore" api:"nullable" format:"date"`
 	// Full docket record (lookup mode)
-	Docket LegalV1DocketResponseDocket `json:"docket" api:"nullable"`
+	Docket DocketDetail `json:"docket" api:"nullable"`
 	// Search results (search mode)
-	Dockets []LegalV1DocketResponseDocket `json:"dockets"`
+	Dockets []DocketSearchResult `json:"dockets"`
 	// Docket entries/filings (lookup mode with includeEntries)
 	Entries []LegalV1DocketResponseEntry `json:"entries" api:"nullable"`
 	Found   int64                        `json:"found"`
@@ -201,52 +291,6 @@ func (r *LegalV1DocketResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r legalV1DocketResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// Full docket record (lookup mode)
-type LegalV1DocketResponseDocket struct {
-	ID             string                          `json:"id"`
-	AssignedTo     string                          `json:"assignedTo" api:"nullable"`
-	CaseName       string                          `json:"caseName" api:"nullable"`
-	Cause          string                          `json:"cause" api:"nullable"`
-	Court          string                          `json:"court" api:"nullable"`
-	CourtID        string                          `json:"courtId" api:"nullable"`
-	DateFiled      time.Time                       `json:"dateFiled" api:"nullable" format:"date"`
-	DateTerminated time.Time                       `json:"dateTerminated" api:"nullable" format:"date"`
-	DocketNumber   string                          `json:"docketNumber" api:"nullable"`
-	NatureOfSuit   string                          `json:"natureOfSuit" api:"nullable"`
-	PacerCaseID    string                          `json:"pacerCaseId" api:"nullable"`
-	Parties        []string                        `json:"parties"`
-	URL            string                          `json:"url"`
-	JSON           legalV1DocketResponseDocketJSON `json:"-"`
-}
-
-// legalV1DocketResponseDocketJSON contains the JSON metadata for the struct
-// [LegalV1DocketResponseDocket]
-type legalV1DocketResponseDocketJSON struct {
-	ID             apijson.Field
-	AssignedTo     apijson.Field
-	CaseName       apijson.Field
-	Cause          apijson.Field
-	Court          apijson.Field
-	CourtID        apijson.Field
-	DateFiled      apijson.Field
-	DateTerminated apijson.Field
-	DocketNumber   apijson.Field
-	NatureOfSuit   apijson.Field
-	PacerCaseID    apijson.Field
-	Parties        apijson.Field
-	URL            apijson.Field
-	raw            string
-	ExtraFields    map[string]apijson.Field
-}
-
-func (r *LegalV1DocketResponseDocket) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r legalV1DocketResponseDocketJSON) RawJSON() string {
 	return r.raw
 }
 
