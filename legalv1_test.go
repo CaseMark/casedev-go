@@ -47,6 +47,42 @@ func TestLegalV1DocketWithOptionalParams(t *testing.T) {
 	}
 }
 
+func TestLegalV1DraftWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Legal.V1.Draft(context.TODO(), githubcomcasemarkcasedevgo.LegalV1DraftParams{
+		Instructions: githubcomcasemarkcasedevgo.F("xxxxxxxxxx"),
+		VaultID:      githubcomcasemarkcasedevgo.F("vault_id"),
+		Citations:    githubcomcasemarkcasedevgo.F(true),
+		Format:       githubcomcasemarkcasedevgo.F("format"),
+		Length: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LegalV1DraftParamsLength{
+			Target: githubcomcasemarkcasedevgo.F(0.000000),
+			Unit:   githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LegalV1DraftParamsLengthUnitWords),
+		}),
+		Model:      githubcomcasemarkcasedevgo.F("model"),
+		ObjectIDs:  githubcomcasemarkcasedevgo.F([]string{"string"}),
+		OutputName: githubcomcasemarkcasedevgo.F("output_name"),
+		OutputType: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LegalV1DraftParamsOutputTypePdf),
+		Verified:   githubcomcasemarkcasedevgo.F(true),
+	})
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestLegalV1FindWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {

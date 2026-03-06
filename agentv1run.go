@@ -309,19 +309,24 @@ func (r agentV1RunGetDetailsResponseJSON) RawJSON() string {
 
 // Final output from the agent
 type AgentV1RunGetDetailsResponseResult struct {
+	// Compact agent-facing result summary and execution issues
+	FinalResponse AgentV1RunGetDetailsResponseResultFinalResponse `json:"finalResponse" api:"nullable"`
 	// Sandbox execution logs (OpenCode server + runner script)
-	Logs   AgentV1RunGetDetailsResponseResultLogs `json:"logs" api:"nullable"`
-	Output string                                 `json:"output"`
-	JSON   agentV1RunGetDetailsResponseResultJSON `json:"-"`
+	Logs            AgentV1RunGetDetailsResponseResultLogs `json:"logs" api:"nullable"`
+	Output          string                                 `json:"output"`
+	OutputObjectIDs []string                               `json:"outputObjectIds"`
+	JSON            agentV1RunGetDetailsResponseResultJSON `json:"-"`
 }
 
 // agentV1RunGetDetailsResponseResultJSON contains the JSON metadata for the struct
 // [AgentV1RunGetDetailsResponseResult]
 type agentV1RunGetDetailsResponseResultJSON struct {
-	Logs        apijson.Field
-	Output      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	FinalResponse   apijson.Field
+	Logs            apijson.Field
+	Output          apijson.Field
+	OutputObjectIDs apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
 }
 
 func (r *AgentV1RunGetDetailsResponseResult) UnmarshalJSON(data []byte) (err error) {
@@ -329,6 +334,32 @@ func (r *AgentV1RunGetDetailsResponseResult) UnmarshalJSON(data []byte) (err err
 }
 
 func (r agentV1RunGetDetailsResponseResultJSON) RawJSON() string {
+	return r.raw
+}
+
+// Compact agent-facing result summary and execution issues
+type AgentV1RunGetDetailsResponseResultFinalResponse struct {
+	CreatedObjectIDs []string                                            `json:"createdObjectIds"`
+	Issues           []string                                            `json:"issues"`
+	Summary          string                                              `json:"summary"`
+	JSON             agentV1RunGetDetailsResponseResultFinalResponseJSON `json:"-"`
+}
+
+// agentV1RunGetDetailsResponseResultFinalResponseJSON contains the JSON metadata
+// for the struct [AgentV1RunGetDetailsResponseResultFinalResponse]
+type agentV1RunGetDetailsResponseResultFinalResponseJSON struct {
+	CreatedObjectIDs apijson.Field
+	Issues           apijson.Field
+	Summary          apijson.Field
+	raw              string
+	ExtraFields      map[string]apijson.Field
+}
+
+func (r *AgentV1RunGetDetailsResponseResultFinalResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r agentV1RunGetDetailsResponseResultFinalResponseJSON) RawJSON() string {
 	return r.raw
 }
 
