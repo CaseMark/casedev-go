@@ -44,6 +44,16 @@ func (r *LegalV1Service) Docket(ctx context.Context, body LegalV1DocketParams, o
 	return
 }
 
+// Generate a legal document with structured inputs. Powered by an agent that
+// handles research, formatting, citation verification, and vault upload. Returns a
+// run ID for polling.
+func (r *LegalV1Service) Draft(ctx context.Context, body LegalV1DraftParams, opts ...option.RequestOption) (res *LegalV1DraftResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "legal/v1/draft"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
 // Search for legal sources including cases, statutes, and regulations from
 // authoritative legal databases. Returns ranked candidates. Always verify with
 // legal.verify() before citing.
@@ -390,6 +400,49 @@ const (
 func (r LegalV1DocketResponseType) IsKnown() bool {
 	switch r {
 	case LegalV1DocketResponseTypeSearch, LegalV1DocketResponseTypeLookup:
+		return true
+	}
+	return false
+}
+
+type LegalV1DraftResponse struct {
+	// Ephemeral agent ID
+	AgentID string `json:"agent_id"`
+	Message string `json:"message"`
+	// Run ID — poll /agent/v1/run/:id/status for progress
+	RunID  string                     `json:"run_id"`
+	Status LegalV1DraftResponseStatus `json:"status"`
+	JSON   legalV1DraftResponseJSON   `json:"-"`
+}
+
+// legalV1DraftResponseJSON contains the JSON metadata for the struct
+// [LegalV1DraftResponse]
+type legalV1DraftResponseJSON struct {
+	AgentID     apijson.Field
+	Message     apijson.Field
+	RunID       apijson.Field
+	Status      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LegalV1DraftResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1DraftResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1DraftResponseStatus string
+
+const (
+	LegalV1DraftResponseStatusRunning LegalV1DraftResponseStatus = "running"
+)
+
+func (r LegalV1DraftResponseStatus) IsKnown() bool {
+	switch r {
+	case LegalV1DraftResponseStatusRunning:
 		return true
 	}
 	return false
@@ -1493,6 +1546,81 @@ const (
 func (r LegalV1DocketParamsType) IsKnown() bool {
 	switch r {
 	case LegalV1DocketParamsTypeSearch, LegalV1DocketParamsTypeLookup:
+		return true
+	}
+	return false
+}
+
+type LegalV1DraftParams struct {
+	// What to draft — the core task. E.g., "Motion to compel defendant to produce
+	// discovery responses"
+	Instructions param.Field[string] `json:"instructions" api:"required"`
+	// Vault ID where the final document will be uploaded
+	VaultID param.Field[string] `json:"vault_id" api:"required"`
+	// Research and include legal citations
+	Citations param.Field[bool] `json:"citations"`
+	// Court or jurisdiction formatting hint. Triggers a legal-skills search. E.g.,
+	// "California Superior Court", "SDNY", "federal pleading"
+	Format param.Field[string] `json:"format"`
+	// Target document length
+	Length param.Field[LegalV1DraftParamsLength] `json:"length"`
+	// LLM model override. Defaults to anthropic/claude-sonnet-4.6
+	Model param.Field[string] `json:"model"`
+	// Vault object IDs to use as source/reference documents
+	ObjectIDs param.Field[[]string] `json:"object_ids"`
+	// Filename for the output document. Auto-generated if omitted.
+	OutputName param.Field[string] `json:"output_name"`
+	// Output file format
+	OutputType param.Field[LegalV1DraftParamsOutputType] `json:"output_type"`
+	// Verify all citations in a loop — re-run verification and repair bad citations
+	// until they pass
+	Verified param.Field[bool] `json:"verified"`
+}
+
+func (r LegalV1DraftParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Target document length
+type LegalV1DraftParamsLength struct {
+	// Target value (e.g., 2000 words or 5 pages)
+	Target param.Field[float64]                      `json:"target"`
+	Unit   param.Field[LegalV1DraftParamsLengthUnit] `json:"unit"`
+}
+
+func (r LegalV1DraftParamsLength) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type LegalV1DraftParamsLengthUnit string
+
+const (
+	LegalV1DraftParamsLengthUnitWords LegalV1DraftParamsLengthUnit = "words"
+	LegalV1DraftParamsLengthUnitPages LegalV1DraftParamsLengthUnit = "pages"
+)
+
+func (r LegalV1DraftParamsLengthUnit) IsKnown() bool {
+	switch r {
+	case LegalV1DraftParamsLengthUnitWords, LegalV1DraftParamsLengthUnitPages:
+		return true
+	}
+	return false
+}
+
+// Output file format
+type LegalV1DraftParamsOutputType string
+
+const (
+	LegalV1DraftParamsOutputTypePdf  LegalV1DraftParamsOutputType = "pdf"
+	LegalV1DraftParamsOutputTypeDocx LegalV1DraftParamsOutputType = "docx"
+	LegalV1DraftParamsOutputTypeXlsx LegalV1DraftParamsOutputType = "xlsx"
+	LegalV1DraftParamsOutputTypePptx LegalV1DraftParamsOutputType = "pptx"
+	LegalV1DraftParamsOutputTypeMd   LegalV1DraftParamsOutputType = "md"
+)
+
+func (r LegalV1DraftParamsOutputType) IsKnown() bool {
+	switch r {
+	case LegalV1DraftParamsOutputTypePdf, LegalV1DraftParamsOutputTypeDocx, LegalV1DraftParamsOutputTypeXlsx, LegalV1DraftParamsOutputTypePptx, LegalV1DraftParamsOutputTypeMd:
 		return true
 	}
 	return false
