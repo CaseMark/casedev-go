@@ -208,6 +208,8 @@ type AgentV1ChatNewParams struct {
 	Model param.Field[string] `json:"model"`
 	// Optional human-readable session title
 	Title param.Field[string] `json:"title"`
+	// Restrict the chat session to specific vault IDs
+	VaultIDs param.Field[[]string] `json:"vaultIds"`
 }
 
 func (r AgentV1ChatNewParams) MarshalJSON() (data []byte, err error) {
