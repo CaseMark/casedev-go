@@ -29,6 +29,7 @@ func TestAgentV1ChatNewWithOptionalParams(t *testing.T) {
 		IdleTimeoutMs: githubcomcasemarkcasedevgo.F(int64(0)),
 		Model:         githubcomcasemarkcasedevgo.F("model"),
 		Title:         githubcomcasemarkcasedevgo.F("title"),
+		VaultIDs:      githubcomcasemarkcasedevgo.F([]string{"string"}),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
