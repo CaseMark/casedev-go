@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.3 (2026-03-07)
+
+Full Changelog: [v0.11.2...v0.11.3](https://github.com/CaseMark/casedev-go/compare/v0.11.2...v0.11.3)
+
+### Chores
+
+* **ci:** skip uploading artifacts on stainless-internal branches ([9c60005](https://github.com/CaseMark/casedev-go/commit/9c6000558f0079aa15fe7c69c03809d7e4c7ebb2))
+
 ## 0.11.2 (2026-03-07)
 
 Full Changelog: [v0.11.1...v0.11.2](https://github.com/CaseMark/casedev-go/compare/v0.11.1...v0.11.2)
