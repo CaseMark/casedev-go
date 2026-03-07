@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.2 (2026-03-07)
+
+Full Changelog: [v0.11.1...v0.11.2](https://github.com/CaseMark/casedev-go/compare/v0.11.1...v0.11.2)
+
+### Chores
+
+* **test:** do not count install time for mock server timeout ([b3b6edd](https://github.com/CaseMark/casedev-go/commit/b3b6eddf983b5ef109960761e954292de97bb4bd))
+
 ## 0.11.1 (2026-03-07)
 
 Full Changelog: [v0.11.0...v0.11.1](https://github.com/CaseMark/casedev-go/compare/v0.11.0...v0.11.1)
