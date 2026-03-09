@@ -353,6 +353,12 @@ type VaultObjectListResponseObject struct {
 	ChunkCount float64 `json:"chunkCount"`
 	// Processing completion timestamp
 	IngestionCompletedAt time.Time `json:"ingestionCompletedAt" format:"date-time"`
+	// Failure reason when ingestion status is a failed state
+	IngestionError string `json:"ingestionError" api:"nullable"`
+	// When ingestion processing began
+	IngestionStartedAt time.Time `json:"ingestionStartedAt" api:"nullable" format:"date-time"`
+	// Durable workflow run ID for the active or last ingestion attempt
+	IngestionWorkflowID string `json:"ingestionWorkflowId" api:"nullable"`
 	// Custom metadata associated with the document
 	Metadata interface{} `json:"metadata"`
 	// Number of pages in the document
@@ -380,6 +386,9 @@ type vaultObjectListResponseObjectJSON struct {
 	IngestionStatus      apijson.Field
 	ChunkCount           apijson.Field
 	IngestionCompletedAt apijson.Field
+	IngestionError       apijson.Field
+	IngestionStartedAt   apijson.Field
+	IngestionWorkflowID  apijson.Field
 	Metadata             apijson.Field
 	PageCount            apijson.Field
 	Path                 apijson.Field
