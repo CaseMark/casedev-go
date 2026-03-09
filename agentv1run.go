@@ -461,21 +461,25 @@ func (r AgentV1RunGetDetailsResponseStepsType) IsKnown() bool {
 
 // Token usage statistics
 type AgentV1RunGetDetailsResponseUsage struct {
-	DurationMs   int64                                 `json:"durationMs"`
-	InputTokens  int64                                 `json:"inputTokens"`
-	Model        string                                `json:"model"`
-	OutputTokens int64                                 `json:"outputTokens"`
-	ToolCalls    int64                                 `json:"toolCalls"`
-	JSON         agentV1RunGetDetailsResponseUsageJSON `json:"-"`
+	DurationMs   int64                                    `json:"durationMs"`
+	Entries      []AgentV1RunGetDetailsResponseUsageEntry `json:"entries"`
+	InputTokens  int64                                    `json:"inputTokens"`
+	Model        string                                   `json:"model"`
+	OutputTokens int64                                    `json:"outputTokens"`
+	Summary      AgentV1RunGetDetailsResponseUsageSummary `json:"summary" api:"nullable"`
+	ToolCalls    int64                                    `json:"toolCalls"`
+	JSON         agentV1RunGetDetailsResponseUsageJSON    `json:"-"`
 }
 
 // agentV1RunGetDetailsResponseUsageJSON contains the JSON metadata for the struct
 // [AgentV1RunGetDetailsResponseUsage]
 type agentV1RunGetDetailsResponseUsageJSON struct {
 	DurationMs   apijson.Field
+	Entries      apijson.Field
 	InputTokens  apijson.Field
 	Model        apijson.Field
 	OutputTokens apijson.Field
+	Summary      apijson.Field
 	ToolCalls    apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
@@ -486,6 +490,93 @@ func (r *AgentV1RunGetDetailsResponseUsage) UnmarshalJSON(data []byte) (err erro
 }
 
 func (r agentV1RunGetDetailsResponseUsageJSON) RawJSON() string {
+	return r.raw
+}
+
+type AgentV1RunGetDetailsResponseUsageEntry struct {
+	ID               string                                       `json:"id"`
+	CompletionTokens int64                                        `json:"completionTokens" api:"nullable"`
+	CostMicros       int64                                        `json:"costMicros"`
+	Endpoint         string                                       `json:"endpoint" api:"nullable"`
+	Kind             AgentV1RunGetDetailsResponseUsageEntriesKind `json:"kind"`
+	Metadata         interface{}                                  `json:"metadata"`
+	Method           string                                       `json:"method" api:"nullable"`
+	Model            string                                       `json:"model" api:"nullable"`
+	PromptTokens     int64                                        `json:"promptTokens" api:"nullable"`
+	Service          string                                       `json:"service"`
+	StatusCode       int64                                        `json:"statusCode" api:"nullable"`
+	Timestamp        time.Time                                    `json:"timestamp" format:"date-time"`
+	TotalTokens      int64                                        `json:"totalTokens" api:"nullable"`
+	JSON             agentV1RunGetDetailsResponseUsageEntryJSON   `json:"-"`
+}
+
+// agentV1RunGetDetailsResponseUsageEntryJSON contains the JSON metadata for the
+// struct [AgentV1RunGetDetailsResponseUsageEntry]
+type agentV1RunGetDetailsResponseUsageEntryJSON struct {
+	ID               apijson.Field
+	CompletionTokens apijson.Field
+	CostMicros       apijson.Field
+	Endpoint         apijson.Field
+	Kind             apijson.Field
+	Metadata         apijson.Field
+	Method           apijson.Field
+	Model            apijson.Field
+	PromptTokens     apijson.Field
+	Service          apijson.Field
+	StatusCode       apijson.Field
+	Timestamp        apijson.Field
+	TotalTokens      apijson.Field
+	raw              string
+	ExtraFields      map[string]apijson.Field
+}
+
+func (r *AgentV1RunGetDetailsResponseUsageEntry) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r agentV1RunGetDetailsResponseUsageEntryJSON) RawJSON() string {
+	return r.raw
+}
+
+type AgentV1RunGetDetailsResponseUsageEntriesKind string
+
+const (
+	AgentV1RunGetDetailsResponseUsageEntriesKindLlm AgentV1RunGetDetailsResponseUsageEntriesKind = "llm"
+	AgentV1RunGetDetailsResponseUsageEntriesKindAPI AgentV1RunGetDetailsResponseUsageEntriesKind = "api"
+)
+
+func (r AgentV1RunGetDetailsResponseUsageEntriesKind) IsKnown() bool {
+	switch r {
+	case AgentV1RunGetDetailsResponseUsageEntriesKindLlm, AgentV1RunGetDetailsResponseUsageEntriesKindAPI:
+		return true
+	}
+	return false
+}
+
+type AgentV1RunGetDetailsResponseUsageSummary struct {
+	CostMicros        int64                                        `json:"costMicros"`
+	TotalInputTokens  int64                                        `json:"totalInputTokens"`
+	TotalOutputTokens int64                                        `json:"totalOutputTokens"`
+	TotalTokens       int64                                        `json:"totalTokens"`
+	JSON              agentV1RunGetDetailsResponseUsageSummaryJSON `json:"-"`
+}
+
+// agentV1RunGetDetailsResponseUsageSummaryJSON contains the JSON metadata for the
+// struct [AgentV1RunGetDetailsResponseUsageSummary]
+type agentV1RunGetDetailsResponseUsageSummaryJSON struct {
+	CostMicros        apijson.Field
+	TotalInputTokens  apijson.Field
+	TotalOutputTokens apijson.Field
+	TotalTokens       apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
+}
+
+func (r *AgentV1RunGetDetailsResponseUsageSummary) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r agentV1RunGetDetailsResponseUsageSummaryJSON) RawJSON() string {
 	return r.raw
 }
 

@@ -72,8 +72,27 @@ func (r *AgentV1ChatService) Cancel(ctx context.Context, id string, opts ...opti
 	return
 }
 
+// Answers a pending OpenCode question for the chat session bound to this agent
+// chat.
+func (r *AgentV1ChatService) ReplyToQuestion(ctx context.Context, id string, requestID string, body AgentV1ChatReplyToQuestionParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	if requestID == "" {
+		err = errors.New("missing required requestID parameter")
+		return
+	}
+	path := fmt.Sprintf("agent/v1/chat/%s/question/%s/reply", id, requestID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	return
+}
+
 // Streams a single assistant turn as normalized state events with stable turn,
-// message, and part ids.
+// message, and part ids. Emits session.usage before turn.completed when token data
+// is available.
 func (r *AgentV1ChatService) RespondStreaming(ctx context.Context, id string, body AgentV1ChatRespondParams, opts ...option.RequestOption) (stream *ssestream.Stream[string]) {
 	var (
 		raw *http.Response
@@ -118,6 +137,24 @@ func (r *AgentV1ChatService) StreamStreaming(ctx context.Context, id string, que
 	}
 	path := fmt.Sprintf("agent/v1/chat/%s/stream", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &raw, opts...)
+	return ssestream.NewStream[string](ssestream.NewDecoder(raw), err)
+}
+
+// Streams a single assistant turn as AI SDK UIMessageChunk SSE events for direct
+// client rendering.
+func (r *AgentV1ChatService) UiStreamStreaming(ctx context.Context, id string, body AgentV1ChatUiStreamParams, opts ...option.RequestOption) (stream *ssestream.Stream[string]) {
+	var (
+		raw *http.Response
+		err error
+	)
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return
+	}
+	path := fmt.Sprintf("agent/v1/chat/%s/ui-stream", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &raw, opts...)
 	return ssestream.NewStream[string](ssestream.NewDecoder(raw), err)
 }
 
@@ -216,6 +253,14 @@ func (r AgentV1ChatNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+type AgentV1ChatReplyToQuestionParams struct {
+	Answers param.Field[[][]string] `json:"answers" api:"required"`
+}
+
+func (r AgentV1ChatReplyToQuestionParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 type AgentV1ChatRespondParams struct {
 	// OpenCode message payload. Passed through 1:1.
 	Body interface{} `json:"body" api:"required"`
@@ -246,4 +291,13 @@ func (r AgentV1ChatStreamParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type AgentV1ChatUiStreamParams struct {
+	// OpenCode message payload. Passed through 1:1.
+	Body interface{} `json:"body" api:"required"`
+}
+
+func (r AgentV1ChatUiStreamParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.Body)
 }
