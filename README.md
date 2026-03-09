@@ -24,7 +24,7 @@ Or to pin the version:
 <!-- x-release-please-start-version -->
 
 ```sh
-go get -u 'github.com/CaseMark/casedev-go@v0.11.3'
+go get -u 'github.com/CaseMark/casedev-go@v0.12.0'
 ```
 
 <!-- x-release-please-end -->
