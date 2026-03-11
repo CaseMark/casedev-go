@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.2 (2026-03-11)
+
+Full Changelog: [v0.12.1...v0.12.2](https://github.com/CaseMark/casedev-go/compare/v0.12.1...v0.12.2)
+
+### Chores
+
+* **internal:** use explicit returns ([b5064da](https://github.com/CaseMark/casedev-go/commit/b5064da8418ae33777fc7409995d50dd3207978d))
+
 ## 0.12.1 (2026-03-11)
 
 Full Changelog: [v0.12.0...v0.12.1](https://github.com/CaseMark/casedev-go/compare/v0.12.0...v0.12.1)
