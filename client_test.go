@@ -39,7 +39,7 @@ func TestUserAgentHeader(t *testing.T) {
 			},
 		}),
 	)
-	client.Vault.New(context.Background(), githubcomcasemarkcasedevgo.VaultNewParams{
+	_, _ = client.Vault.New(context.Background(), githubcomcasemarkcasedevgo.VaultNewParams{
 		Name: githubcomcasemarkcasedevgo.F("My Vault"),
 	})
 	if userAgent != fmt.Sprintf("Casedev/Go %s", internal.PackageVersion) {
