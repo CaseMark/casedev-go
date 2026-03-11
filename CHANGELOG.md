@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.1 (2026-03-11)
+
+Full Changelog: [v0.12.0...v0.12.1](https://github.com/CaseMark/casedev-go/compare/v0.12.0...v0.12.1)
+
+### Chores
+
+* **internal:** minor cleanup ([0d6c18b](https://github.com/CaseMark/casedev-go/commit/0d6c18b770a3f03f11c4e5de81a326b5841d0c7f))
+
 ## 0.12.0 (2026-03-09)
 
 Full Changelog: [v0.11.3...v0.12.0](https://github.com/CaseMark/casedev-go/compare/v0.11.3...v0.12.0)
