@@ -38,7 +38,9 @@ func NewApplicationV1DeploymentService(opts ...option.RequestOption) (r *Applica
 	return
 }
 
-// Trigger a new deployment for a project
+// Creates a deployment for an existing project by fetching repository files from
+// GitHub and uploading them to the hosting provider. Use ref to deploy a branch,
+// tag, or commit other than the project default branch.
 func (r *ApplicationV1DeploymentService) New(ctx context.Context, body ApplicationV1DeploymentNewParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -47,7 +49,8 @@ func (r *ApplicationV1DeploymentService) New(ctx context.Context, body Applicati
 	return err
 }
 
-// Get details of a specific deployment including build logs
+// Returns deployment details for one project in the authenticated organization.
+// Set includeLogs=true to include recent build output in the response.
 func (r *ApplicationV1DeploymentService) Get(ctx context.Context, id string, query ApplicationV1DeploymentGetParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -60,7 +63,8 @@ func (r *ApplicationV1DeploymentService) Get(ctx context.Context, id string, que
 	return err
 }
 
-// List deployments for a project
+// Lists recent deployments for one project in the authenticated organization. Use
+// the optional filters to narrow results by target or deployment state.
 func (r *ApplicationV1DeploymentService) List(ctx context.Context, query ApplicationV1DeploymentListParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -69,7 +73,9 @@ func (r *ApplicationV1DeploymentService) List(ctx context.Context, query Applica
 	return err
 }
 
-// Cancel a running deployment
+// Cancels a running deployment after verifying that the referenced project belongs
+// to the authenticated organization. Use this when a build is stuck,
+// misconfigured, or no longer needed.
 func (r *ApplicationV1DeploymentService) Cancel(ctx context.Context, id string, body ApplicationV1DeploymentCancelParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -91,7 +97,9 @@ func (r *ApplicationV1DeploymentService) NewFromFiles(ctx context.Context, opts 
 	return err
 }
 
-// Get build logs for a specific deployment
+// Returns build and runtime log events for a deployment after verifying access to
+// the owning project. Use this when you need detailed output for a failed or
+// in-progress build.
 func (r *ApplicationV1DeploymentService) GetLogs(ctx context.Context, id string, query ApplicationV1DeploymentGetLogsParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -104,7 +112,9 @@ func (r *ApplicationV1DeploymentService) GetLogs(ctx context.Context, id string,
 	return err
 }
 
-// Get the current status of a deployment
+// Returns the current status of a deployment without fetching full build logs. Use
+// this endpoint for lightweight polling while a deployment is building or waiting
+// to become ready.
 func (r *ApplicationV1DeploymentService) GetStatus(ctx context.Context, id string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -131,11 +141,11 @@ func (r *ApplicationV1DeploymentService) Stream(ctx context.Context, id string, 
 }
 
 type ApplicationV1DeploymentNewParams struct {
-	// Project ID
+	// Project ID to deploy
 	ProjectID param.Field[string] `json:"projectId" api:"required"`
-	// Git ref (branch, tag, or commit) to deploy
+	// Git branch, tag, or commit to deploy. Defaults to the project branch.
 	Ref param.Field[string] `json:"ref"`
-	// Deployment target
+	// Deployment target environment
 	Target param.Field[ApplicationV1DeploymentNewParamsTarget] `json:"target"`
 }
 
@@ -143,7 +153,7 @@ func (r ApplicationV1DeploymentNewParams) MarshalJSON() (data []byte, err error)
 	return apijson.MarshalRoot(r)
 }
 
-// Deployment target
+// Deployment target environment
 type ApplicationV1DeploymentNewParamsTarget string
 
 const (
@@ -160,9 +170,9 @@ func (r ApplicationV1DeploymentNewParamsTarget) IsKnown() bool {
 }
 
 type ApplicationV1DeploymentGetParams struct {
-	// Project ID (for authorization)
+	// Project ID used to verify access to the deployment
 	ProjectID param.Field[string] `query:"projectId" api:"required"`
-	// Include build logs
+	// Whether to include build logs in the response
 	IncludeLogs param.Field[bool] `query:"includeLogs"`
 }
 
@@ -176,13 +186,13 @@ func (r ApplicationV1DeploymentGetParams) URLQuery() (v url.Values) {
 }
 
 type ApplicationV1DeploymentListParams struct {
-	// Project ID
+	// Project ID to list deployments for
 	ProjectID param.Field[string] `query:"projectId" api:"required"`
 	// Maximum number of deployments to return
 	Limit param.Field[float64] `query:"limit"`
-	// Filter by deployment state
+	// Deployment state to filter by
 	State param.Field[string] `query:"state"`
-	// Filter by deployment target
+	// Deployment target to filter by
 	Target param.Field[ApplicationV1DeploymentListParamsTarget] `query:"target"`
 }
 
@@ -195,7 +205,7 @@ func (r ApplicationV1DeploymentListParams) URLQuery() (v url.Values) {
 	})
 }
 
-// Filter by deployment target
+// Deployment target to filter by
 type ApplicationV1DeploymentListParamsTarget string
 
 const (
@@ -212,7 +222,7 @@ func (r ApplicationV1DeploymentListParamsTarget) IsKnown() bool {
 }
 
 type ApplicationV1DeploymentCancelParams struct {
-	// Project ID (for authorization)
+	// Project ID used to verify access to the deployment
 	ProjectID param.Field[string] `json:"projectId" api:"required"`
 }
 
@@ -221,7 +231,7 @@ func (r ApplicationV1DeploymentCancelParams) MarshalJSON() (data []byte, err err
 }
 
 type ApplicationV1DeploymentGetLogsParams struct {
-	// Project ID (for authorization)
+	// Project ID used to verify access to the deployment
 	ProjectID param.Field[string] `query:"projectId" api:"required"`
 }
 

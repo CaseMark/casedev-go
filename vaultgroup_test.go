@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestVaultGroupNew(t *testing.T) {
+func TestVaultGroupNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,10 @@ func TestVaultGroupNew(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Vault.Groups.New(context.TODO())
+	err := client.Vault.Groups.New(context.TODO(), githubcomcasemarkcasedevgo.VaultGroupNewParams{
+		Name:        githubcomcasemarkcasedevgo.F("name"),
+		Description: githubcomcasemarkcasedevgo.F("description"),
+	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -35,7 +38,7 @@ func TestVaultGroupNew(t *testing.T) {
 	}
 }
 
-func TestVaultGroupUpdate(t *testing.T) {
+func TestVaultGroupUpdateWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -47,7 +50,14 @@ func TestVaultGroupUpdate(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Vault.Groups.Update(context.TODO(), "groupId")
+	err := client.Vault.Groups.Update(
+		context.TODO(),
+		"groupId",
+		githubcomcasemarkcasedevgo.VaultGroupUpdateParams{
+			Description: githubcomcasemarkcasedevgo.F("description"),
+			Name:        githubcomcasemarkcasedevgo.F("name"),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

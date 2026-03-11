@@ -36,7 +36,9 @@ func NewApplicationV1ProjectService(opts ...option.RequestOption) (r *Applicatio
 	return
 }
 
-// Create a new web application project
+// Creates a new application project, validates GitHub access, provisions a default
+// case.dev domain, and starts the deployment workflow. The initial response
+// returns as soon as the workflow is queued so clients can poll for progress.
 func (r *ApplicationV1ProjectService) New(ctx context.Context, body ApplicationV1ProjectNewParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -45,7 +47,9 @@ func (r *ApplicationV1ProjectService) New(ctx context.Context, body ApplicationV
 	return err
 }
 
-// Get details of a specific web application project
+// Returns project details, domains, and recent deployment information for one
+// application project or deployed Thurgood app. Use this endpoint when you need a
+// single record with hosting metadata for a details view.
 func (r *ApplicationV1ProjectService) Get(ctx context.Context, id string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -58,15 +62,19 @@ func (r *ApplicationV1ProjectService) Get(ctx context.Context, id string, opts .
 	return err
 }
 
-// List all web application projects
-func (r *ApplicationV1ProjectService) List(ctx context.Context, opts ...option.RequestOption) (res *ApplicationV1ProjectListResponse, err error) {
+// Lists application projects and deployed Thurgood apps for the authenticated
+// organization. Use enrich=true to include additional hosting metadata for
+// projects linked to Vercel.
+func (r *ApplicationV1ProjectService) List(ctx context.Context, query ApplicationV1ProjectListParams, opts ...option.RequestOption) (res *ApplicationV1ProjectListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "applications/v1/projects"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return res, err
 }
 
-// Delete a web application project
+// Soft-deletes an application project or deployed Thurgood app from Case.dev. By
+// default it also removes the linked hosting project; set deleteFromHosting=false
+// to keep the external hosting resources intact.
 func (r *ApplicationV1ProjectService) Delete(ctx context.Context, id string, body ApplicationV1ProjectDeleteParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -79,7 +87,9 @@ func (r *ApplicationV1ProjectService) Delete(ctx context.Context, id string, bod
 	return err
 }
 
-// Trigger a new deployment for a project.
+// Starts a new deployment for an existing project using its saved repository and
+// hosting configuration. Any environment variables passed in the request are
+// merged into the deployment workflow before the build starts.
 func (r *ApplicationV1ProjectService) NewDeployment(ctx context.Context, id string, body ApplicationV1ProjectNewDeploymentParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -165,7 +175,9 @@ func (r *ApplicationV1ProjectService) GetRuntimeLogs(ctx context.Context, id str
 	return err
 }
 
-// List deployments for a specific project
+// Lists deployments for one project in the authenticated organization. If the
+// hosting project has not been created yet, this endpoint returns an empty list
+// with a progress message instead of failing.
 func (r *ApplicationV1ProjectService) ListDeployments(ctx context.Context, id string, query ApplicationV1ProjectListDeploymentsParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -206,6 +218,7 @@ func (r *ApplicationV1ProjectService) ListEnv(ctx context.Context, id string, qu
 }
 
 type ApplicationV1ProjectListResponse struct {
+	// Projects and deployed apps visible to the organization
 	Projects []ApplicationV1ProjectListResponseProject `json:"projects"`
 	JSON     applicationV1ProjectListResponseJSON      `json:"-"`
 }
@@ -227,17 +240,27 @@ func (r applicationV1ProjectListResponseJSON) RawJSON() string {
 }
 
 type ApplicationV1ProjectListResponseProject struct {
-	ID              string                                           `json:"id"`
-	CreatedAt       string                                           `json:"createdAt"`
-	Domains         []ApplicationV1ProjectListResponseProjectsDomain `json:"domains"`
-	Framework       string                                           `json:"framework"`
-	GitBranch       string                                           `json:"gitBranch"`
-	GitRepo         string                                           `json:"gitRepo"`
-	Name            string                                           `json:"name"`
-	Status          string                                           `json:"status"`
-	UpdatedAt       string                                           `json:"updatedAt"`
-	VercelProjectID string                                           `json:"vercelProjectId"`
-	JSON            applicationV1ProjectListResponseProjectJSON      `json:"-"`
+	// Project identifier
+	ID string `json:"id"`
+	// When the project record was created
+	CreatedAt string `json:"createdAt"`
+	// Custom or generated domains assigned to the project
+	Domains []ApplicationV1ProjectListResponseProjectsDomain `json:"domains"`
+	// Detected or configured application framework
+	Framework string `json:"framework"`
+	// Default Git branch used for deployments
+	GitBranch string `json:"gitBranch"`
+	// Connected Git repository in owner/repo format
+	GitRepo string `json:"gitRepo"`
+	// Project display name
+	Name string `json:"name"`
+	// Current project deployment status
+	Status string `json:"status"`
+	// When the project record was last updated
+	UpdatedAt string `json:"updatedAt"`
+	// Hosting provider project ID, when linked
+	VercelProjectID string                                      `json:"vercelProjectId"`
+	JSON            applicationV1ProjectListResponseProjectJSON `json:"-"`
 }
 
 // applicationV1ProjectListResponseProjectJSON contains the JSON metadata for the
@@ -266,9 +289,13 @@ func (r applicationV1ProjectListResponseProjectJSON) RawJSON() string {
 }
 
 type ApplicationV1ProjectListResponseProjectsDomain struct {
-	ID         string                                             `json:"id"`
-	Domain     string                                             `json:"domain"`
-	IsPrimary  bool                                               `json:"isPrimary"`
+	// Domain record identifier
+	ID string `json:"id"`
+	// Hostname assigned to the project
+	Domain string `json:"domain"`
+	// Whether this is the primary project domain
+	IsPrimary bool `json:"isPrimary"`
+	// Whether the domain has been verified by the hosting provider
 	IsVerified bool                                               `json:"isVerified"`
 	JSON       applicationV1ProjectListResponseProjectsDomainJSON `json:"-"`
 }
@@ -293,23 +320,23 @@ func (r applicationV1ProjectListResponseProjectsDomainJSON) RawJSON() string {
 }
 
 type ApplicationV1ProjectNewParams struct {
-	// GitHub repository URL or "owner/repo"
+	// GitHub repository URL or owner/repo identifier
 	GitRepo param.Field[string] `json:"gitRepo" api:"required"`
-	// Project name
+	// Human-readable project name
 	Name param.Field[string] `json:"name" api:"required"`
-	// Custom build command
+	// Custom build command to override the framework default
 	BuildCommand param.Field[string] `json:"buildCommand"`
-	// Environment variables to set on the project
+	// Environment variables to create before the first deployment
 	EnvironmentVariables param.Field[[]ApplicationV1ProjectNewParamsEnvironmentVariable] `json:"environmentVariables"`
-	// Framework (e.g., "nextjs", "remix", "astro")
+	// Framework preset for the hosting project, such as nextjs or remix
 	Framework param.Field[string] `json:"framework"`
-	// Git branch to deploy
+	// Git branch to deploy. Defaults to main.
 	GitBranch param.Field[string] `json:"gitBranch"`
-	// Custom install command
+	// Custom install command to override the framework default
 	InstallCommand param.Field[string] `json:"installCommand"`
-	// Build output directory
+	// Build output directory relative to the project root
 	OutputDirectory param.Field[string] `json:"outputDirectory"`
-	// Root directory of the project
+	// Repository subdirectory that contains the app to deploy
 	RootDirectory param.Field[string] `json:"rootDirectory"`
 }
 
@@ -320,11 +347,11 @@ func (r ApplicationV1ProjectNewParams) MarshalJSON() (data []byte, err error) {
 type ApplicationV1ProjectNewParamsEnvironmentVariable struct {
 	// Environment variable name
 	Key param.Field[string] `json:"key" api:"required"`
-	// Deployment targets for this variable
+	// Deployment targets that should receive this variable
 	Target param.Field[[]ApplicationV1ProjectNewParamsEnvironmentVariablesTarget] `json:"target" api:"required"`
 	// Environment variable value
 	Value param.Field[string] `json:"value" api:"required"`
-	// Variable type
+	// Storage mode for the environment variable value
 	Type param.Field[ApplicationV1ProjectNewParamsEnvironmentVariablesType] `json:"type"`
 }
 
@@ -348,7 +375,7 @@ func (r ApplicationV1ProjectNewParamsEnvironmentVariablesTarget) IsKnown() bool 
 	return false
 }
 
-// Variable type
+// Storage mode for the environment variable value
 type ApplicationV1ProjectNewParamsEnvironmentVariablesType string
 
 const (
@@ -365,8 +392,24 @@ func (r ApplicationV1ProjectNewParamsEnvironmentVariablesType) IsKnown() bool {
 	return false
 }
 
+type ApplicationV1ProjectListParams struct {
+	// Whether to include additional hosting metadata from Vercel
+	Enrich param.Field[bool] `query:"enrich"`
+	// Maximum number of projects to return from each backing source
+	Limit param.Field[float64] `query:"limit"`
+}
+
+// URLQuery serializes [ApplicationV1ProjectListParams]'s query parameters as
+// `url.Values`.
+func (r ApplicationV1ProjectListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
 type ApplicationV1ProjectDeleteParams struct {
-	// Also delete the project from hosting (default: true)
+	// Whether to also delete the linked hosting project. Defaults to true.
 	DeleteFromHosting param.Field[bool] `query:"deleteFromHosting"`
 }
 
@@ -391,11 +434,11 @@ func (r ApplicationV1ProjectNewDeploymentParams) MarshalJSON() (data []byte, err
 type ApplicationV1ProjectNewDeploymentParamsEnvironmentVariable struct {
 	// Environment variable name
 	Key param.Field[string] `json:"key" api:"required"`
-	// Deployment targets for this variable
+	// Deployment targets that should receive this variable
 	Target param.Field[[]ApplicationV1ProjectNewDeploymentParamsEnvironmentVariablesTarget] `json:"target" api:"required"`
 	// Environment variable value
 	Value param.Field[string] `json:"value" api:"required"`
-	// Variable type
+	// Storage mode for the environment variable value
 	Type param.Field[ApplicationV1ProjectNewDeploymentParamsEnvironmentVariablesType] `json:"type"`
 }
 
@@ -419,7 +462,7 @@ func (r ApplicationV1ProjectNewDeploymentParamsEnvironmentVariablesTarget) IsKno
 	return false
 }
 
-// Variable type
+// Storage mode for the environment variable value
 type ApplicationV1ProjectNewDeploymentParamsEnvironmentVariablesType string
 
 const (
@@ -514,9 +557,9 @@ func (r ApplicationV1ProjectGetRuntimeLogsParams) URLQuery() (v url.Values) {
 type ApplicationV1ProjectListDeploymentsParams struct {
 	// Maximum number of deployments to return
 	Limit param.Field[float64] `query:"limit"`
-	// Filter by deployment state
+	// Deployment state to filter by
 	State param.Field[string] `query:"state"`
-	// Filter by deployment target
+	// Deployment target to filter by
 	Target param.Field[ApplicationV1ProjectListDeploymentsParamsTarget] `query:"target"`
 }
 
@@ -529,7 +572,7 @@ func (r ApplicationV1ProjectListDeploymentsParams) URLQuery() (v url.Values) {
 	})
 }
 
-// Filter by deployment target
+// Deployment target to filter by
 type ApplicationV1ProjectListDeploymentsParamsTarget string
 
 const (

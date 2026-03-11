@@ -55,7 +55,9 @@ type FormatV1NewDocumentParams struct {
 	OutputFormat param.Field[FormatV1NewDocumentParamsOutputFormat] `json:"output_format" api:"required"`
 	// Format of the input content
 	InputFormat param.Field[FormatV1NewDocumentParamsInputFormat] `json:"input_format"`
-	Options     param.Field[FormatV1NewDocumentParamsOptions]     `json:"options"`
+	// Optional template composition and styling settings used during document
+	// generation
+	Options param.Field[FormatV1NewDocumentParamsOptions] `json:"options"`
 }
 
 func (r FormatV1NewDocumentParams) MarshalJSON() (data []byte, err error) {
@@ -96,6 +98,8 @@ func (r FormatV1NewDocumentParamsInputFormat) IsKnown() bool {
 	return false
 }
 
+// Optional template composition and styling settings used during document
+// generation
 type FormatV1NewDocumentParamsOptions struct {
 	// Template components with variables
 	Components param.Field[[]FormatV1NewDocumentParamsOptionsComponent] `json:"components"`
