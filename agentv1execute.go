@@ -39,7 +39,7 @@ func (r *AgentV1ExecuteService) New(ctx context.Context, body AgentV1ExecuteNewP
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/execute"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type AgentV1ExecuteNewResponse struct {

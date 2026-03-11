@@ -40,7 +40,7 @@ func (r *TranslateV1Service) Detect(ctx context.Context, body TranslateV1DetectP
 	opts = slices.Concat(r.Options, opts)
 	path := "translate/v1/detect"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Get the list of languages supported for translation. Optionally specify a target
@@ -49,7 +49,7 @@ func (r *TranslateV1Service) ListLanguages(ctx context.Context, query TranslateV
 	opts = slices.Concat(r.Options, opts)
 	path := "translate/v1/languages"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Translate text between languages using Google Cloud Translation API. Supports
@@ -59,7 +59,7 @@ func (r *TranslateV1Service) Translate(ctx context.Context, body TranslateV1Tran
 	opts = slices.Concat(r.Options, opts)
 	path := "translate/v1/translate"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type TranslateV1DetectResponse struct {

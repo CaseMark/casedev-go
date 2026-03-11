@@ -40,7 +40,7 @@ func (r *VaultGroupService) New(ctx context.Context, opts ...option.RequestOptio
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "vault/groups"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Update vault group
@@ -49,11 +49,11 @@ func (r *VaultGroupService) Update(ctx context.Context, groupID string, opts ...
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if groupID == "" {
 		err = errors.New("missing required groupId parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("vault/groups/%s", groupID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // List vault groups
@@ -62,7 +62,7 @@ func (r *VaultGroupService) List(ctx context.Context, opts ...option.RequestOpti
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "vault/groups"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Delete vault group
@@ -71,9 +71,9 @@ func (r *VaultGroupService) Delete(ctx context.Context, groupID string, opts ...
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if groupID == "" {
 		err = errors.New("missing required groupId parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("vault/groups/%s", groupID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }

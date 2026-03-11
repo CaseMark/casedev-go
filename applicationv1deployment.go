@@ -44,7 +44,7 @@ func (r *ApplicationV1DeploymentService) New(ctx context.Context, body Applicati
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "applications/v1/deployments"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Get details of a specific deployment including build logs
@@ -53,11 +53,11 @@ func (r *ApplicationV1DeploymentService) Get(ctx context.Context, id string, que
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/deployments/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return
+	return err
 }
 
 // List deployments for a project
@@ -66,7 +66,7 @@ func (r *ApplicationV1DeploymentService) List(ctx context.Context, query Applica
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "applications/v1/deployments"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return
+	return err
 }
 
 // Cancel a running deployment
@@ -75,11 +75,11 @@ func (r *ApplicationV1DeploymentService) Cancel(ctx context.Context, id string, 
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/deployments/%s/cancel", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Create a deployment from raw file contents (for Thurgood sandbox deployments)
@@ -88,7 +88,7 @@ func (r *ApplicationV1DeploymentService) NewFromFiles(ctx context.Context, opts 
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "applications/v1/deployments/from-files"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Get build logs for a specific deployment
@@ -97,11 +97,11 @@ func (r *ApplicationV1DeploymentService) GetLogs(ctx context.Context, id string,
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/deployments/%s/logs", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return
+	return err
 }
 
 // Get the current status of a deployment
@@ -110,11 +110,11 @@ func (r *ApplicationV1DeploymentService) GetStatus(ctx context.Context, id strin
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/deployments/%s/status", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Stream real-time deployment progress events via Server-Sent Events
@@ -123,11 +123,11 @@ func (r *ApplicationV1DeploymentService) Stream(ctx context.Context, id string, 
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/deployments/%s/stream", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return
+	return err
 }
 
 type ApplicationV1DeploymentNewParams struct {

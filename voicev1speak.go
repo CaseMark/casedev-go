@@ -42,7 +42,7 @@ func (r *VoiceV1SpeakService) New(ctx context.Context, body VoiceV1SpeakNewParam
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "audio/mpeg")}, opts...)
 	path := "voice/v1/speak"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type VoiceV1SpeakNewParams struct {

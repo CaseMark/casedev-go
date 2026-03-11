@@ -45,7 +45,7 @@ func (r *ComputeV1EnvironmentService) New(ctx context.Context, body ComputeV1Env
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/environments"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve a specific compute environment by name. Returns environment
@@ -55,11 +55,11 @@ func (r *ComputeV1EnvironmentService) Get(ctx context.Context, name string, opts
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("compute/v1/environments/%s", name)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve all compute environments for your organization. Environments provide
@@ -68,7 +68,7 @@ func (r *ComputeV1EnvironmentService) List(ctx context.Context, opts ...option.R
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/environments"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Permanently delete a compute environment and all its associated resources. This
@@ -78,11 +78,11 @@ func (r *ComputeV1EnvironmentService) Delete(ctx context.Context, name string, o
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("compute/v1/environments/%s", name)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Sets a compute environment as the default for the organization. Only one
@@ -92,11 +92,11 @@ func (r *ComputeV1EnvironmentService) SetDefault(ctx context.Context, name strin
 	opts = slices.Concat(r.Options, opts)
 	if name == "" {
 		err = errors.New("missing required name parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("compute/v1/environments/%s/default", name)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type ComputeV1EnvironmentNewResponse struct {

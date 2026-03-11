@@ -41,7 +41,7 @@ func (r *AgentV1AgentService) New(ctx context.Context, body AgentV1AgentNewParam
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/agents"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves a single agent definition by ID.
@@ -49,11 +49,11 @@ func (r *AgentV1AgentService) Get(ctx context.Context, id string, opts ...option
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/agents/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Updates an agent definition. Only provided fields are changed.
@@ -61,11 +61,11 @@ func (r *AgentV1AgentService) Update(ctx context.Context, id string, body AgentV
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/agents/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Lists all active agents for the authenticated organization.
@@ -73,7 +73,7 @@ func (r *AgentV1AgentService) List(ctx context.Context, opts ...option.RequestOp
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/agents"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Soft-deletes an agent and revokes its scoped API key.
@@ -81,11 +81,11 @@ func (r *AgentV1AgentService) Delete(ctx context.Context, id string, opts ...opt
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/agents/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type AgentV1AgentNewResponse struct {

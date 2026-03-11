@@ -44,7 +44,7 @@ func (r *LlmV1Service) NewEmbedding(ctx context.Context, body LlmV1NewEmbeddingP
 	opts = slices.Concat(r.Options, opts)
 	path := "llm/v1/embeddings"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve a list of all available language models from 40+ providers including
@@ -57,7 +57,7 @@ func (r *LlmV1Service) ListModels(ctx context.Context, opts ...option.RequestOpt
 	opts = slices.Concat(r.Options, opts)
 	path := "llm/v1/models"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type LlmV1NewEmbeddingResponse struct {
