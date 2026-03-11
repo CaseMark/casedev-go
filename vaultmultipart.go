@@ -42,11 +42,11 @@ func (r *VaultMultipartService) Abort(ctx context.Context, id string, body Vault
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("vault/%s/multipart/abort", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Generate presigned URLs for individual multipart upload parts (live).
@@ -54,11 +54,11 @@ func (r *VaultMultipartService) GetPartURLs(ctx context.Context, id string, body
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/multipart/part-urls", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type VaultMultipartGetPartURLsResponse struct {

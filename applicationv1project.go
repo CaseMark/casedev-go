@@ -42,7 +42,7 @@ func (r *ApplicationV1ProjectService) New(ctx context.Context, body ApplicationV
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "applications/v1/projects"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Get details of a specific web application project
@@ -51,11 +51,11 @@ func (r *ApplicationV1ProjectService) Get(ctx context.Context, id string, opts .
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // List all web application projects
@@ -63,7 +63,7 @@ func (r *ApplicationV1ProjectService) List(ctx context.Context, opts ...option.R
 	opts = slices.Concat(r.Options, opts)
 	path := "applications/v1/projects"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Delete a web application project
@@ -72,11 +72,11 @@ func (r *ApplicationV1ProjectService) Delete(ctx context.Context, id string, bod
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Trigger a new deployment for a project.
@@ -85,11 +85,11 @@ func (r *ApplicationV1ProjectService) NewDeployment(ctx context.Context, id stri
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s/deployments", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Add a custom domain to a project
@@ -98,11 +98,11 @@ func (r *ApplicationV1ProjectService) NewDomain(ctx context.Context, id string, 
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s/domains", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Create a new environment variable for a project
@@ -111,11 +111,11 @@ func (r *ApplicationV1ProjectService) NewEnv(ctx context.Context, id string, bod
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s/env", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Remove a domain from a project
@@ -124,15 +124,15 @@ func (r *ApplicationV1ProjectService) DeleteDomain(ctx context.Context, id strin
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	if domain == "" {
 		err = errors.New("missing required domain parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s/domains/%s", id, domain)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Delete an environment variable from a project
@@ -141,15 +141,15 @@ func (r *ApplicationV1ProjectService) DeleteEnv(ctx context.Context, id string, 
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	if envID == "" {
 		err = errors.New("missing required envId parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s/env/%s", id, envID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Get runtime/function logs for a project
@@ -158,11 +158,11 @@ func (r *ApplicationV1ProjectService) GetRuntimeLogs(ctx context.Context, id str
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s/runtime-logs", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return
+	return err
 }
 
 // List deployments for a specific project
@@ -171,11 +171,11 @@ func (r *ApplicationV1ProjectService) ListDeployments(ctx context.Context, id st
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s/deployments", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return
+	return err
 }
 
 // List all domains configured for a project
@@ -184,11 +184,11 @@ func (r *ApplicationV1ProjectService) ListDomains(ctx context.Context, id string
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s/domains", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // List all environment variables for a project (values are hidden unless
@@ -198,11 +198,11 @@ func (r *ApplicationV1ProjectService) ListEnv(ctx context.Context, id string, qu
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/projects/%s/env", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return
+	return err
 }
 
 type ApplicationV1ProjectListResponse struct {

@@ -53,7 +53,7 @@ func (r *MemoryV1Service) New(ctx context.Context, body MemoryV1NewParams, opts 
 	opts = slices.Concat(r.Options, opts)
 	path := "memory/v1"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve a single memory by its ID.
@@ -61,11 +61,11 @@ func (r *MemoryV1Service) Get(ctx context.Context, id string, opts ...option.Req
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("memory/v1/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // List all memories with optional filtering by tags and category.
@@ -73,7 +73,7 @@ func (r *MemoryV1Service) List(ctx context.Context, query MemoryV1ListParams, op
 	opts = slices.Concat(r.Options, opts)
 	path := "memory/v1"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Delete a single memory by its ID.
@@ -81,11 +81,11 @@ func (r *MemoryV1Service) Delete(ctx context.Context, id string, opts ...option.
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("memory/v1/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Delete multiple memories matching tag filter criteria. CAUTION: This will delete
@@ -94,7 +94,7 @@ func (r *MemoryV1Service) DeleteAll(ctx context.Context, body MemoryV1DeleteAllP
 	opts = slices.Concat(r.Options, opts)
 	path := "memory/v1"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Search memories using semantic similarity. Filter by tag fields to narrow
@@ -109,7 +109,7 @@ func (r *MemoryV1Service) Search(ctx context.Context, body MemoryV1SearchParams,
 	opts = slices.Concat(r.Options, opts)
 	path := "memory/v1/search"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type MemoryV1NewResponse struct {

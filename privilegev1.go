@@ -52,7 +52,7 @@ func (r *PrivilegeV1Service) Detect(ctx context.Context, body PrivilegeV1DetectP
 	opts = slices.Concat(r.Options, opts)
 	path := "privilege/v1/detect"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type PrivilegeV1DetectResponse struct {

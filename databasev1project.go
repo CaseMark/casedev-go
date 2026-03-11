@@ -48,7 +48,7 @@ func (r *DatabaseV1ProjectService) New(ctx context.Context, body DatabaseV1Proje
 	opts = slices.Concat(r.Options, opts)
 	path := "database/v1/projects"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves detailed information about a specific database project including
@@ -58,11 +58,11 @@ func (r *DatabaseV1ProjectService) Get(ctx context.Context, id string, opts ...o
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("database/v1/projects/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves all serverless Postgres database projects for the authenticated
@@ -72,7 +72,7 @@ func (r *DatabaseV1ProjectService) List(ctx context.Context, opts ...option.Requ
 	opts = slices.Concat(r.Options, opts)
 	path := "database/v1/projects"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Permanently deletes a database project from Neon and marks it as deleted in
@@ -82,11 +82,11 @@ func (r *DatabaseV1ProjectService) Delete(ctx context.Context, id string, opts .
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("database/v1/projects/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Creates a new branch from the specified parent branch (or default 'main'
@@ -98,11 +98,11 @@ func (r *DatabaseV1ProjectService) NewBranch(ctx context.Context, id string, bod
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("database/v1/projects/%s/branches", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves the PostgreSQL connection URI for a database project. Supports
@@ -113,11 +113,11 @@ func (r *DatabaseV1ProjectService) GetConnection(ctx context.Context, id string,
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("database/v1/projects/%s/connection", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves all branches for a database project. Branches enable isolated
@@ -128,11 +128,11 @@ func (r *DatabaseV1ProjectService) ListBranches(ctx context.Context, id string, 
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("database/v1/projects/%s/branches", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type DatabaseV1ProjectNewResponse struct {

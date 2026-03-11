@@ -43,11 +43,11 @@ func (r *VaultEventSubscriptionService) New(ctx context.Context, id string, body
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("vault/%s/events/subscriptions", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Updates callback URL, filters, active state, or signing secret for a vault
@@ -57,15 +57,15 @@ func (r *VaultEventSubscriptionService) Update(ctx context.Context, id string, s
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	if subscriptionID == "" {
 		err = errors.New("missing required subscriptionId parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("vault/%s/events/subscriptions/%s", id, subscriptionID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Lists webhook subscriptions configured for a vault.
@@ -74,11 +74,11 @@ func (r *VaultEventSubscriptionService) List(ctx context.Context, id string, opt
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("vault/%s/events/subscriptions", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Deactivates a vault webhook subscription.
@@ -87,15 +87,15 @@ func (r *VaultEventSubscriptionService) Delete(ctx context.Context, id string, s
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	if subscriptionID == "" {
 		err = errors.New("missing required subscriptionId parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("vault/%s/events/subscriptions/%s", id, subscriptionID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Delivers a test event to a single vault webhook subscription. Uses the same
@@ -105,15 +105,15 @@ func (r *VaultEventSubscriptionService) Test(ctx context.Context, id string, sub
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	if subscriptionID == "" {
 		err = errors.New("missing required subscriptionId parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("vault/%s/events/subscriptions/%s/test", id, subscriptionID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 type VaultEventSubscriptionNewParams struct {

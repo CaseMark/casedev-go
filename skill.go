@@ -44,11 +44,11 @@ func (r *SkillService) Read(ctx context.Context, slug string, opts ...option.Req
 	opts = slices.Concat(r.Options, opts)
 	if slug == "" {
 		err = errors.New("missing required slug parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("skills/%s", slug)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Search the Legal Skills Store using hybrid search (text + tag + semantic).
@@ -57,7 +57,7 @@ func (r *SkillService) Resolve(ctx context.Context, query SkillResolveParams, op
 	opts = slices.Concat(r.Options, opts)
 	path := "skills/resolve"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 type SkillReadResponse struct {

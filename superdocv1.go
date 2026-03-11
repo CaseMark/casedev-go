@@ -42,7 +42,7 @@ func (r *SuperdocV1Service) Annotate(ctx context.Context, body SuperdocV1Annotat
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/pdf")}, opts...)
 	path := "superdoc/v1/annotate"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Convert documents between formats using SuperDoc. Supports DOCX to PDF, Markdown
@@ -52,7 +52,7 @@ func (r *SuperdocV1Service) Convert(ctx context.Context, body SuperdocV1ConvertP
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/pdf")}, opts...)
 	path := "superdoc/v1/convert"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type SuperdocV1AnnotateParams struct {

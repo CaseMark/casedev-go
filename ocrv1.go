@@ -43,11 +43,11 @@ func (r *OcrV1Service) Get(ctx context.Context, id string, opts ...option.Reques
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("ocr/v1/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Download OCR processing results in various formats. Returns the processed
@@ -58,11 +58,11 @@ func (r *OcrV1Service) Download(ctx context.Context, id string, type_ OcrV1Downl
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/octet-stream")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("ocr/v1/%s/download/%v", id, type_)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Submit a document for OCR processing to extract text, detect tables, forms, and
@@ -72,7 +72,7 @@ func (r *OcrV1Service) Process(ctx context.Context, body OcrV1ProcessParams, opt
 	opts = slices.Concat(r.Options, opts)
 	path := "ocr/v1/process"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type OcrV1GetResponse struct {

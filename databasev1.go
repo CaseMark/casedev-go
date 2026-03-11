@@ -44,7 +44,7 @@ func (r *DatabaseV1Service) GetUsage(ctx context.Context, opts ...option.Request
 	opts = slices.Concat(r.Options, opts)
 	path := "database/v1/usage"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type DatabaseV1GetUsageResponse struct {

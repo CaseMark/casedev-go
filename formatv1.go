@@ -45,7 +45,7 @@ func (r *FormatV1Service) NewDocument(ctx context.Context, body FormatV1NewDocum
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/pdf")}, opts...)
 	path := "format/v1/document"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type FormatV1NewDocumentParams struct {

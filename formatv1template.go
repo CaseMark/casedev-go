@@ -46,7 +46,7 @@ func (r *FormatV1TemplateService) New(ctx context.Context, body FormatV1Template
 	opts = slices.Concat(r.Options, opts)
 	path := "format/v1/templates"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve a specific document format template by ID. Format templates define how
@@ -56,11 +56,11 @@ func (r *FormatV1TemplateService) Get(ctx context.Context, id string, opts ...op
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("format/v1/templates/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve all format templates for the organization. Templates define reusable
@@ -73,7 +73,7 @@ func (r *FormatV1TemplateService) List(ctx context.Context, query FormatV1Templa
 	opts = slices.Concat(r.Options, opts)
 	path := "format/v1/templates"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 type FormatV1TemplateNewResponse struct {

@@ -44,7 +44,7 @@ func (r *AgentV1RunService) New(ctx context.Context, body AgentV1RunNewParams, o
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/run"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Cancels a running or queued run. Idempotent — cancelling a finished run returns
@@ -53,11 +53,11 @@ func (r *AgentV1RunService) Cancel(ctx context.Context, id string, opts ...optio
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/run/%s/cancel", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Streams real-time run events over SSE. Supports replay using Last-Event-ID.
@@ -70,7 +70,7 @@ func (r *AgentV1RunService) EventsStreaming(ctx context.Context, id string, quer
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return ssestream.NewStream[string](nil, err)
 	}
 	path := fmt.Sprintf("agent/v1/run/%s/events", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &raw, opts...)
@@ -83,11 +83,11 @@ func (r *AgentV1RunService) Exec(ctx context.Context, id string, opts ...option.
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/run/%s/exec", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Full audit trail for a run including output, steps (tool calls, text), and token
@@ -96,11 +96,11 @@ func (r *AgentV1RunService) GetDetails(ctx context.Context, id string, opts ...o
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/run/%s/details", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Lightweight status poll for a run. Use /run/:id/details for the full audit
@@ -109,11 +109,11 @@ func (r *AgentV1RunService) GetStatus(ctx context.Context, id string, opts ...op
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/run/%s/status", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Register a callback URL to receive notifications when the run completes. URL
@@ -122,11 +122,11 @@ func (r *AgentV1RunService) Watch(ctx context.Context, id string, body AgentV1Ru
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/run/%s/watch", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type AgentV1RunNewResponse struct {
