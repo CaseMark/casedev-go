@@ -42,7 +42,7 @@ func (r *LlmV1ChatService) NewCompletion(ctx context.Context, body LlmV1ChatNewC
 	opts = slices.Concat(r.Options, opts)
 	path := "llm/v1/chat/completions"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type LlmV1ChatNewCompletionResponse struct {

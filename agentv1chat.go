@@ -44,7 +44,7 @@ func (r *AgentV1ChatService) New(ctx context.Context, body AgentV1ChatNewParams,
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/chat"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Snapshots and terminates the active sandbox (if any), then marks the chat as
@@ -53,11 +53,11 @@ func (r *AgentV1ChatService) Delete(ctx context.Context, id string, opts ...opti
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/chat/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Aborts the active OpenCode generation for this chat session.
@@ -65,11 +65,11 @@ func (r *AgentV1ChatService) Cancel(ctx context.Context, id string, opts ...opti
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("agent/v1/chat/%s/cancel", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Answers a pending OpenCode question for the chat session bound to this agent
@@ -79,15 +79,15 @@ func (r *AgentV1ChatService) ReplyToQuestion(ctx context.Context, id string, req
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	if requestID == "" {
 		err = errors.New("missing required requestID parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("agent/v1/chat/%s/question/%s/reply", id, requestID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Streams a single assistant turn as normalized state events with stable turn,
@@ -102,7 +102,7 @@ func (r *AgentV1ChatService) RespondStreaming(ctx context.Context, id string, bo
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return ssestream.NewStream[string](nil, err)
 	}
 	path := fmt.Sprintf("agent/v1/chat/%s/respond", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &raw, opts...)
@@ -115,11 +115,11 @@ func (r *AgentV1ChatService) SendMessage(ctx context.Context, id string, body Ag
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("agent/v1/chat/%s/message", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Relays OpenCode SSE events for this chat. Supports replay from buffered events
@@ -133,7 +133,7 @@ func (r *AgentV1ChatService) StreamStreaming(ctx context.Context, id string, que
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return ssestream.NewStream[string](nil, err)
 	}
 	path := fmt.Sprintf("agent/v1/chat/%s/stream", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &raw, opts...)
@@ -151,7 +151,7 @@ func (r *AgentV1ChatService) UiStreamStreaming(ctx context.Context, id string, b
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return ssestream.NewStream[string](nil, err)
 	}
 	path := fmt.Sprintf("agent/v1/chat/%s/ui-stream", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &raw, opts...)

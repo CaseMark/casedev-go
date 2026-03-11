@@ -43,11 +43,11 @@ func (r *ApplicationV1WorkflowService) GetStatus(ctx context.Context, id string,
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("applications/v1/workflows/%s/status", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return
+	return err
 }
 
 type ApplicationV1WorkflowGetStatusParams struct {

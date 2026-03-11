@@ -47,7 +47,7 @@ func (r *VoiceV1Service) ListVoices(ctx context.Context, query VoiceV1ListVoices
 	opts = slices.Concat(r.Options, opts)
 	path := "voice/v1/voices"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 type VoiceV1ListVoicesResponse struct {

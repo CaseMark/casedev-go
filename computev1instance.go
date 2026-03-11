@@ -45,7 +45,7 @@ func (r *ComputeV1InstanceService) New(ctx context.Context, body ComputeV1Instan
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/instances"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves detailed information about a GPU instance including SSH connection
@@ -55,11 +55,11 @@ func (r *ComputeV1InstanceService) Get(ctx context.Context, id string, opts ...o
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("compute/v1/instances/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves all GPU compute instances for your organization with real-time status
@@ -70,7 +70,7 @@ func (r *ComputeV1InstanceService) List(ctx context.Context, opts ...option.Requ
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/instances"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Terminates a running GPU instance, calculates final cost, and cleans up SSH
@@ -80,11 +80,11 @@ func (r *ComputeV1InstanceService) Delete(ctx context.Context, id string, opts .
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("compute/v1/instances/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type ComputeV1InstanceNewResponse struct {

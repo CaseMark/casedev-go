@@ -61,7 +61,7 @@ func (r *VaultService) New(ctx context.Context, body VaultNewParams, opts ...opt
 	opts = slices.Concat(r.Options, opts)
 	path := "vault"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve detailed information about a specific vault, including storage
@@ -71,11 +71,11 @@ func (r *VaultService) Get(ctx context.Context, id string, opts ...option.Reques
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Update vault settings including name, description, and enableGraph. Changing
@@ -85,11 +85,11 @@ func (r *VaultService) Update(ctx context.Context, id string, body VaultUpdatePa
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // List all vaults for the authenticated organization. Returns vault metadata
@@ -98,7 +98,7 @@ func (r *VaultService) List(ctx context.Context, opts ...option.RequestOption) (
 	opts = slices.Concat(r.Options, opts)
 	path := "vault"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Permanently deletes a vault and all its contents including documents, vectors,
@@ -108,11 +108,11 @@ func (r *VaultService) Delete(ctx context.Context, id string, body VaultDeletePa
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Confirm whether a direct-to-S3 vault upload succeeded or failed. This endpoint
@@ -122,15 +122,15 @@ func (r *VaultService) ConfirmUpload(ctx context.Context, id string, objectID st
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/upload/%s/confirm", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Triggers ingestion workflow for a vault object to extract text, generate chunks,
@@ -145,15 +145,15 @@ func (r *VaultService) Ingest(ctx context.Context, id string, objectID string, o
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/ingest/%s", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Search across vault documents using multiple methods including hybrid vector +
@@ -164,11 +164,11 @@ func (r *VaultService) Search(ctx context.Context, id string, body VaultSearchPa
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/search", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Generate a presigned URL for uploading files directly to a vault's S3 storage.
@@ -178,11 +178,11 @@ func (r *VaultService) Upload(ctx context.Context, id string, body VaultUploadPa
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/upload", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type VaultNewResponse struct {

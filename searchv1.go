@@ -47,7 +47,7 @@ func (r *SearchV1Service) Answer(ctx context.Context, body SearchV1AnswerParams,
 	opts = slices.Concat(r.Options, opts)
 	path := "search/v1/answer"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Scrapes and extracts text content from web pages, PDFs, and documents. Useful
@@ -57,7 +57,7 @@ func (r *SearchV1Service) Contents(ctx context.Context, body SearchV1ContentsPar
 	opts = slices.Concat(r.Options, opts)
 	path := "search/v1/contents"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Performs deep research by conducting multi-step analysis, gathering information
@@ -67,7 +67,7 @@ func (r *SearchV1Service) Research(ctx context.Context, body SearchV1ResearchPar
 	opts = slices.Concat(r.Options, opts)
 	path := "search/v1/research"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve the status and results of a deep research task by ID. Supports both
@@ -78,11 +78,11 @@ func (r *SearchV1Service) GetResearch(ctx context.Context, id string, query Sear
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("search/v1/research/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Executes intelligent web search queries with advanced filtering and
@@ -92,7 +92,7 @@ func (r *SearchV1Service) Search(ctx context.Context, body SearchV1SearchParams,
 	opts = slices.Concat(r.Options, opts)
 	path := "search/v1/search"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Find web pages and documents similar to a given URL. Useful for legal research
@@ -102,7 +102,7 @@ func (r *SearchV1Service) Similar(ctx context.Context, body SearchV1SimilarParam
 	opts = slices.Concat(r.Options, opts)
 	path := "search/v1/similar"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type SearchV1AnswerResponse struct {

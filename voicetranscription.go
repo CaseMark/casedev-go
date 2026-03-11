@@ -48,7 +48,7 @@ func (r *VoiceTranscriptionService) New(ctx context.Context, body VoiceTranscrip
 	opts = slices.Concat(r.Options, opts)
 	path := "voice/transcription"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve the status and result of an audio transcription job. For vault-based
@@ -58,11 +58,11 @@ func (r *VoiceTranscriptionService) Get(ctx context.Context, id string, opts ...
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("voice/transcription/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Deletes a transcription job. For managed vault jobs (tr\_\*), also removes local
@@ -73,11 +73,11 @@ func (r *VoiceTranscriptionService) Delete(ctx context.Context, id string, opts 
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("voice/transcription/%s", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }
 
 type VoiceTranscriptionNewResponse struct {

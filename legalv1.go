@@ -41,7 +41,7 @@ func (r *LegalV1Service) Docket(ctx context.Context, body LegalV1DocketParams, o
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/docket"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Generate a legal document with structured inputs. Powered by an agent that
@@ -51,7 +51,7 @@ func (r *LegalV1Service) Draft(ctx context.Context, body LegalV1DraftParams, opt
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/draft"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Search for legal sources including cases, statutes, and regulations from
@@ -61,7 +61,7 @@ func (r *LegalV1Service) Find(ctx context.Context, body LegalV1FindParams, opts 
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/find"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Parses legal citations from text and returns structured Bluebook components
@@ -71,7 +71,7 @@ func (r *LegalV1Service) GetCitations(ctx context.Context, body LegalV1GetCitati
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/citations"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Extract all legal citations and references from a document URL. Returns
@@ -81,7 +81,7 @@ func (r *LegalV1Service) GetCitationsFromURL(ctx context.Context, body LegalV1Ge
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/citations-from-url"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve the full text content of a legal document. Use after verifying the
@@ -91,7 +91,7 @@ func (r *LegalV1Service) GetFullText(ctx context.Context, body LegalV1GetFullTex
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/full-text"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns CourtListener court IDs and names for docket filtering. Use these IDs in
@@ -100,7 +100,7 @@ func (r *LegalV1Service) ListCourts(ctx context.Context, body LegalV1ListCourtsP
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/courts"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Search for a jurisdiction by name. Returns matching jurisdictions with their IDs
@@ -109,7 +109,7 @@ func (r *LegalV1Service) ListJurisdictions(ctx context.Context, body LegalV1List
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/jurisdictions"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Search the USPTO Open Data Portal for US patent applications and granted
@@ -120,7 +120,7 @@ func (r *LegalV1Service) PatentSearch(ctx context.Context, body LegalV1PatentSea
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/patent-search"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Perform comprehensive legal research with multiple query variations. Uses
@@ -130,7 +130,7 @@ func (r *LegalV1Service) Research(ctx context.Context, body LegalV1ResearchParam
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/research"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Find cases and documents similar to a given legal source. Useful for finding
@@ -139,7 +139,7 @@ func (r *LegalV1Service) Similar(ctx context.Context, body LegalV1SimilarParams,
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/similar"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Look up trademark status and details from the USPTO Trademark Status & Document
@@ -150,7 +150,7 @@ func (r *LegalV1Service) TrademarkSearch(ctx context.Context, body LegalV1Tradem
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/trademark-search"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Validates legal citations against authoritative case law sources (CourtListener
@@ -161,7 +161,7 @@ func (r *LegalV1Service) Verify(ctx context.Context, body LegalV1VerifyParams, o
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/verify"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Full docket record (lookup mode)

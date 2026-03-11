@@ -54,7 +54,7 @@ func (r *ComputeV1SecretService) New(ctx context.Context, body ComputeV1SecretNe
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/secrets"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve all secret groups for a compute environment. Secret groups organize
@@ -64,7 +64,7 @@ func (r *ComputeV1SecretService) List(ctx context.Context, query ComputeV1Secret
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/secrets"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Delete an entire secret group or a specific key within a secret group. When
@@ -74,11 +74,11 @@ func (r *ComputeV1SecretService) DeleteGroup(ctx context.Context, group string, 
 	opts = slices.Concat(r.Options, opts)
 	if group == "" {
 		err = errors.New("missing required group parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("compute/v1/secrets/%s", group)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve the keys (names) of secrets in a specified group within a compute
@@ -88,11 +88,11 @@ func (r *ComputeV1SecretService) GetGroup(ctx context.Context, group string, que
 	opts = slices.Concat(r.Options, opts)
 	if group == "" {
 		err = errors.New("missing required group parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("compute/v1/secrets/%s", group)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Set or update secrets in a compute secret group. Secrets are encrypted with
@@ -102,11 +102,11 @@ func (r *ComputeV1SecretService) UpdateGroup(ctx context.Context, group string, 
 	opts = slices.Concat(r.Options, opts)
 	if group == "" {
 		err = errors.New("missing required group parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("compute/v1/secrets/%s", group)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type ComputeV1SecretNewResponse struct {

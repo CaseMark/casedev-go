@@ -40,7 +40,7 @@ func (r *SystemService) ListServices(ctx context.Context, opts ...option.Request
 	opts = slices.Concat(r.Options, opts)
 	path := "services"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type SystemListServicesResponse struct {

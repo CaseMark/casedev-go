@@ -46,15 +46,15 @@ func (r *VaultObjectService) Get(ctx context.Context, id string, objectID string
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Update a document's filename, path, or metadata. Use this to rename files or
@@ -64,15 +64,15 @@ func (r *VaultObjectService) Update(ctx context.Context, id string, objectID str
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve all objects stored in a specific vault, including document metadata,
@@ -81,11 +81,11 @@ func (r *VaultObjectService) List(ctx context.Context, id string, opts ...option
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Permanently deletes a document from the vault including all associated vectors,
@@ -94,15 +94,15 @@ func (r *VaultObjectService) Delete(ctx context.Context, id string, objectID str
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Generate presigned URLs for direct S3 operations (GET, PUT, DELETE, HEAD) on
@@ -113,15 +113,15 @@ func (r *VaultObjectService) NewPresignedURL(ctx context.Context, id string, obj
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s/presigned-url", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Downloads a file from a vault. Returns the actual file content as a binary
@@ -133,15 +133,15 @@ func (r *VaultObjectService) Download(ctx context.Context, id string, objectID s
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/octet-stream")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s/download", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves word-level OCR bounding box data for a processed PDF document. Each
@@ -152,15 +152,15 @@ func (r *VaultObjectService) GetOcrWords(ctx context.Context, id string, objectI
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s/ocr-words", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // Get the status of a CaseMark summary workflow job.
@@ -168,19 +168,19 @@ func (r *VaultObjectService) GetSummarizeJob(ctx context.Context, id string, obj
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	if jobID == "" {
 		err = errors.New("missing required jobId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s/summarize/%s", id, objectID, jobID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieves the full extracted text content from a processed vault object. Returns
@@ -190,15 +190,15 @@ func (r *VaultObjectService) GetText(ctx context.Context, id string, objectID st
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s/text", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type VaultObjectGetResponse struct {

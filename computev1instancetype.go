@@ -41,7 +41,7 @@ func (r *ComputeV1InstanceTypeService) List(ctx context.Context, opts ...option.
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/instance-types"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type ComputeV1InstanceTypeListResponse struct {

@@ -48,7 +48,7 @@ func (r *VoiceStreamingService) GetURL(ctx context.Context, opts ...option.Reque
 	opts = slices.Concat(r.Options, opts)
 	path := "voice/streaming/url"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type VoiceStreamingGetURLResponse struct {

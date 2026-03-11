@@ -56,7 +56,7 @@ func (r *ComputeV1Service) GetPricing(ctx context.Context, opts ...option.Reques
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "compute/v1/pricing"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
-	return
+	return err
 }
 
 // Returns detailed compute usage statistics and billing information for your
@@ -66,7 +66,7 @@ func (r *ComputeV1Service) GetUsage(ctx context.Context, query ComputeV1GetUsage
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/usage"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 type ComputeV1GetUsageResponse struct {

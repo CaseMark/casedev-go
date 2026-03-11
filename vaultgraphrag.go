@@ -44,11 +44,11 @@ func (r *VaultGraphragService) GetStats(ctx context.Context, id string, opts ...
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/graphrag/stats", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Initialize a GraphRAG workspace for a vault to enable advanced knowledge graph
@@ -59,11 +59,11 @@ func (r *VaultGraphragService) Init(ctx context.Context, id string, opts ...opti
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/graphrag/init", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 // Manually trigger GraphRAG indexing for a vault object. The object must already
@@ -73,15 +73,15 @@ func (r *VaultGraphragService) ProcessObject(ctx context.Context, id string, obj
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return
+		return nil, err
 	}
 	if objectID == "" {
 		err = errors.New("missing required objectId parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/graphrag/%s", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type VaultGraphragGetStatsResponse struct {
