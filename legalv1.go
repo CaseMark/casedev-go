@@ -1584,14 +1584,16 @@ func (r LegalV1DraftParams) MarshalJSON() (data []byte, err error) {
 // Target document length
 type LegalV1DraftParamsLength struct {
 	// Target value (e.g., 2000 words or 5 pages)
-	Target param.Field[float64]                      `json:"target"`
-	Unit   param.Field[LegalV1DraftParamsLengthUnit] `json:"unit"`
+	Target param.Field[float64] `json:"target"`
+	// Whether the target length is measured in words or pages
+	Unit param.Field[LegalV1DraftParamsLengthUnit] `json:"unit"`
 }
 
 func (r LegalV1DraftParamsLength) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// Whether the target length is measured in words or pages
 type LegalV1DraftParamsLengthUnit string
 
 const (
@@ -1679,8 +1681,10 @@ type LegalV1ListCourtsParams struct {
 	InUseOnly param.Field[bool] `json:"inUseOnly"`
 	// Optional CourtListener jurisdiction code filter (e.g. FD, F, S)
 	Jurisdiction param.Field[string] `json:"jurisdiction"`
-	Limit        param.Field[int64]  `json:"limit"`
-	Offset       param.Field[int64]  `json:"offset"`
+	// Maximum number of courts to return
+	Limit param.Field[int64] `json:"limit"`
+	// Number of courts to skip before returning results
+	Offset param.Field[int64] `json:"offset"`
 	// Search by court name or slug (e.g. "Northern District", "nysd", "ca9")
 	Query param.Field[string] `json:"query"`
 }

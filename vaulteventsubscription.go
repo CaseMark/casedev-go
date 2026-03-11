@@ -117,10 +117,15 @@ func (r *VaultEventSubscriptionService) Test(ctx context.Context, id string, sub
 }
 
 type VaultEventSubscriptionNewParams struct {
-	CallbackURL   param.Field[string]   `json:"callbackUrl" api:"required" format:"uri"`
-	EventTypes    param.Field[[]string] `json:"eventTypes"`
-	ObjectIDs     param.Field[[]string] `json:"objectIds"`
-	SigningSecret param.Field[string]   `json:"signingSecret"`
+	// Webhook endpoint URL that will receive vault event deliveries
+	CallbackURL param.Field[string] `json:"callbackUrl" api:"required" format:"uri"`
+	// Vault event types to deliver. Omit to receive the default supported set.
+	EventTypes param.Field[[]string] `json:"eventTypes"`
+	// Vault object IDs to limit notifications to. Omit to receive events for all
+	// objects in the vault.
+	ObjectIDs param.Field[[]string] `json:"objectIds"`
+	// Optional secret used to sign outbound webhook deliveries
+	SigningSecret param.Field[string] `json:"signingSecret"`
 }
 
 func (r VaultEventSubscriptionNewParams) MarshalJSON() (data []byte, err error) {
@@ -128,12 +133,19 @@ func (r VaultEventSubscriptionNewParams) MarshalJSON() (data []byte, err error) 
 }
 
 type VaultEventSubscriptionUpdateParams struct {
-	CallbackURL        param.Field[string]   `json:"callbackUrl" format:"uri"`
-	ClearSigningSecret param.Field[bool]     `json:"clearSigningSecret"`
-	EventTypes         param.Field[[]string] `json:"eventTypes"`
-	IsActive           param.Field[bool]     `json:"isActive"`
-	ObjectIDs          param.Field[[]string] `json:"objectIds"`
-	SigningSecret      param.Field[string]   `json:"signingSecret"`
+	// Updated webhook endpoint URL for deliveries
+	CallbackURL param.Field[string] `json:"callbackUrl" format:"uri"`
+	// Whether to remove the existing signing secret
+	ClearSigningSecret param.Field[bool] `json:"clearSigningSecret"`
+	// Updated event types to deliver for this subscription
+	EventTypes param.Field[[]string] `json:"eventTypes"`
+	// Whether the subscription should continue delivering events
+	IsActive param.Field[bool] `json:"isActive"`
+	// Updated vault object IDs to limit notifications to. Pass an empty array to
+	// remove the filter.
+	ObjectIDs param.Field[[]string] `json:"objectIds"`
+	// Replacement secret used to sign webhook deliveries
+	SigningSecret param.Field[string] `json:"signingSecret"`
 }
 
 func (r VaultEventSubscriptionUpdateParams) MarshalJSON() (data []byte, err error) {

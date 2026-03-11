@@ -17,6 +17,8 @@ type VoiceService struct {
 	// Audio transcription and text-to-speech
 	Streaming *VoiceStreamingService
 	// Audio transcription and text-to-speech
+	BoostList *VoiceBoostListService
+	// Audio transcription and text-to-speech
 	Transcription *VoiceTranscriptionService
 	// Audio transcription and text-to-speech
 	V1 *VoiceV1Service
@@ -29,6 +31,7 @@ func NewVoiceService(opts ...option.RequestOption) (r *VoiceService) {
 	r = &VoiceService{}
 	r.Options = opts
 	r.Streaming = NewVoiceStreamingService(opts...)
+	r.BoostList = NewVoiceBoostListService(opts...)
 	r.Transcription = NewVoiceTranscriptionService(opts...)
 	r.V1 = NewVoiceV1Service(opts...)
 	return

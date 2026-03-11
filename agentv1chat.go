@@ -259,6 +259,7 @@ func (r AgentV1ChatNewParams) MarshalJSON() (data []byte, err error) {
 }
 
 type AgentV1ChatReplyToQuestionParams struct {
+	// Answer selections for each prompt element in the pending question
 	Answers param.Field[[][]string] `json:"answers" api:"required"`
 }
 

@@ -345,19 +345,26 @@ func (r AgentV1AgentNewParamsSandbox) MarshalJSON() (data []byte, err error) {
 }
 
 type AgentV1AgentUpdateParams struct {
+	// Updated agent description. Pass null to clear if supported by the client.
 	Description param.Field[string] `json:"description"`
 	// Denylist of tools the agent cannot use. Mutually exclusive with enabledTools —
 	// set one or the other, not both. Pass null to clear.
 	DisabledTools param.Field[[]string] `json:"disabledTools"`
 	// Allowlist of tools the agent can use. Mutually exclusive with disabledTools —
 	// set one or the other, not both. Pass null to clear.
-	EnabledTools param.Field[[]string]    `json:"enabledTools"`
-	Instructions param.Field[string]      `json:"instructions"`
-	Model        param.Field[string]      `json:"model"`
-	Name         param.Field[string]      `json:"name"`
-	Sandbox      param.Field[interface{}] `json:"sandbox"`
-	VaultGroups  param.Field[[]string]    `json:"vaultGroups"`
-	VaultIDs     param.Field[[]string]    `json:"vaultIds"`
+	EnabledTools param.Field[[]string] `json:"enabledTools"`
+	// Updated system instructions that guide agent behavior
+	Instructions param.Field[string] `json:"instructions"`
+	// Model identifier the agent should use for future runs
+	Model param.Field[string] `json:"model"`
+	// Updated agent display name
+	Name param.Field[string] `json:"name"`
+	// Sandbox configuration override for future agent runs. Pass null to clear.
+	Sandbox param.Field[interface{}] `json:"sandbox"`
+	// Vault group IDs the agent can access. Pass null to clear.
+	VaultGroups param.Field[[]string] `json:"vaultGroups"`
+	// Vault IDs the agent can access directly. Pass null to clear.
+	VaultIDs param.Field[[]string] `json:"vaultIds"`
 }
 
 func (r AgentV1AgentUpdateParams) MarshalJSON() (data []byte, err error) {
