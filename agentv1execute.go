@@ -13,6 +13,9 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Create, manage, and execute AI agents with tool access, sandbox environments,
+// and async run workflows
+//
 // AgentV1ExecuteService contains methods and other services that help with
 // interacting with the casedev API.
 //
@@ -35,6 +38,13 @@ func NewAgentV1ExecuteService(opts ...option.RequestOption) (r *AgentV1ExecuteSe
 // Creates an ephemeral agent and immediately executes a run. Returns the run ID
 // for polling status and results. This is the fastest way to run an agent without
 // managing agent lifecycle.
+//
+// **Ephemeral agent lifecycle:** The agent created by this endpoint is
+// automatically soft-deleted and its scoped API key revoked when the run completes
+// (whether it succeeds, fails, or times out). Ephemeral agents do not appear in
+// GET /agent/v1/agents listings. The returned agentId is valid only for the
+// duration of the run — do not store it for reuse. For persistent, reusable
+// agents, use POST /agent/v1/agents instead.
 func (r *AgentV1ExecuteService) New(ctx context.Context, body AgentV1ExecuteNewParams, opts ...option.RequestOption) (res *AgentV1ExecuteNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/execute"
@@ -43,7 +53,8 @@ func (r *AgentV1ExecuteService) New(ctx context.Context, body AgentV1ExecuteNewP
 }
 
 type AgentV1ExecuteNewResponse struct {
-	// Ephemeral agent ID (auto-created)
+	// Ephemeral agent ID (auto-created). This agent is soft-deleted when the run
+	// completes and should not be stored for reuse.
 	AgentID string `json:"agentId"`
 	Message string `json:"message"`
 	// Run ID — poll /agent/v1/run/:id/status
@@ -88,9 +99,11 @@ func (r AgentV1ExecuteNewResponseStatus) IsKnown() bool {
 type AgentV1ExecuteNewParams struct {
 	// Task prompt for the agent
 	Prompt param.Field[string] `json:"prompt" api:"required"`
-	// Denylist of tools the agent cannot use
+	// Denylist of tools the agent cannot use. Mutually exclusive with enabledTools —
+	// set one or the other, not both.
 	DisabledTools param.Field[[]string] `json:"disabledTools"`
-	// Allowlist of tools the agent can use
+	// Allowlist of tools the agent can use. Mutually exclusive with disabledTools —
+	// set one or the other, not both.
 	EnabledTools param.Field[[]string] `json:"enabledTools"`
 	// Additional context or constraints for this run
 	Guidance param.Field[string] `json:"guidance"`

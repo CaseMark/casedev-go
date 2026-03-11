@@ -19,6 +19,9 @@ import (
 	"github.com/CaseMark/casedev-go/packages/ssestream"
 )
 
+// Create, manage, and execute AI agents with tool access, sandbox environments,
+// and async run workflows
+//
 // AgentV1ChatService contains methods and other services that help with
 // interacting with the casedev API.
 //
@@ -90,9 +93,19 @@ func (r *AgentV1ChatService) ReplyToQuestion(ctx context.Context, id string, req
 	return err
 }
 
-// Streams a single assistant turn as normalized state events with stable turn,
-// message, and part ids. Emits session.usage before turn.completed when token data
-// is available.
+// Streams a single assistant turn as normalized SSE events with stable turn,
+// message, and part IDs. Emits events: `turn.started`, `turn.status`,
+// `message.created`, `message.part.updated`, `message.completed`, `session.usage`,
+// `turn.completed`.
+//
+// **When to use this endpoint:** Recommended for building custom chat UIs that
+// need real-time streaming progress. This is the primary streaming endpoint for
+// new integrations.
+//
+// **Alternatives:**
+//
+//   - `POST /chat/:id/message` — synchronous, returns complete response as JSON
+//     (best for server-to-server)
 func (r *AgentV1ChatService) RespondStreaming(ctx context.Context, id string, body AgentV1ChatRespondParams, opts ...option.RequestOption) (stream *ssestream.Stream[string]) {
 	var (
 		raw *http.Response
@@ -109,7 +122,17 @@ func (r *AgentV1ChatService) RespondStreaming(ctx context.Context, id string, bo
 	return ssestream.NewStream[string](ssestream.NewDecoder(raw), err)
 }
 
-// Proxies a message to the OpenCode session bound to this chat.
+// Sends a message and returns the complete response as a single JSON body. Blocks
+// until the agent turn completes.
+//
+// **When to use this endpoint:** Best for server-to-server integrations,
+// background processing, or any context where you want the full response in one
+// call without managing an SSE stream.
+//
+// **Alternatives:**
+//
+//   - `POST /chat/:id/respond` — streaming SSE with normalized events (recommended
+//     for custom chat UIs)
 func (r *AgentV1ChatService) SendMessage(ctx context.Context, id string, body AgentV1ChatSendMessageParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -137,24 +160,6 @@ func (r *AgentV1ChatService) StreamStreaming(ctx context.Context, id string, que
 	}
 	path := fmt.Sprintf("agent/v1/chat/%s/stream", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &raw, opts...)
-	return ssestream.NewStream[string](ssestream.NewDecoder(raw), err)
-}
-
-// Streams a single assistant turn as AI SDK UIMessageChunk SSE events for direct
-// client rendering.
-func (r *AgentV1ChatService) UiStreamStreaming(ctx context.Context, id string, body AgentV1ChatUiStreamParams, opts ...option.RequestOption) (stream *ssestream.Stream[string]) {
-	var (
-		raw *http.Response
-		err error
-	)
-	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "text/event-stream")}, opts...)
-	if id == "" {
-		err = errors.New("missing required id parameter")
-		return ssestream.NewStream[string](nil, err)
-	}
-	path := fmt.Sprintf("agent/v1/chat/%s/ui-stream", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &raw, opts...)
 	return ssestream.NewStream[string](ssestream.NewDecoder(raw), err)
 }
 
@@ -262,21 +267,75 @@ func (r AgentV1ChatReplyToQuestionParams) MarshalJSON() (data []byte, err error)
 }
 
 type AgentV1ChatRespondParams struct {
-	// OpenCode message payload. Passed through 1:1.
-	Body interface{} `json:"body" api:"required"`
+	// Message content parts. Currently only "text" type is supported. Additional types
+	// (e.g. file, image) may be added in future versions.
+	Parts param.Field[[]AgentV1ChatRespondParamsPart] `json:"parts"`
 }
 
 func (r AgentV1ChatRespondParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	return apijson.MarshalRoot(r)
+}
+
+type AgentV1ChatRespondParamsPart struct {
+	// The message text content
+	Text param.Field[string] `json:"text" api:"required"`
+	// Part type. Currently only "text" is supported.
+	Type param.Field[AgentV1ChatRespondParamsPartsType] `json:"type" api:"required"`
+}
+
+func (r AgentV1ChatRespondParamsPart) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Part type. Currently only "text" is supported.
+type AgentV1ChatRespondParamsPartsType string
+
+const (
+	AgentV1ChatRespondParamsPartsTypeText AgentV1ChatRespondParamsPartsType = "text"
+)
+
+func (r AgentV1ChatRespondParamsPartsType) IsKnown() bool {
+	switch r {
+	case AgentV1ChatRespondParamsPartsTypeText:
+		return true
+	}
+	return false
 }
 
 type AgentV1ChatSendMessageParams struct {
-	// OpenCode message payload. Passed through 1:1.
-	Body interface{} `json:"body" api:"required"`
+	// Message content parts. Currently only "text" type is supported. Additional types
+	// (e.g. file, image) may be added in future versions.
+	Parts param.Field[[]AgentV1ChatSendMessageParamsPart] `json:"parts"`
 }
 
 func (r AgentV1ChatSendMessageParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
+	return apijson.MarshalRoot(r)
+}
+
+type AgentV1ChatSendMessageParamsPart struct {
+	// The message text content
+	Text param.Field[string] `json:"text" api:"required"`
+	// Part type. Currently only "text" is supported.
+	Type param.Field[AgentV1ChatSendMessageParamsPartsType] `json:"type" api:"required"`
+}
+
+func (r AgentV1ChatSendMessageParamsPart) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Part type. Currently only "text" is supported.
+type AgentV1ChatSendMessageParamsPartsType string
+
+const (
+	AgentV1ChatSendMessageParamsPartsTypeText AgentV1ChatSendMessageParamsPartsType = "text"
+)
+
+func (r AgentV1ChatSendMessageParamsPartsType) IsKnown() bool {
+	switch r {
+	case AgentV1ChatSendMessageParamsPartsTypeText:
+		return true
+	}
+	return false
 }
 
 type AgentV1ChatStreamParams struct {
@@ -291,13 +350,4 @@ func (r AgentV1ChatStreamParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
-}
-
-type AgentV1ChatUiStreamParams struct {
-	// OpenCode message payload. Passed through 1:1.
-	Body interface{} `json:"body" api:"required"`
-}
-
-func (r AgentV1ChatUiStreamParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
 }

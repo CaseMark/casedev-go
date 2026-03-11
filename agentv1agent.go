@@ -7,15 +7,20 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"slices"
 	"time"
 
 	"github.com/CaseMark/casedev-go/internal/apijson"
+	"github.com/CaseMark/casedev-go/internal/apiquery"
 	"github.com/CaseMark/casedev-go/internal/param"
 	"github.com/CaseMark/casedev-go/internal/requestconfig"
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Create, manage, and execute AI agents with tool access, sandbox environments,
+// and async run workflows
+//
 // AgentV1AgentService contains methods and other services that help with
 // interacting with the casedev API.
 //
@@ -69,10 +74,10 @@ func (r *AgentV1AgentService) Update(ctx context.Context, id string, body AgentV
 }
 
 // Lists all active agents for the authenticated organization.
-func (r *AgentV1AgentService) List(ctx context.Context, opts ...option.RequestOption) (res *AgentV1AgentListResponse, err error) {
+func (r *AgentV1AgentService) List(ctx context.Context, query AgentV1AgentListParams, opts ...option.RequestOption) (res *AgentV1AgentListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/agents"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return res, err
 }
 
@@ -218,14 +223,19 @@ func (r agentV1AgentUpdateResponseJSON) RawJSON() string {
 }
 
 type AgentV1AgentListResponse struct {
-	Agents []AgentV1AgentListResponseAgent `json:"agents"`
-	JSON   agentV1AgentListResponseJSON    `json:"-"`
+	Agents  []AgentV1AgentListResponseAgent `json:"agents"`
+	HasMore bool                            `json:"hasMore"`
+	// Pass as cursor to fetch the next page
+	NextCursor string                       `json:"nextCursor" api:"nullable"`
+	JSON       agentV1AgentListResponseJSON `json:"-"`
 }
 
 // agentV1AgentListResponseJSON contains the JSON metadata for the struct
 // [AgentV1AgentListResponse]
 type agentV1AgentListResponseJSON struct {
 	Agents      apijson.Field
+	HasMore     apijson.Field
+	NextCursor  apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -301,9 +311,11 @@ type AgentV1AgentNewParams struct {
 	Name param.Field[string] `json:"name" api:"required"`
 	// Optional description of the agent
 	Description param.Field[string] `json:"description"`
-	// Denylist of tools the agent cannot use
+	// Denylist of tools the agent cannot use. Mutually exclusive with enabledTools —
+	// set one or the other, not both.
 	DisabledTools param.Field[[]string] `json:"disabledTools"`
-	// Allowlist of tools the agent can use
+	// Allowlist of tools the agent can use. Mutually exclusive with disabledTools —
+	// set one or the other, not both.
 	EnabledTools param.Field[[]string] `json:"enabledTools"`
 	// LLM model identifier (e.g. anthropic/claude-sonnet-4.6). Defaults to
 	// anthropic/claude-sonnet-4.6
@@ -333,17 +345,37 @@ func (r AgentV1AgentNewParamsSandbox) MarshalJSON() (data []byte, err error) {
 }
 
 type AgentV1AgentUpdateParams struct {
-	Description   param.Field[string]      `json:"description"`
-	DisabledTools param.Field[[]string]    `json:"disabledTools"`
-	EnabledTools  param.Field[[]string]    `json:"enabledTools"`
-	Instructions  param.Field[string]      `json:"instructions"`
-	Model         param.Field[string]      `json:"model"`
-	Name          param.Field[string]      `json:"name"`
-	Sandbox       param.Field[interface{}] `json:"sandbox"`
-	VaultGroups   param.Field[[]string]    `json:"vaultGroups"`
-	VaultIDs      param.Field[[]string]    `json:"vaultIds"`
+	Description param.Field[string] `json:"description"`
+	// Denylist of tools the agent cannot use. Mutually exclusive with enabledTools —
+	// set one or the other, not both. Pass null to clear.
+	DisabledTools param.Field[[]string] `json:"disabledTools"`
+	// Allowlist of tools the agent can use. Mutually exclusive with disabledTools —
+	// set one or the other, not both. Pass null to clear.
+	EnabledTools param.Field[[]string]    `json:"enabledTools"`
+	Instructions param.Field[string]      `json:"instructions"`
+	Model        param.Field[string]      `json:"model"`
+	Name         param.Field[string]      `json:"name"`
+	Sandbox      param.Field[interface{}] `json:"sandbox"`
+	VaultGroups  param.Field[[]string]    `json:"vaultGroups"`
+	VaultIDs     param.Field[[]string]    `json:"vaultIds"`
 }
 
 func (r AgentV1AgentUpdateParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type AgentV1AgentListParams struct {
+	// Pagination cursor (agent ID from previous page). Returns agents created before
+	// this agent.
+	Cursor param.Field[string] `query:"cursor"`
+	// Maximum number of agents to return (default 50, max 250)
+	Limit param.Field[int64] `query:"limit"`
+}
+
+// URLQuery serializes [AgentV1AgentListParams]'s query parameters as `url.Values`.
+func (r AgentV1AgentListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }

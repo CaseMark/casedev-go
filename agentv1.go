@@ -14,10 +14,18 @@ import (
 // the [NewAgentV1Service] method instead.
 type AgentV1Service struct {
 	Options []option.RequestOption
-	Agents  *AgentV1AgentService
-	Run     *AgentV1RunService
+	// Create, manage, and execute AI agents with tool access, sandbox environments,
+	// and async run workflows
+	Agents *AgentV1AgentService
+	// Create, manage, and execute AI agents with tool access, sandbox environments,
+	// and async run workflows
+	Run *AgentV1RunService
+	// Create, manage, and execute AI agents with tool access, sandbox environments,
+	// and async run workflows
 	Execute *AgentV1ExecuteService
-	Chat    *AgentV1ChatService
+	// Create, manage, and execute AI agents with tool access, sandbox environments,
+	// and async run workflows
+	Chat *AgentV1ChatService
 }
 
 // NewAgentV1Service generates a new service that applies the given options to each

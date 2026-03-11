@@ -106,7 +106,7 @@ func TestAgentV1AgentUpdateWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestAgentV1AgentList(t *testing.T) {
+func TestAgentV1AgentListWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -118,7 +118,10 @@ func TestAgentV1AgentList(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Agent.V1.Agents.List(context.TODO())
+	_, err := client.Agent.V1.Agents.List(context.TODO(), githubcomcasemarkcasedevgo.AgentV1AgentListParams{
+		Cursor: githubcomcasemarkcasedevgo.F("cursor"),
+		Limit:  githubcomcasemarkcasedevgo.F(int64(1)),
+	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

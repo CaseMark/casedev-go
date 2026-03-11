@@ -113,7 +113,7 @@ func TestAgentV1ChatReplyToQuestion(t *testing.T) {
 	}
 }
 
-func TestAgentV1ChatSendMessage(t *testing.T) {
+func TestAgentV1ChatSendMessageWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -129,7 +129,10 @@ func TestAgentV1ChatSendMessage(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.AgentV1ChatSendMessageParams{
-			Body: map[string]interface{}{},
+			Parts: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.AgentV1ChatSendMessageParamsPart{{
+				Text: githubcomcasemarkcasedevgo.F("text"),
+				Type: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.AgentV1ChatSendMessageParamsPartsTypeText),
+			}}),
 		},
 	)
 	if err != nil {
