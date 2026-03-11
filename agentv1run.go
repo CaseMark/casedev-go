@@ -19,6 +19,9 @@ import (
 	"github.com/CaseMark/casedev-go/packages/ssestream"
 )
 
+// Create, manage, and execute AI agents with tool access, sandbox environments,
+// and async run workflows
+//
 // AgentV1RunService contains methods and other services that help with interacting
 // with the casedev API.
 //
@@ -44,6 +47,15 @@ func (r *AgentV1RunService) New(ctx context.Context, body AgentV1RunNewParams, o
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/run"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
+// Lists agent runs for the authenticated organization. Supports filtering by
+// agent, status, and cursor-based pagination.
+func (r *AgentV1RunService) List(ctx context.Context, query AgentV1RunListParams, opts ...option.RequestOption) (res *AgentV1RunListResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "agent/v1/run"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return res, err
 }
 
@@ -167,6 +179,86 @@ const (
 func (r AgentV1RunNewResponseStatus) IsKnown() bool {
 	switch r {
 	case AgentV1RunNewResponseStatusQueued:
+		return true
+	}
+	return false
+}
+
+type AgentV1RunListResponse struct {
+	HasMore bool `json:"hasMore"`
+	// Pass as cursor to fetch the next page
+	NextCursor string                      `json:"nextCursor" api:"nullable"`
+	Runs       []AgentV1RunListResponseRun `json:"runs"`
+	JSON       agentV1RunListResponseJSON  `json:"-"`
+}
+
+// agentV1RunListResponseJSON contains the JSON metadata for the struct
+// [AgentV1RunListResponse]
+type agentV1RunListResponseJSON struct {
+	HasMore     apijson.Field
+	NextCursor  apijson.Field
+	Runs        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *AgentV1RunListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r agentV1RunListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type AgentV1RunListResponseRun struct {
+	ID          string    `json:"id"`
+	AgentID     string    `json:"agentId"`
+	CompletedAt time.Time `json:"completedAt" api:"nullable" format:"date-time"`
+	CreatedAt   time.Time `json:"createdAt" format:"date-time"`
+	Model       string    `json:"model" api:"nullable"`
+	// Truncated to first 200 characters
+	Prompt    string                           `json:"prompt"`
+	StartedAt time.Time                        `json:"startedAt" api:"nullable" format:"date-time"`
+	Status    AgentV1RunListResponseRunsStatus `json:"status"`
+	JSON      agentV1RunListResponseRunJSON    `json:"-"`
+}
+
+// agentV1RunListResponseRunJSON contains the JSON metadata for the struct
+// [AgentV1RunListResponseRun]
+type agentV1RunListResponseRunJSON struct {
+	ID          apijson.Field
+	AgentID     apijson.Field
+	CompletedAt apijson.Field
+	CreatedAt   apijson.Field
+	Model       apijson.Field
+	Prompt      apijson.Field
+	StartedAt   apijson.Field
+	Status      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *AgentV1RunListResponseRun) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r agentV1RunListResponseRunJSON) RawJSON() string {
+	return r.raw
+}
+
+type AgentV1RunListResponseRunsStatus string
+
+const (
+	AgentV1RunListResponseRunsStatusQueued    AgentV1RunListResponseRunsStatus = "queued"
+	AgentV1RunListResponseRunsStatusRunning   AgentV1RunListResponseRunsStatus = "running"
+	AgentV1RunListResponseRunsStatusCompleted AgentV1RunListResponseRunsStatus = "completed"
+	AgentV1RunListResponseRunsStatusFailed    AgentV1RunListResponseRunsStatus = "failed"
+	AgentV1RunListResponseRunsStatusCancelled AgentV1RunListResponseRunsStatus = "cancelled"
+)
+
+func (r AgentV1RunListResponseRunsStatus) IsKnown() bool {
+	switch r {
+	case AgentV1RunListResponseRunsStatusQueued, AgentV1RunListResponseRunsStatusRunning, AgentV1RunListResponseRunsStatusCompleted, AgentV1RunListResponseRunsStatusFailed, AgentV1RunListResponseRunsStatusCancelled:
 		return true
 	}
 	return false
@@ -656,6 +748,10 @@ type AgentV1RunNewParams struct {
 	AgentID param.Field[string] `json:"agentId" api:"required"`
 	// Task prompt for the agent
 	Prompt param.Field[string] `json:"prompt" api:"required"`
+	// HTTPS callback URL to receive a notification when the run completes. Registered
+	// atomically with the run — eliminates the race condition of calling /watch after
+	// /exec. Additional watchers can still be added via POST /run/:id/watch.
+	CallbackURL param.Field[string] `json:"callbackUrl" format:"uri"`
 	// Additional guidance for this run
 	Guidance param.Field[string] `json:"guidance"`
 	// Override the agent default model for this run
@@ -667,6 +763,45 @@ type AgentV1RunNewParams struct {
 
 func (r AgentV1RunNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type AgentV1RunListParams struct {
+	// Filter by agent ID
+	AgentID param.Field[string] `query:"agentId"`
+	// Pagination cursor (run ID from previous page). Returns runs created before this
+	// run.
+	Cursor param.Field[string] `query:"cursor"`
+	// Maximum number of runs to return (default 50, max 250)
+	Limit param.Field[int64] `query:"limit"`
+	// Filter by run status
+	Status param.Field[AgentV1RunListParamsStatus] `query:"status"`
+}
+
+// URLQuery serializes [AgentV1RunListParams]'s query parameters as `url.Values`.
+func (r AgentV1RunListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Filter by run status
+type AgentV1RunListParamsStatus string
+
+const (
+	AgentV1RunListParamsStatusQueued    AgentV1RunListParamsStatus = "queued"
+	AgentV1RunListParamsStatusRunning   AgentV1RunListParamsStatus = "running"
+	AgentV1RunListParamsStatusCompleted AgentV1RunListParamsStatus = "completed"
+	AgentV1RunListParamsStatusFailed    AgentV1RunListParamsStatus = "failed"
+	AgentV1RunListParamsStatusCancelled AgentV1RunListParamsStatus = "cancelled"
+)
+
+func (r AgentV1RunListParamsStatus) IsKnown() bool {
+	switch r {
+	case AgentV1RunListParamsStatusQueued, AgentV1RunListParamsStatusRunning, AgentV1RunListParamsStatusCompleted, AgentV1RunListParamsStatusFailed, AgentV1RunListParamsStatusCancelled:
+		return true
+	}
+	return false
 }
 
 type AgentV1RunEventsParams struct {
