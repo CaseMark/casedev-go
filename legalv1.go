@@ -36,7 +36,7 @@ func NewLegalV1Service(opts ...option.RequestOption) (r *LegalV1Service) {
 }
 
 // Search federal court dockets or retrieve a specific docket with optional filing
-// entries via CourtListener RECAP data.
+// entries. Use legal.listCourts() to resolve court slugs for filtering.
 func (r *LegalV1Service) Docket(ctx context.Context, body LegalV1DocketParams, opts ...option.RequestOption) (res *LegalV1DocketResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/docket"
@@ -94,8 +94,8 @@ func (r *LegalV1Service) GetFullText(ctx context.Context, body LegalV1GetFullTex
 	return res, err
 }
 
-// Returns CourtListener court IDs and names for docket filtering. Use these IDs in
-// legal.docket() as the court parameter.
+// Returns court IDs (slugs) and names for use with the docket search endpoint. Use
+// the returned court ID as the `court` parameter in legal.docket().
 func (r *LegalV1Service) ListCourts(ctx context.Context, body LegalV1ListCourtsParams, opts ...option.RequestOption) (res *LegalV1ListCourtsResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "legal/v1/courts"
@@ -270,6 +270,10 @@ type LegalV1DocketResponse struct {
 	Found   int64                        `json:"found"`
 	// Whether entries were requested (lookup mode only)
 	IncludeEntries bool `json:"includeEntries"`
+	// Whether this was a live PACER fetch (lookup mode only)
+	Live bool `json:"live"`
+	// PACER fee information (present when live: true)
+	PacerFees LegalV1DocketResponsePacerFees `json:"pacerFees" api:"nullable"`
 	// Pagination info for entry list (lookup mode with includeEntries)
 	Pagination LegalV1DocketResponsePagination `json:"pagination" api:"nullable"`
 	// Echo of search query (search mode only)
@@ -289,6 +293,8 @@ type legalV1DocketResponseJSON struct {
 	Entries         apijson.Field
 	Found           apijson.Field
 	IncludeEntries  apijson.Field
+	Live            apijson.Field
+	PacerFees       apijson.Field
 	Pagination      apijson.Field
 	Query           apijson.Field
 	Type            apijson.Field
@@ -362,6 +368,51 @@ func (r *LegalV1DocketResponseEntriesDocument) UnmarshalJSON(data []byte) (err e
 
 func (r legalV1DocketResponseEntriesDocumentJSON) RawJSON() string {
 	return r.raw
+}
+
+// PACER fee information (present when live: true)
+type LegalV1DocketResponsePacerFees struct {
+	Currency LegalV1DocketResponsePacerFeesCurrency `json:"currency"`
+	// Time taken for PACER fetch in milliseconds
+	FetchDurationMs int64 `json:"fetchDurationMs"`
+	// Maximum PACER charge per docket in USD
+	MaxPacerCost float64 `json:"maxPacerCost"`
+	// CaseMark service fee in USD
+	ServiceFee float64                            `json:"serviceFee"`
+	JSON       legalV1DocketResponsePacerFeesJSON `json:"-"`
+}
+
+// legalV1DocketResponsePacerFeesJSON contains the JSON metadata for the struct
+// [LegalV1DocketResponsePacerFees]
+type legalV1DocketResponsePacerFeesJSON struct {
+	Currency        apijson.Field
+	FetchDurationMs apijson.Field
+	MaxPacerCost    apijson.Field
+	ServiceFee      apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *LegalV1DocketResponsePacerFees) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1DocketResponsePacerFeesJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1DocketResponsePacerFeesCurrency string
+
+const (
+	LegalV1DocketResponsePacerFeesCurrencyUsd LegalV1DocketResponsePacerFeesCurrency = "USD"
+)
+
+func (r LegalV1DocketResponsePacerFeesCurrency) IsKnown() bool {
+	switch r {
+	case LegalV1DocketResponsePacerFeesCurrencyUsd:
+		return true
+	}
+	return false
 }
 
 // Pagination info for entry list (lookup mode with includeEntries)
@@ -849,7 +900,7 @@ func (r legalV1ListCourtsResponseJSON) RawJSON() string {
 }
 
 type LegalV1ListCourtsResponseCourt struct {
-	// CourtListener court slug
+	// Court slug (use as the court parameter in legal.docket())
 	ID           string                             `json:"id"`
 	FullName     string                             `json:"fullName" api:"nullable"`
 	Jurisdiction string                             `json:"jurisdiction" api:"nullable"`
@@ -1509,21 +1560,27 @@ func (r legalV1VerifyResponseSummaryJSON) RawJSON() string {
 type LegalV1DocketParams struct {
 	// Search dockets or look up a docket by ID
 	Type param.Field[LegalV1DocketParamsType] `json:"type" api:"required"`
-	// Optional CourtListener court slug (e.g. "nysd", "ca9", "cafc")
+	// Required when live: true. Acknowledges that PACER fees (up to $3.00 per docket)
+	// plus a $0.05 service fee will be charged to your account.
+	AcknowledgePacerFees param.Field[bool] `json:"acknowledgePacerFees"`
+	// Optional court slug for filtering (e.g. "nysd", "ca9", "cafc"). Use
+	// legal.listCourts() to find slugs.
 	Court param.Field[string] `json:"court"`
 	// Optional lower bound for filing date (YYYY-MM-DD)
 	DateFiledAfter param.Field[time.Time] `json:"dateFiledAfter" format:"date"`
 	// Optional upper bound for filing date (YYYY-MM-DD)
 	DateFiledBefore param.Field[time.Time] `json:"dateFiledBefore" format:"date"`
-	// CourtListener docket ID (required for lookup)
+	// Docket ID (required for lookup)
 	DocketID param.Field[string] `json:"docketId"`
-	// Include docket entries/filings in lookup responses
+	// Include docket entries/filings in lookup responses. Coming soon — currently
+	// returns 501. The parameter is accepted for forward compatibility.
 	IncludeEntries param.Field[bool] `json:"includeEntries"`
 	// Page size for search results or entry list (default 25 for search, 50 for
 	// lookup)
 	Limit param.Field[int64] `json:"limit"`
-	// Reserved for future PACER live fetch support. Setting true currently
-	// returns 400.
+	// Trigger a live PACER fetch for dockets not yet in the RECAP archive. Requires
+	// acknowledgePacerFees: true. PACER charges up to $3.00 per docket sheet plus a
+	// $0.05 service fee. Only valid with type: "lookup".
 	Live param.Field[bool] `json:"live"`
 	// Offset for search results or entry list
 	Offset param.Field[int64] `json:"offset"`
@@ -1677,9 +1734,10 @@ func (r LegalV1GetFullTextParams) MarshalJSON() (data []byte, err error) {
 }
 
 type LegalV1ListCourtsParams struct {
-	// Only return courts currently in use by CourtListener
+	// Only return courts with available docket data
 	InUseOnly param.Field[bool] `json:"inUseOnly"`
-	// Optional CourtListener jurisdiction code filter (e.g. FD, F, S)
+	// Optional jurisdiction code filter (e.g. FD for Federal District, F for all
+	// Federal, S for State)
 	Jurisdiction param.Field[string] `json:"jurisdiction"`
 	// Maximum number of courts to return
 	Limit param.Field[int64] `json:"limit"`
