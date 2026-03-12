@@ -27,16 +27,17 @@ func TestLegalV1DocketWithOptionalParams(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Legal.V1.Docket(context.TODO(), githubcomcasemarkcasedevgo.LegalV1DocketParams{
-		Type:            githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LegalV1DocketParamsTypeSearch),
-		Court:           githubcomcasemarkcasedevgo.F("court"),
-		DateFiledAfter:  githubcomcasemarkcasedevgo.F(time.Now()),
-		DateFiledBefore: githubcomcasemarkcasedevgo.F(time.Now()),
-		DocketID:        githubcomcasemarkcasedevgo.F("docketId"),
-		IncludeEntries:  githubcomcasemarkcasedevgo.F(true),
-		Limit:           githubcomcasemarkcasedevgo.F(int64(1)),
-		Live:            githubcomcasemarkcasedevgo.F(true),
-		Offset:          githubcomcasemarkcasedevgo.F(int64(0)),
-		Query:           githubcomcasemarkcasedevgo.F("xx"),
+		Type:                 githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LegalV1DocketParamsTypeSearch),
+		AcknowledgePacerFees: githubcomcasemarkcasedevgo.F(true),
+		Court:                githubcomcasemarkcasedevgo.F("court"),
+		DateFiledAfter:       githubcomcasemarkcasedevgo.F(time.Now()),
+		DateFiledBefore:      githubcomcasemarkcasedevgo.F(time.Now()),
+		DocketID:             githubcomcasemarkcasedevgo.F("docketId"),
+		IncludeEntries:       githubcomcasemarkcasedevgo.F(true),
+		Limit:                githubcomcasemarkcasedevgo.F(int64(1)),
+		Live:                 githubcomcasemarkcasedevgo.F(true),
+		Offset:               githubcomcasemarkcasedevgo.F(int64(0)),
+		Query:                githubcomcasemarkcasedevgo.F("xx"),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
