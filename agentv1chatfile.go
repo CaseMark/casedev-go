@@ -51,18 +51,18 @@ func (r *AgentV1ChatFileService) List(ctx context.Context, id string, opts ...op
 
 // Downloads a file from the sandbox workspace by path. Only available while the
 // sandbox is running.
-func (r *AgentV1ChatFileService) Download(ctx context.Context, id string, path string, opts ...option.RequestOption) (res *http.Response, err error) {
+func (r *AgentV1ChatFileService) Download(ctx context.Context, id string, filePath string, opts ...option.RequestOption) (res *http.Response, err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/octet-stream")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return nil, err
 	}
-	if path == "" {
-		err = errors.New("missing required path parameter")
+	if filePath == "" {
+		err = errors.New("missing required filePath parameter")
 		return nil, err
 	}
-	requestPath := fmt.Sprintf("agent/v1/chat/%s/files/%s", id, path)
+	requestPath := fmt.Sprintf("agent/v1/chat/%s/files/%s", id, filePath)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, requestPath, nil, &res, opts...)
 	return res, err
 }

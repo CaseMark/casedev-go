@@ -53,7 +53,7 @@ func TestAgentV1ChatFileDownload(t *testing.T) {
 	resp, err := client.Agent.V1.Chat.Files.Download(
 		context.TODO(),
 		"id",
-		"path",
+		"filePath",
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
