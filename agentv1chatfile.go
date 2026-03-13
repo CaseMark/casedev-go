@@ -62,8 +62,8 @@ func (r *AgentV1ChatFileService) Download(ctx context.Context, id string, path s
 		err = errors.New("missing required path parameter")
 		return nil, err
 	}
-	path := fmt.Sprintf("agent/v1/chat/%s/files/%s", id, path)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	requestPath := fmt.Sprintf("agent/v1/chat/%s/files/%s", id, path)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, requestPath, nil, &res, opts...)
 	return res, err
 }
 
