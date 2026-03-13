@@ -30,6 +30,9 @@ import (
 // the [NewAgentV1ChatService] method instead.
 type AgentV1ChatService struct {
 	Options []option.RequestOption
+	// Create, manage, and execute AI agents with tool access, sandbox environments,
+	// and async run workflows
+	Files *AgentV1ChatFileService
 }
 
 // NewAgentV1ChatService generates a new service that applies the given options to
@@ -38,6 +41,7 @@ type AgentV1ChatService struct {
 func NewAgentV1ChatService(opts ...option.RequestOption) (r *AgentV1ChatService) {
 	r = &AgentV1ChatService{}
 	r.Options = opts
+	r.Files = NewAgentV1ChatFileService(opts...)
 	return
 }
 

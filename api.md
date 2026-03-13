@@ -71,6 +71,17 @@ Methods:
 - <code title="post /agent/v1/chat/{id}/message">client.Agent.V1.Chat.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatService.SendMessage">SendMessage</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatSendMessageParams">AgentV1ChatSendMessageParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
 - <code title="get /agent/v1/chat/{id}/stream">client.Agent.V1.Chat.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatService.Stream">Stream</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatStreamParams">AgentV1ChatStreamParams</a>) (\*<a href="https://pkg.go.dev/builtin#string">string</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
+#### Files
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatFileListResponse">AgentV1ChatFileListResponse</a>
+
+Methods:
+
+- <code title="get /agent/v1/chat/{id}/files">client.Agent.V1.Chat.Files.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatFileService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatFileListResponse">AgentV1ChatFileListResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /agent/v1/chat/{id}/files/{path}">client.Agent.V1.Chat.Files.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatFileService.Download">Download</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, path <a href="https://pkg.go.dev/builtin#string">string</a>) (\*http.Response, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
 # System
 
 Response Types:
