@@ -387,17 +387,62 @@ Methods:
 
 - <code title="post /privilege/v1/detect">client.Privilege.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#PrivilegeV1Service.Detect">Detect</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#PrivilegeV1DetectParams">PrivilegeV1DetectParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#PrivilegeV1DetectResponse">PrivilegeV1DetectResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
+# Mail
+
+## V1
+
+### Inboxes
+
+Methods:
+
+- <code title="post /mail/v1/inboxes">client.Mail.V1.Inboxes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxNewParams">MailV1InboxNewParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /mail/v1/inboxes/{inboxId}">client.Mail.V1.Inboxes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, inboxID <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /mail/v1/inboxes">client.Mail.V1.Inboxes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="delete /mail/v1/inboxes/{inboxId}">client.Mail.V1.Inboxes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, inboxID <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /mail/v1/inboxes/{inboxId}/messages/{messageId}/attachments/{attachmentId}">client.Mail.V1.Inboxes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxService.GetAttachment">GetAttachment</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, inboxID <a href="https://pkg.go.dev/builtin#string">string</a>, messageID <a href="https://pkg.go.dev/builtin#string">string</a>, attachmentID <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /mail/v1/inboxes/{inboxId}/messages/{messageId}">client.Mail.V1.Inboxes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxService.GetMessage">GetMessage</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, inboxID <a href="https://pkg.go.dev/builtin#string">string</a>, messageID <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /mail/v1/inboxes/{inboxId}/messages">client.Mail.V1.Inboxes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxService.ListMessages">ListMessages</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, inboxID <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /mail/v1/inboxes/{inboxId}/messages/{messageId}/reply">client.Mail.V1.Inboxes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxService.Reply">Reply</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, inboxID <a href="https://pkg.go.dev/builtin#string">string</a>, messageID <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /mail/v1/inboxes/{inboxId}/messages/send">client.Mail.V1.Inboxes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MailV1InboxService.Send">Send</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, inboxID <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
+# Operator
+
+## V1
+
+Methods:
+
+- <code title="post /operator/v1/create">client.Operator.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#OperatorV1Service.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#OperatorV1NewParams">OperatorV1NewParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /operator/v1/chat/completions">client.Operator.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#OperatorV1Service.NewChatCompletion">NewChatCompletion</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /operator/v1/responses">client.Operator.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#OperatorV1Service.NewResponse">NewResponse</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /operator/v1/status">client.Operator.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#OperatorV1Service.GetStatus">GetStatus</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
 # Skills
 
 Response Types:
 
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillNewResponse">SkillNewResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillUpdateResponse">SkillUpdateResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillDeleteResponse">SkillDeleteResponse</a>
 - <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillReadResponse">SkillReadResponse</a>
 - <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillResolveResponse">SkillResolveResponse</a>
 
 Methods:
 
+- <code title="post /skills">client.Skills.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillNewParams">SkillNewParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillNewResponse">SkillNewResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="put /skills/{slug}">client.Skills.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillService.Update">Update</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, slug <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillUpdateParams">SkillUpdateParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillUpdateResponse">SkillUpdateResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="delete /skills/{slug}">client.Skills.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, slug <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillDeleteResponse">SkillDeleteResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="get /skills/{slug}">client.Skills.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillService.Read">Read</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, slug <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillReadResponse">SkillReadResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="get /skills/resolve">client.Skills.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillService.Resolve">Resolve</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillResolveParams">SkillResolveParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillResolveResponse">SkillResolveResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
+## Custom
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillCustomListResponse">SkillCustomListResponse</a>
+
+Methods:
+
+- <code title="get /skills/custom">client.Skills.Custom.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillCustomService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillCustomListParams">SkillCustomListParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillCustomListResponse">SkillCustomListResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 # Search
 

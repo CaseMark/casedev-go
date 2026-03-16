@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"time"
 
 	"github.com/CaseMark/casedev-go/internal/apijson"
 	"github.com/CaseMark/casedev-go/internal/apiquery"
@@ -27,6 +28,8 @@ import (
 // the [NewSkillService] method instead.
 type SkillService struct {
 	Options []option.RequestOption
+	// Search and read legal AI skills for agents
+	Custom *SkillCustomService
 }
 
 // NewSkillService generates a new service that applies the given options to each
@@ -35,7 +38,43 @@ type SkillService struct {
 func NewSkillService(opts ...option.RequestOption) (r *SkillService) {
 	r = &SkillService{}
 	r.Options = opts
+	r.Custom = NewSkillCustomService(opts...)
 	return
+}
+
+// Create an org-scoped custom skill. The skill will be searchable via
+// /skills/resolve alongside curated skills.
+func (r *SkillService) New(ctx context.Context, body SkillNewParams, opts ...option.RequestOption) (res *SkillNewResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "skills"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
+// Update an org-scoped custom skill by slug. Only provided fields are updated.
+// Version is auto-incremented.
+func (r *SkillService) Update(ctx context.Context, slug string, body SkillUpdateParams, opts ...option.RequestOption) (res *SkillUpdateResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if slug == "" {
+		err = errors.New("missing required slug parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("skills/%s", slug)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, &res, opts...)
+	return res, err
+}
+
+// Soft-delete an org-scoped custom skill by slug. The skill will no longer appear
+// in search results.
+func (r *SkillService) Delete(ctx context.Context, slug string, opts ...option.RequestOption) (res *SkillDeleteResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if slug == "" {
+		err = errors.New("missing required slug parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("skills/%s", slug)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
+	return res, err
 }
 
 // Read the full content of a legal skill by its slug. Returns markdown content,
@@ -60,6 +99,99 @@ func (r *SkillService) Resolve(ctx context.Context, query SkillResolveParams, op
 	return res, err
 }
 
+type SkillNewResponse struct {
+	Content   string               `json:"content"`
+	CreatedAt time.Time            `json:"created_at" format:"date-time"`
+	Metadata  interface{}          `json:"metadata"`
+	Name      string               `json:"name"`
+	Slug      string               `json:"slug"`
+	Summary   string               `json:"summary" api:"nullable"`
+	Tags      []string             `json:"tags"`
+	Version   int64                `json:"version"`
+	JSON      skillNewResponseJSON `json:"-"`
+}
+
+// skillNewResponseJSON contains the JSON metadata for the struct
+// [SkillNewResponse]
+type skillNewResponseJSON struct {
+	Content     apijson.Field
+	CreatedAt   apijson.Field
+	Metadata    apijson.Field
+	Name        apijson.Field
+	Slug        apijson.Field
+	Summary     apijson.Field
+	Tags        apijson.Field
+	Version     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SkillNewResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillNewResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type SkillUpdateResponse struct {
+	Content   string                  `json:"content"`
+	Metadata  interface{}             `json:"metadata"`
+	Name      string                  `json:"name"`
+	Slug      string                  `json:"slug"`
+	Summary   string                  `json:"summary" api:"nullable"`
+	Tags      []string                `json:"tags"`
+	UpdatedAt time.Time               `json:"updated_at" format:"date-time"`
+	Version   int64                   `json:"version"`
+	JSON      skillUpdateResponseJSON `json:"-"`
+}
+
+// skillUpdateResponseJSON contains the JSON metadata for the struct
+// [SkillUpdateResponse]
+type skillUpdateResponseJSON struct {
+	Content     apijson.Field
+	Metadata    apijson.Field
+	Name        apijson.Field
+	Slug        apijson.Field
+	Summary     apijson.Field
+	Tags        apijson.Field
+	UpdatedAt   apijson.Field
+	Version     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SkillUpdateResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillUpdateResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type SkillDeleteResponse struct {
+	Deleted bool                    `json:"deleted"`
+	Slug    string                  `json:"slug"`
+	JSON    skillDeleteResponseJSON `json:"-"`
+}
+
+// skillDeleteResponseJSON contains the JSON metadata for the struct
+// [SkillDeleteResponse]
+type skillDeleteResponseJSON struct {
+	Deleted     apijson.Field
+	Slug        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SkillDeleteResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillDeleteResponseJSON) RawJSON() string {
+	return r.raw
+}
+
 type SkillReadResponse struct {
 	// Skill author
 	AuthorName string `json:"author_name"`
@@ -67,10 +199,14 @@ type SkillReadResponse struct {
 	Content string `json:"content"`
 	// Skill license
 	License string `json:"license"`
+	// Custom metadata (custom skills only)
+	Metadata interface{} `json:"metadata"`
 	// Skill name
 	Name string `json:"name"`
 	// Unique skill identifier
 	Slug string `json:"slug"`
+	// Skill source (authenticated requests only)
+	Source SkillReadResponseSource `json:"source"`
 	// Brief skill description
 	Summary string `json:"summary"`
 	// Skill tags
@@ -86,8 +222,10 @@ type skillReadResponseJSON struct {
 	AuthorName  apijson.Field
 	Content     apijson.Field
 	License     apijson.Field
+	Metadata    apijson.Field
 	Name        apijson.Field
 	Slug        apijson.Field
+	Source      apijson.Field
 	Summary     apijson.Field
 	Tags        apijson.Field
 	Version     apijson.Field
@@ -101,6 +239,22 @@ func (r *SkillReadResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r skillReadResponseJSON) RawJSON() string {
 	return r.raw
+}
+
+// Skill source (authenticated requests only)
+type SkillReadResponseSource string
+
+const (
+	SkillReadResponseSourceCurated SkillReadResponseSource = "curated"
+	SkillReadResponseSourceCustom  SkillReadResponseSource = "custom"
+)
+
+func (r SkillReadResponseSource) IsKnown() bool {
+	switch r {
+	case SkillReadResponseSourceCurated, SkillReadResponseSourceCustom:
+		return true
+	}
+	return false
 }
 
 type SkillResolveResponse struct {
@@ -134,6 +288,8 @@ type SkillResolveResponseResult struct {
 	Score float64 `json:"score"`
 	// Unique skill identifier
 	Slug string `json:"slug"`
+	// Whether the skill is curated or org-custom
+	Source SkillResolveResponseResultsSource `json:"source"`
 	// Brief skill description
 	Summary string `json:"summary"`
 	// Skill tags
@@ -147,6 +303,7 @@ type skillResolveResponseResultJSON struct {
 	Name        apijson.Field
 	Score       apijson.Field
 	Slug        apijson.Field
+	Source      apijson.Field
 	Summary     apijson.Field
 	Tags        apijson.Field
 	raw         string
@@ -159,6 +316,55 @@ func (r *SkillResolveResponseResult) UnmarshalJSON(data []byte) (err error) {
 
 func (r skillResolveResponseResultJSON) RawJSON() string {
 	return r.raw
+}
+
+// Whether the skill is curated or org-custom
+type SkillResolveResponseResultsSource string
+
+const (
+	SkillResolveResponseResultsSourceCurated SkillResolveResponseResultsSource = "curated"
+	SkillResolveResponseResultsSourceCustom  SkillResolveResponseResultsSource = "custom"
+)
+
+func (r SkillResolveResponseResultsSource) IsKnown() bool {
+	switch r {
+	case SkillResolveResponseResultsSourceCurated, SkillResolveResponseResultsSourceCustom:
+		return true
+	}
+	return false
+}
+
+type SkillNewParams struct {
+	// Full skill content in markdown
+	Content param.Field[string] `json:"content" api:"required"`
+	// Skill name
+	Name param.Field[string] `json:"name" api:"required"`
+	// Arbitrary metadata (author, license, etc.)
+	Metadata param.Field[interface{}] `json:"metadata"`
+	// URL-safe slug. Auto-generated from name if omitted.
+	Slug param.Field[string] `json:"slug"`
+	// Brief description (1-2 sentences)
+	Summary param.Field[string] `json:"summary"`
+	// Tags for categorization and search boosting
+	Tags param.Field[[]string] `json:"tags"`
+}
+
+func (r SkillNewParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type SkillUpdateParams struct {
+	Content  param.Field[string]      `json:"content"`
+	Metadata param.Field[interface{}] `json:"metadata"`
+	Name     param.Field[string]      `json:"name"`
+	// New slug (renames the skill)
+	Slug    param.Field[string]   `json:"slug"`
+	Summary param.Field[string]   `json:"summary"`
+	Tags    param.Field[[]string] `json:"tags"`
+}
+
+func (r SkillUpdateParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type SkillResolveParams struct {
