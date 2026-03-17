@@ -133,6 +133,16 @@ func (r *LegalV1Service) Research(ctx context.Context, body LegalV1ResearchParam
 	return res, err
 }
 
+// Search SEC EDGAR full-text filings via efts.sec.gov or fetch a filer's
+// structured filing history via data.sec.gov. Returns direct SEC archive URLs with
+// filing metadata and match snippets when available.
+func (r *LegalV1Service) SecFiling(ctx context.Context, body LegalV1SecFilingParams, opts ...option.RequestOption) (res *LegalV1SecFilingResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "legal/v1/sec-filing"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
 // Find cases and documents similar to a given legal source. Useful for finding
 // citing cases, related precedents, or similar statutes.
 func (r *LegalV1Service) Similar(ctx context.Context, body LegalV1SimilarParams, opts ...option.RequestOption) (res *LegalV1SimilarResponse, err error) {
@@ -1167,6 +1177,159 @@ func (r legalV1ResearchResponseCandidateJSON) RawJSON() string {
 	return r.raw
 }
 
+type LegalV1SecFilingResponse struct {
+	Cik        string                           `json:"cik" api:"nullable"`
+	DateAfter  time.Time                        `json:"dateAfter" api:"nullable" format:"date"`
+	DateBefore time.Time                        `json:"dateBefore" api:"nullable" format:"date"`
+	Entity     string                           `json:"entity" api:"nullable"`
+	Filings    []LegalV1SecFilingResponseFiling `json:"filings"`
+	FormTypes  []string                         `json:"formTypes"`
+	Limit      int64                            `json:"limit"`
+	Offset     int64                            `json:"offset"`
+	Query      string                           `json:"query" api:"nullable"`
+	Ticker     string                           `json:"ticker" api:"nullable"`
+	Total      int64                            `json:"total"`
+	Type       LegalV1SecFilingResponseType     `json:"type"`
+	JSON       legalV1SecFilingResponseJSON     `json:"-"`
+}
+
+// legalV1SecFilingResponseJSON contains the JSON metadata for the struct
+// [LegalV1SecFilingResponse]
+type legalV1SecFilingResponseJSON struct {
+	Cik         apijson.Field
+	DateAfter   apijson.Field
+	DateBefore  apijson.Field
+	Entity      apijson.Field
+	Filings     apijson.Field
+	FormTypes   apijson.Field
+	Limit       apijson.Field
+	Offset      apijson.Field
+	Query       apijson.Field
+	Ticker      apijson.Field
+	Total       apijson.Field
+	Type        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LegalV1SecFilingResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1SecFilingResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1SecFilingResponseFiling struct {
+	AccessionNumber string                                    `json:"accessionNumber"`
+	Description     string                                    `json:"description" api:"nullable"`
+	Documents       []LegalV1SecFilingResponseFilingsDocument `json:"documents"`
+	Entity          LegalV1SecFilingResponseFilingsEntity     `json:"entity"`
+	FiledAt         time.Time                                 `json:"filedAt" format:"date"`
+	FormType        string                                    `json:"formType"`
+	PeriodOfReport  time.Time                                 `json:"periodOfReport" api:"nullable" format:"date"`
+	SecURL          string                                    `json:"secUrl"`
+	Snippet         string                                    `json:"snippet" api:"nullable"`
+	JSON            legalV1SecFilingResponseFilingJSON        `json:"-"`
+}
+
+// legalV1SecFilingResponseFilingJSON contains the JSON metadata for the struct
+// [LegalV1SecFilingResponseFiling]
+type legalV1SecFilingResponseFilingJSON struct {
+	AccessionNumber apijson.Field
+	Description     apijson.Field
+	Documents       apijson.Field
+	Entity          apijson.Field
+	FiledAt         apijson.Field
+	FormType        apijson.Field
+	PeriodOfReport  apijson.Field
+	SecURL          apijson.Field
+	Snippet         apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *LegalV1SecFilingResponseFiling) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1SecFilingResponseFilingJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1SecFilingResponseFilingsDocument struct {
+	Description string                                      `json:"description"`
+	Type        string                                      `json:"type"`
+	URL         string                                      `json:"url"`
+	JSON        legalV1SecFilingResponseFilingsDocumentJSON `json:"-"`
+}
+
+// legalV1SecFilingResponseFilingsDocumentJSON contains the JSON metadata for the
+// struct [LegalV1SecFilingResponseFilingsDocument]
+type legalV1SecFilingResponseFilingsDocumentJSON struct {
+	Description apijson.Field
+	Type        apijson.Field
+	URL         apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *LegalV1SecFilingResponseFilingsDocument) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1SecFilingResponseFilingsDocumentJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1SecFilingResponseFilingsEntity struct {
+	Cik                  string                                    `json:"cik"`
+	EntityType           string                                    `json:"entityType" api:"nullable"`
+	Name                 string                                    `json:"name" api:"nullable"`
+	Sic                  string                                    `json:"sic" api:"nullable"`
+	SicDescription       string                                    `json:"sicDescription" api:"nullable"`
+	StateOfIncorporation string                                    `json:"stateOfIncorporation" api:"nullable"`
+	Ticker               string                                    `json:"ticker" api:"nullable"`
+	JSON                 legalV1SecFilingResponseFilingsEntityJSON `json:"-"`
+}
+
+// legalV1SecFilingResponseFilingsEntityJSON contains the JSON metadata for the
+// struct [LegalV1SecFilingResponseFilingsEntity]
+type legalV1SecFilingResponseFilingsEntityJSON struct {
+	Cik                  apijson.Field
+	EntityType           apijson.Field
+	Name                 apijson.Field
+	Sic                  apijson.Field
+	SicDescription       apijson.Field
+	StateOfIncorporation apijson.Field
+	Ticker               apijson.Field
+	raw                  string
+	ExtraFields          map[string]apijson.Field
+}
+
+func (r *LegalV1SecFilingResponseFilingsEntity) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1SecFilingResponseFilingsEntityJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1SecFilingResponseType string
+
+const (
+	LegalV1SecFilingResponseTypeSearch LegalV1SecFilingResponseType = "search"
+	LegalV1SecFilingResponseTypeEntity LegalV1SecFilingResponseType = "entity"
+)
+
+func (r LegalV1SecFilingResponseType) IsKnown() bool {
+	switch r {
+	case LegalV1SecFilingResponseTypeSearch, LegalV1SecFilingResponseTypeEntity:
+		return true
+	}
+	return false
+}
+
 type LegalV1SimilarResponse struct {
 	// Number of similar sources found
 	Found int64 `json:"found"`
@@ -1859,6 +2022,49 @@ type LegalV1ResearchParams struct {
 
 func (r LegalV1ResearchParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type LegalV1SecFilingParams struct {
+	// Run a full-text search or fetch a single entity filing history
+	Type param.Field[LegalV1SecFilingParamsType] `json:"type" api:"required"`
+	// CIK for entity lookups. Accepts padded or unpadded digits.
+	Cik param.Field[string] `json:"cik"`
+	// Optional lower filing date bound (YYYY-MM-DD)
+	DateAfter param.Field[time.Time] `json:"dateAfter" format:"date"`
+	// Optional upper filing date bound (YYYY-MM-DD)
+	DateBefore param.Field[time.Time] `json:"dateBefore" format:"date"`
+	// Optional entity filter passed through to EDGAR full-text search
+	Entity param.Field[string] `json:"entity"`
+	// Optional SEC form type filter such as 10-K, 10-Q, 8-K, or 4
+	FormTypes param.Field[[]string] `json:"formTypes"`
+	// Maximum filings to return
+	Limit param.Field[int64] `json:"limit"`
+	// Result offset for pagination
+	Offset param.Field[int64] `json:"offset"`
+	// Full-text SEC search query (required for type: search)
+	Query param.Field[string] `json:"query"`
+	// Optional company ticker. Valid for both search and entity lookups.
+	Ticker param.Field[string] `json:"ticker"`
+}
+
+func (r LegalV1SecFilingParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Run a full-text search or fetch a single entity filing history
+type LegalV1SecFilingParamsType string
+
+const (
+	LegalV1SecFilingParamsTypeSearch LegalV1SecFilingParamsType = "search"
+	LegalV1SecFilingParamsTypeEntity LegalV1SecFilingParamsType = "entity"
+)
+
+func (r LegalV1SecFilingParamsType) IsKnown() bool {
+	switch r {
+	case LegalV1SecFilingParamsTypeSearch, LegalV1SecFilingParamsTypeEntity:
+		return true
+	}
+	return false
 }
 
 type LegalV1SimilarParams struct {
