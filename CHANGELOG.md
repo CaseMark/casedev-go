@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.18.1 (2026-03-17)
+
+Full Changelog: [v0.18.0...v0.18.1](https://github.com/CaseMark/casedev-go/compare/v0.18.0...v0.18.1)
+
+### Chores
+
+* **internal:** tweak CI branches ([ffa120b](https://github.com/CaseMark/casedev-go/commit/ffa120bebe21b4fb44f77fd351ed373f36661288))
+
 ## 0.18.0 (2026-03-16)
 
 Full Changelog: [v0.17.0...v0.18.0](https://github.com/CaseMark/casedev-go/compare/v0.17.0...v0.18.0)
