@@ -31,7 +31,6 @@ type Client struct {
 	Ocr       *OcrService
 	Privilege *PrivilegeService
 	Mail      *MailService
-	Operator  *OperatorService
 	// Search and read legal AI skills for agents
 	Skills    *SkillService
 	Search    *SearchService
@@ -76,7 +75,6 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Ocr = NewOcrService(opts...)
 	r.Privilege = NewPrivilegeService(opts...)
 	r.Mail = NewMailService(opts...)
-	r.Operator = NewOperatorService(opts...)
 	r.Skills = NewSkillService(opts...)
 	r.Search = NewSearchService(opts...)
 	r.Superdoc = NewSuperdocService(opts...)
