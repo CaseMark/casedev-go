@@ -120,6 +120,20 @@ func (r *MailV1InboxService) GetMessage(ctx context.Context, inboxID string, mes
 	return err
 }
 
+// Get the sender allowlist and send/reply/read access rules for an inbox owned by
+// the authenticated organization.
+func (r *MailV1InboxService) GetPolicy(ctx context.Context, inboxID string, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if inboxID == "" {
+		err = errors.New("missing required inboxId parameter")
+		return err
+	}
+	path := fmt.Sprintf("mail/v1/inboxes/%s/policy", inboxID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
+	return err
+}
+
 // List messages for an inbox owned by the authenticated organization.
 func (r *MailV1InboxService) ListMessages(ctx context.Context, inboxID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -163,11 +177,43 @@ func (r *MailV1InboxService) Send(ctx context.Context, inboxID string, opts ...o
 	return err
 }
 
+// Set the sender allowlist and send/reply/read access rules for an inbox owned by
+// the authenticated organization.
+func (r *MailV1InboxService) SetPolicy(ctx context.Context, inboxID string, body MailV1InboxSetPolicyParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if inboxID == "" {
+		err = errors.New("missing required inboxId parameter")
+		return err
+	}
+	path := fmt.Sprintf("mail/v1/inboxes/%s/policy", inboxID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, nil, opts...)
+	return err
+}
+
 type MailV1InboxNewParams struct {
 	Address     param.Field[string] `json:"address"`
 	DisplayName param.Field[string] `json:"displayName"`
 }
 
 func (r MailV1InboxNewParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type MailV1InboxSetPolicyParams struct {
+	// Exact emails, @domain rules, or \*
+	AllowedSenderPatterns  param.Field[[]string] `json:"allowedSenderPatterns"`
+	EnforceSenderAllowlist param.Field[bool]     `json:"enforceSenderAllowlist"`
+	// Rules like organization, operator, user:<id>, api_key, api_key:<id>,
+	// clerk_session, or \*
+	ReadAccessRules param.Field[[]string] `json:"readAccessRules"`
+	// Rules like organization, operator, user:<id>, api_key, api_key:<id>,
+	// clerk_session, or \*
+	ReplyAccessRules param.Field[[]string] `json:"replyAccessRules"`
+	// Rules like organization, user:<id>, api_key, api_key:<id>, clerk_session, or \*
+	SendAccessRules param.Field[[]string] `json:"sendAccessRules"`
+}
+
+func (r MailV1InboxSetPolicyParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
