@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.20.1 (2026-03-20)
+
+Full Changelog: [v0.20.0...v0.20.1](https://github.com/CaseMark/casedev-go/compare/v0.20.0...v0.20.1)
+
+### Refactors
+
+* **tests:** switch from prism to steady ([bb6b8f0](https://github.com/CaseMark/casedev-go/commit/bb6b8f0c914da0e3db4d2e94381464ae1d56590a))
+
 ## 0.20.0 (2026-03-18)
 
 Full Changelog: [v0.19.0...v0.20.0](https://github.com/CaseMark/casedev-go/compare/v0.19.0...v0.20.0)
