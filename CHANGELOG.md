@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.20.3 (2026-03-21)
+
+Full Changelog: [v0.20.2...v0.20.3](https://github.com/CaseMark/casedev-go/compare/v0.20.2...v0.20.3)
+
+### Chores
+
+* **tests:** bump steady to v0.19.5 ([845bb82](https://github.com/CaseMark/casedev-go/commit/845bb8292f6b92a677e18de2fd5bde9284d349a6))
+
 ## 0.20.2 (2026-03-21)
 
 Full Changelog: [v0.20.1...v0.20.2](https://github.com/CaseMark/casedev-go/compare/v0.20.1...v0.20.2)
