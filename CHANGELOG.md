@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.20.4 (2026-03-24)
+
+Full Changelog: [v0.20.3...v0.20.4](https://github.com/CaseMark/casedev-go/compare/v0.20.3...v0.20.4)
+
+### Chores
+
+* **internal:** update gitignore ([31c6a26](https://github.com/CaseMark/casedev-go/commit/31c6a26caa9c3002000fa82c4c0676b90661956a))
+
 ## 0.20.3 (2026-03-21)
 
 Full Changelog: [v0.20.2...v0.20.3](https://github.com/CaseMark/casedev-go/compare/v0.20.2...v0.20.3)
