@@ -82,6 +82,64 @@ Methods:
 - <code title="get /agent/v1/chat/{id}/files">client.Agent.V1.Chat.Files.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatFileService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatFileListResponse">AgentV1ChatFileListResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="get /agent/v1/chat/{id}/files/{filePath}">client.Agent.V1.Chat.Files.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV1ChatFileService.Download">Download</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, filePath <a href="https://pkg.go.dev/builtin#string">string</a>) (\*http.Response, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
+## V2
+
+### Run
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunNewResponse">AgentV2RunNewResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunExecResponse">AgentV2RunExecResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunGetDetailsResponse">AgentV2RunGetDetailsResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunGetStatusResponse">AgentV2RunGetStatusResponse</a>
+
+Methods:
+
+- <code title="post /agent/v2/run">client.Agent.V2.Run.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunNewParams">AgentV2RunNewParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunNewResponse">AgentV2RunNewResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /agent/v2/run/{id}/events">client.Agent.V2.Run.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunService.Events">Events</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunEventsParams">AgentV2RunEventsParams</a>) (\*<a href="https://pkg.go.dev/builtin#string">string</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /agent/v2/run/{id}/exec">client.Agent.V2.Run.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunService.Exec">Exec</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunExecResponse">AgentV2RunExecResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /agent/v2/run/{id}/details">client.Agent.V2.Run.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunService.GetDetails">GetDetails</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunGetDetailsResponse">AgentV2RunGetDetailsResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /agent/v2/run/{id}/status">client.Agent.V2.Run.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunService.GetStatus">GetStatus</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2RunGetStatusResponse">AgentV2RunGetStatusResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
+### Execute
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ExecuteNewResponse">AgentV2ExecuteNewResponse</a>
+
+Methods:
+
+- <code title="post /agent/v2/execute">client.Agent.V2.Execute.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ExecuteService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ExecuteNewParams">AgentV2ExecuteNewParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ExecuteNewResponse">AgentV2ExecuteNewResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
+### Chat
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatNewResponse">AgentV2ChatNewResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatDeleteResponse">AgentV2ChatDeleteResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatCancelResponse">AgentV2ChatCancelResponse</a>
+
+Methods:
+
+- <code title="post /agent/v2/chat">client.Agent.V2.Chat.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatNewParams">AgentV2ChatNewParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatNewResponse">AgentV2ChatNewResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="delete /agent/v2/chat/{id}">client.Agent.V2.Chat.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatDeleteResponse">AgentV2ChatDeleteResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /agent/v2/chat/{id}/cancel">client.Agent.V2.Chat.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatService.Cancel">Cancel</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatCancelResponse">AgentV2ChatCancelResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /agent/v2/chat/{id}/question/{requestID}/reply">client.Agent.V2.Chat.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatService.ReplyToQuestion">ReplyToQuestion</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, requestID <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatReplyToQuestionParams">AgentV2ChatReplyToQuestionParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /agent/v2/chat/{id}/respond">client.Agent.V2.Chat.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatService.Respond">Respond</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatRespondParams">AgentV2ChatRespondParams</a>) (\*<a href="https://pkg.go.dev/builtin#string">string</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /agent/v2/chat/{id}/message">client.Agent.V2.Chat.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatService.SendMessage">SendMessage</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatSendMessageParams">AgentV2ChatSendMessageParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /agent/v2/chat/{id}/stream">client.Agent.V2.Chat.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatService.Stream">Stream</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatStreamParams">AgentV2ChatStreamParams</a>) (\*<a href="https://pkg.go.dev/builtin#string">string</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
+#### Files
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatFileListResponse">AgentV2ChatFileListResponse</a>
+
+Methods:
+
+- <code title="get /agent/v2/chat/{id}/files">client.Agent.V2.Chat.Files.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatFileService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatFileListResponse">AgentV2ChatFileListResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /agent/v2/chat/{id}/files/{filePath}">client.Agent.V2.Chat.Files.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentV2ChatFileService.Download">Download</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, filePath <a href="https://pkg.go.dev/builtin#string">string</a>) (\*http.Response, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
 # System
 
 Response Types:
