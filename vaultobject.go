@@ -220,6 +220,8 @@ type VaultObjectGetResponse struct {
 	VaultID string `json:"vaultId" api:"required"`
 	// Number of text chunks created
 	ChunkCount int64 `json:"chunkCount"`
+	// Error details when ingestion fails
+	IngestionError string `json:"ingestionError" api:"nullable"`
 	// Additional metadata
 	Metadata interface{} `json:"metadata"`
 	// Number of pages (for documents)
@@ -247,6 +249,7 @@ type vaultObjectGetResponseJSON struct {
 	IngestionStatus apijson.Field
 	VaultID         apijson.Field
 	ChunkCount      apijson.Field
+	IngestionError  apijson.Field
 	Metadata        apijson.Field
 	PageCount       apijson.Field
 	Path            apijson.Field
