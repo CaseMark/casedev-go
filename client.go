@@ -25,6 +25,7 @@ type Client struct {
 	Database     *DatabaseService
 	Format       *FormatService
 	Legal        *LegalService
+	Matters      *MatterService
 	// Access 40+ language models through a unified API
 	Llm       *LlmService
 	Memory    *MemoryService
@@ -70,6 +71,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Database = NewDatabaseService(opts...)
 	r.Format = NewFormatService(opts...)
 	r.Legal = NewLegalService(opts...)
+	r.Matters = NewMatterService(opts...)
 	r.Llm = NewLlmService(opts...)
 	r.Memory = NewMemoryService(opts...)
 	r.Ocr = NewOcrService(opts...)
