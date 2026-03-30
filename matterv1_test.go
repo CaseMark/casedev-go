@@ -60,6 +60,7 @@ func TestMatterV1NewWithOptionalParams(t *testing.T) {
 				"foo": "bar",
 			}),
 		}),
+		VaultID: githubcomcasemarkcasedevgo.F("vault_id"),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
