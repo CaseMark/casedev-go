@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.21.0 (2026-03-30)
+
+Full Changelog: [v0.20.5...v0.21.0](https://github.com/CaseMark/casedev-go/compare/v0.20.5...v0.21.0)
+
+### Features
+
+* **api:** api update ([2e2d454](https://github.com/CaseMark/casedev-go/commit/2e2d4545fa825a914244796316716402c2b7117e))
+* **api:** api update ([3f1c424](https://github.com/CaseMark/casedev-go/commit/3f1c424be0b0dce3b660a8d53a0578954ba28e9c))
+* **api:** api update ([2634946](https://github.com/CaseMark/casedev-go/commit/2634946e812684da6dc92142bf5a53fa8c4ebc97))
+* **internal:** support comma format in multipart form encoding ([3f7f27f](https://github.com/CaseMark/casedev-go/commit/3f7f27fa1e7034b3ad1a59982faec2503510f247))
+
+
+### Bug Fixes
+
+* prevent duplicate ? in query params ([c74ed3f](https://github.com/CaseMark/casedev-go/commit/c74ed3f87fd3dd951316124fd94bd891fb0c5b82))
+
+
+### Chores
+
+* **ci:** skip lint on metadata-only changes ([a249334](https://github.com/CaseMark/casedev-go/commit/a249334937726d4fb689d46a74e5fc27e5e0800c))
+* **ci:** support opting out of skipping builds on metadata-only commits ([70e1c04](https://github.com/CaseMark/casedev-go/commit/70e1c04c0d3496813105610c777ad0ded6d2a850))
+* remove unnecessary error check for url parsing ([52e0ce1](https://github.com/CaseMark/casedev-go/commit/52e0ce1572e49a4eb354fbfa5c73015ac083c08e))
+* **tests:** bump steady to v0.19.7 ([bf8eb22](https://github.com/CaseMark/casedev-go/commit/bf8eb22ecfe432e4ab78b3cd34413f20348d27e6))
+
 ## 0.20.5 (2026-03-24)
 
 Full Changelog: [v0.20.4...v0.20.5](https://github.com/CaseMark/casedev-go/compare/v0.20.4...v0.20.5)
