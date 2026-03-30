@@ -62,7 +62,7 @@ func NewMatterV1Service(opts ...option.RequestOption) (r *MatterV1Service) {
 	return
 }
 
-// Create a new legal matter and provision its primary vault.
+// Create a new legal matter and optionally link an existing primary vault.
 func (r *MatterV1Service) New(ctx context.Context, body MatterV1NewParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -123,6 +123,7 @@ type MatterV1NewParams struct {
 	Status                param.Field[MatterV1NewParamsStatus] `json:"status"`
 	Subtype               param.Field[string]                  `json:"subtype"`
 	Vault                 param.Field[MatterV1NewParamsVault]  `json:"vault"`
+	VaultID               param.Field[string]                  `json:"vault_id"`
 }
 
 func (r MatterV1NewParams) MarshalJSON() (data []byte, err error) {
