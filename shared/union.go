@@ -4,6 +4,8 @@ package shared
 
 type UnionString string
 
+func (UnionString) ImplementsMatterV1LogListParamsScopeUnion()          {}
+func (UnionString) ImplementsMatterV1LogExportParamsScopeUnion()        {}
 func (UnionString) ImplementsLlmV1NewEmbeddingParamsInputUnion()        {}
 func (UnionString) ImplementsSuperdocV1AnnotateParamsFieldsValueUnion() {}
 func (UnionString) ImplementsTranslateV1DetectParamsQUnion()            {}

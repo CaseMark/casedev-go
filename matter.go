@@ -6,25 +6,24 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// AgentService contains methods and other services that help with interacting with
-// the casedev API.
+// MatterService contains methods and other services that help with interacting
+// with the casedev API.
 //
 // Note, unlike clients, this service does not read variables from the environment
 // automatically. You should not instantiate this service directly, and instead use
-// the [NewAgentService] method instead.
-type AgentService struct {
+// the [NewMatterService] method instead.
+type MatterService struct {
 	Options []option.RequestOption
-	V1      *AgentV1Service
-	V2      *AgentV2Service
+	// Matter-native legal workspaces and orchestration primitives
+	V1 *MatterV1Service
 }
 
-// NewAgentService generates a new service that applies the given options to each
+// NewMatterService generates a new service that applies the given options to each
 // request. These options are applied after the parent client's options (if there
 // is one), and before any request-specific options.
-func NewAgentService(opts ...option.RequestOption) (r *AgentService) {
-	r = &AgentService{}
+func NewMatterService(opts ...option.RequestOption) (r *MatterService) {
+	r = &MatterService{}
 	r.Options = opts
-	r.V1 = NewAgentV1Service(opts...)
-	r.V2 = NewAgentV2Service(opts...)
+	r.V1 = NewMatterV1Service(opts...)
 	return
 }
