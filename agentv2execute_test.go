@@ -27,6 +27,7 @@ func TestAgentV2ExecuteNewWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Agent.V2.Execute.New(context.TODO(), githubcomcasemarkcasedevgo.AgentV2ExecuteNewParams{
 		Prompt:        githubcomcasemarkcasedevgo.F("prompt"),
+		AgentRuntime:  githubcomcasemarkcasedevgo.F(true),
 		DisabledTools: githubcomcasemarkcasedevgo.F([]string{"string"}),
 		EnabledTools:  githubcomcasemarkcasedevgo.F([]string{"string"}),
 		Guidance:      githubcomcasemarkcasedevgo.F("guidance"),
