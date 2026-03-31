@@ -34,12 +34,12 @@ func NewPrivilegeV1Service(opts ...option.RequestOption) (r *PrivilegeV1Service)
 	return
 }
 
-// Analyzes text or vault documents for legal privilege. Detects attorney-client
-// privilege, work product doctrine, common interest privilege, and litigation hold
-// materials.
+// Analyzes text or vault documents for legal privilege review. Detects
+// attorney-client privilege, work product doctrine, and common interest privilege.
 //
-// Returns structured privilege flags with confidence scores and policy-friendly
-// rationale suitable for discovery workflows and privilege logs.
+// Returns structured review flags with confidence scores and policy-friendly
+// rationale suitable for discovery workflows and privilege logs. This endpoint is
+// an AI-assisted triage tool and does not replace attorney judgment.
 //
 // **Size Limit:** Maximum 200,000 characters (larger documents rejected).
 //
@@ -142,7 +142,7 @@ func (r PrivilegeV1DetectResponseRecommendation) IsKnown() bool {
 
 type PrivilegeV1DetectParams struct {
 	// Privilege categories to check. Defaults to all: attorney_client, work_product,
-	// common_interest, litigation_hold
+	// common_interest
 	Categories param.Field[[]PrivilegeV1DetectParamsCategory] `json:"categories"`
 	// Text content to analyze (required if document_id not provided)
 	Content param.Field[string] `json:"content"`
@@ -168,12 +168,11 @@ const (
 	PrivilegeV1DetectParamsCategoryAttorneyClient PrivilegeV1DetectParamsCategory = "attorney_client"
 	PrivilegeV1DetectParamsCategoryWorkProduct    PrivilegeV1DetectParamsCategory = "work_product"
 	PrivilegeV1DetectParamsCategoryCommonInterest PrivilegeV1DetectParamsCategory = "common_interest"
-	PrivilegeV1DetectParamsCategoryLitigationHold PrivilegeV1DetectParamsCategory = "litigation_hold"
 )
 
 func (r PrivilegeV1DetectParamsCategory) IsKnown() bool {
 	switch r {
-	case PrivilegeV1DetectParamsCategoryAttorneyClient, PrivilegeV1DetectParamsCategoryWorkProduct, PrivilegeV1DetectParamsCategoryCommonInterest, PrivilegeV1DetectParamsCategoryLitigationHold:
+	case PrivilegeV1DetectParamsCategoryAttorneyClient, PrivilegeV1DetectParamsCategoryWorkProduct, PrivilegeV1DetectParamsCategoryCommonInterest:
 		return true
 	}
 	return false
