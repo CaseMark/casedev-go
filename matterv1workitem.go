@@ -99,7 +99,8 @@ func (r *MatterV1WorkItemService) List(ctx context.Context, id string, query Mat
 	return err
 }
 
-// Allow a human to act as the orchestrator for a work item.
+// Approve, revise, block, or reassign a work item. Used by humans or agents to
+// move work items through their lifecycle.
 func (r *MatterV1WorkItemService) Decide(ctx context.Context, id string, workItemID string, body MatterV1WorkItemDecideParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
