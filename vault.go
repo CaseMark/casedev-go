@@ -37,6 +37,8 @@ type VaultService struct {
 	Multipart *VaultMultipartService
 	// Secure document storage with semantic search and GraphRAG
 	Objects *VaultObjectService
+	// Secure document storage with semantic search and GraphRAG
+	Memory *VaultMemoryService
 }
 
 // NewVaultService generates a new service that applies the given options to each
@@ -50,6 +52,7 @@ func NewVaultService(opts ...option.RequestOption) (r *VaultService) {
 	r.Groups = NewVaultGroupService(opts...)
 	r.Multipart = NewVaultMultipartService(opts...)
 	r.Objects = NewVaultObjectService(opts...)
+	r.Memory = NewVaultMemoryService(opts...)
 	return
 }
 
