@@ -291,6 +291,9 @@ func (r AgentV2ChatReplyToQuestionParams) MarshalJSON() (data []byte, err error)
 }
 
 type AgentV2ChatRespondParams struct {
+	// Optional model override. When provided, the runtime bootstrap config is updated
+	// so subsequent turns use this model. Conversation history is preserved.
+	Model param.Field[string] `json:"model"`
 	// Message content parts. Currently only "text" type is supported. Additional types
 	// (e.g. file, image) may be added in future versions.
 	Parts param.Field[[]AgentV2ChatRespondParamsPart] `json:"parts"`
@@ -327,6 +330,9 @@ func (r AgentV2ChatRespondParamsPartsType) IsKnown() bool {
 }
 
 type AgentV2ChatSendMessageParams struct {
+	// Optional model override. When provided, the runtime bootstrap config is updated
+	// so subsequent turns use this model. Conversation history is preserved.
+	Model param.Field[string] `json:"model"`
 	// Message content parts. Currently only "text" type is supported. Additional types
 	// (e.g. file, image) may be added in future versions.
 	Parts param.Field[[]AgentV2ChatSendMessageParamsPart] `json:"parts"`

@@ -129,6 +129,7 @@ func TestAgentV2ChatSendMessageWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.AgentV2ChatSendMessageParams{
+			Model: githubcomcasemarkcasedevgo.F("model"),
 			Parts: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.AgentV2ChatSendMessageParamsPart{{
 				Text: githubcomcasemarkcasedevgo.F("text"),
 				Type: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.AgentV2ChatSendMessageParamsPartsTypeText),
