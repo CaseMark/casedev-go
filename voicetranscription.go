@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"slices"
 
 	"github.com/CaseMark/casedev-go/internal/apijson"
+	"github.com/CaseMark/casedev-go/internal/apiquery"
 	"github.com/CaseMark/casedev-go/internal/param"
 	"github.com/CaseMark/casedev-go/internal/requestconfig"
 	"github.com/CaseMark/casedev-go/option"
@@ -54,14 +56,14 @@ func (r *VoiceTranscriptionService) New(ctx context.Context, body VoiceTranscrip
 // Retrieve the status and result of an audio transcription job. For vault-based
 // jobs, returns status and result_object_id when complete. For legacy direct URL
 // jobs, returns the full transcription data.
-func (r *VoiceTranscriptionService) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *VoiceTranscriptionGetResponse, err error) {
+func (r *VoiceTranscriptionService) Get(ctx context.Context, id string, query VoiceTranscriptionGetParams, opts ...option.RequestOption) (res *VoiceTranscriptionGetResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return nil, err
 	}
 	path := fmt.Sprintf("voice/transcription/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return res, err
 }
 
@@ -144,7 +146,8 @@ type VoiceTranscriptionGetResponse struct {
 	ResultObjectID string `json:"result_object_id"`
 	// Source audio object ID (vault-based jobs only)
 	SourceObjectID string `json:"source_object_id"`
-	// Full transcription text (legacy direct URL jobs only)
+	// Full transcription text (only included when include_text=true for vault-based
+	// jobs, or for legacy direct URL jobs)
 	Text string `json:"text"`
 	// Vault ID (vault-based jobs only)
 	VaultID string `json:"vault_id"`
@@ -265,6 +268,36 @@ const (
 func (r VoiceTranscriptionNewParamsFormat) IsKnown() bool {
 	switch r {
 	case VoiceTranscriptionNewParamsFormatJson, VoiceTranscriptionNewParamsFormatText:
+		return true
+	}
+	return false
+}
+
+type VoiceTranscriptionGetParams struct {
+	// Include full transcript text in response for vault-based jobs (default: false)
+	IncludeText param.Field[VoiceTranscriptionGetParamsIncludeText] `query:"include_text"`
+}
+
+// URLQuery serializes [VoiceTranscriptionGetParams]'s query parameters as
+// `url.Values`.
+func (r VoiceTranscriptionGetParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Include full transcript text in response for vault-based jobs (default: false)
+type VoiceTranscriptionGetParamsIncludeText string
+
+const (
+	VoiceTranscriptionGetParamsIncludeTextTrue  VoiceTranscriptionGetParamsIncludeText = "true"
+	VoiceTranscriptionGetParamsIncludeTextFalse VoiceTranscriptionGetParamsIncludeText = "false"
+)
+
+func (r VoiceTranscriptionGetParamsIncludeText) IsKnown() bool {
+	switch r {
+	case VoiceTranscriptionGetParamsIncludeTextTrue, VoiceTranscriptionGetParamsIncludeTextFalse:
 		return true
 	}
 	return false

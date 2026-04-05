@@ -51,7 +51,7 @@ func TestVoiceTranscriptionNewWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVoiceTranscriptionGet(t *testing.T) {
+func TestVoiceTranscriptionGetWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -63,7 +63,13 @@ func TestVoiceTranscriptionGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Voice.Transcription.Get(context.TODO(), "tr_abc123def456")
+	_, err := client.Voice.Transcription.Get(
+		context.TODO(),
+		"tr_abc123def456",
+		githubcomcasemarkcasedevgo.VoiceTranscriptionGetParams{
+			IncludeText: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VoiceTranscriptionGetParamsIncludeTextTrue),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
