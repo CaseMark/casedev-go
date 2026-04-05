@@ -1,5 +1,78 @@
 # Changelog
 
+## 0.28.0 (2026-04-05)
+
+Full Changelog: [v0.27.0...v0.28.0](https://github.com/CaseMark/casedev-go/compare/v0.27.0...v0.28.0)
+
+### Features
+
+* **api:** api update ([b62fa97](https://github.com/CaseMark/casedev-go/commit/b62fa97c74ebe7b625e05e69386d9fadaaca4e05))
+* **api:** api update ([3455964](https://github.com/CaseMark/casedev-go/commit/3455964590c7e1e7934aed788e00b7dfc72ad296))
+* **api:** api update ([c147ce6](https://github.com/CaseMark/casedev-go/commit/c147ce669ca1e2d5ea91231770d0aa812355ae37))
+* **api:** api update ([f68f18b](https://github.com/CaseMark/casedev-go/commit/f68f18bc242d1c9b5fe93076ceb2a3467e7c88b6))
+* **api:** api update ([d585915](https://github.com/CaseMark/casedev-go/commit/d5859155d729816004467dcd887cbe47d7a07bea))
+* **api:** api update ([afbd6b0](https://github.com/CaseMark/casedev-go/commit/afbd6b0b6c1094684ff2d714b273f06a155efb6c))
+* **api:** api update ([76b958e](https://github.com/CaseMark/casedev-go/commit/76b958e98f116ac27f34ac0b99086e3d0fe34c91))
+* **api:** api update ([a463298](https://github.com/CaseMark/casedev-go/commit/a46329839c2f4046228d1b0c6ccec1694b8885c5))
+* **api:** api update ([1083061](https://github.com/CaseMark/casedev-go/commit/108306135e963665a17587d3b2a47b060d731aea))
+* **api:** api update ([f0fb997](https://github.com/CaseMark/casedev-go/commit/f0fb99763fe1b8b3da9e28ab6870bceaf4dfdd14))
+* **api:** api update ([d80d97d](https://github.com/CaseMark/casedev-go/commit/d80d97d32119d72e15811ff6cd2e0124fc6a1f4b))
+* **api:** api update ([7dc21d4](https://github.com/CaseMark/casedev-go/commit/7dc21d4bce8746383c3737aa4be6112d8538d1a6))
+* **api:** api update ([d7c5292](https://github.com/CaseMark/casedev-go/commit/d7c5292aed570eaf2ad9e7d82f87a546e4b2ecd7))
+* **api:** api update ([88782e6](https://github.com/CaseMark/casedev-go/commit/88782e608ec232c288341ba2f7c8b8ca3880d545))
+* **api:** api update ([35fbbb3](https://github.com/CaseMark/casedev-go/commit/35fbbb3fb4be77ecc0794fb248d4cdea04d7942d))
+* **api:** api update ([ed20020](https://github.com/CaseMark/casedev-go/commit/ed20020699e3896037df7dba0bac790cc15bd15e))
+* **api:** api update ([8edfd4c](https://github.com/CaseMark/casedev-go/commit/8edfd4cc3cdf57d1eec11011890dbc0342066d97))
+* **api:** api update ([f6e3fb7](https://github.com/CaseMark/casedev-go/commit/f6e3fb7263a006cc8a1ad0c64a837d41a1c78d50))
+* **api:** api update ([079bae6](https://github.com/CaseMark/casedev-go/commit/079bae61504fef70ba6472676b13047d57f1e61e))
+* **api:** api update ([de56832](https://github.com/CaseMark/casedev-go/commit/de568327d0e12cf3b369119fa09d1b1f1098a2ea))
+* **api:** api update ([a7c1cc9](https://github.com/CaseMark/casedev-go/commit/a7c1cc9c39f90cad22cced8200d66c31e64666c9))
+* **api:** api update ([36cbae2](https://github.com/CaseMark/casedev-go/commit/36cbae270b8cd74d859a315ba90a5aec9108243a))
+* **api:** api update ([73e33ec](https://github.com/CaseMark/casedev-go/commit/73e33eca0c0927821409c4bd47289d2d9233f2af))
+* **api:** api update ([b47e368](https://github.com/CaseMark/casedev-go/commit/b47e3681804edfb3eb7401709b9899723f9bf176))
+* **api:** api update ([a2389bc](https://github.com/CaseMark/casedev-go/commit/a2389bc5fe50c22b6fbbfd9b7e3d5c8aab4872e9))
+* **api:** api update ([dbd0404](https://github.com/CaseMark/casedev-go/commit/dbd0404f7fff2e99657795f278a5e366ceb87665))
+* **api:** api update ([bbd8306](https://github.com/CaseMark/casedev-go/commit/bbd830689e52cb682549684069c1561404348558))
+* **api:** api update ([e4a8503](https://github.com/CaseMark/casedev-go/commit/e4a850396dde21c74365aec7a05e0cb3d9bee2db))
+
+
+### Bug Fixes
+
+* allow canceling a request while it is waiting to retry ([2d51cab](https://github.com/CaseMark/casedev-go/commit/2d51cabaac79c4a3164f9e5622188059f15e2a63))
+* avoid path shadowing in chat file download ([eb22032](https://github.com/CaseMark/casedev-go/commit/eb2203275bc049d57c444cfd03a75b8c50bd0aae))
+* deduplicate CI Slack alerts at workflow level, not PR level ([#23](https://github.com/CaseMark/casedev-go/issues/23)) ([6d44b42](https://github.com/CaseMark/casedev-go/commit/6d44b425a9c655ddfe89ee87ae5bff05f63b91df))
+* only alert on CI failure for PRs targeting main ([9e073b4](https://github.com/CaseMark/casedev-go/commit/9e073b4b29ee43604bc03b28968fbedc4b7b9a76))
+* only alert Slack on CI failure for main branch ([ce98e09](https://github.com/CaseMark/casedev-go/commit/ce98e096e5680a073d374ace1f833a693ba367a8))
+* prevent duplicate Slack alerts from release-please branches ([e69a96b](https://github.com/CaseMark/casedev-go/commit/e69a96b90c94ea35731802e7b9e32df3dc95c6b1))
+
+
+### Chores
+
+* **ci:** skip uploading artifacts on stainless-internal branches ([9c60005](https://github.com/CaseMark/casedev-go/commit/9c6000558f0079aa15fe7c69c03809d7e4c7ebb2))
+* **internal:** codegen related update ([3d9527b](https://github.com/CaseMark/casedev-go/commit/3d9527bd8c4db2ff44d7671ed6ead2011b3b3030))
+* **internal:** codegen related update ([c9cfc08](https://github.com/CaseMark/casedev-go/commit/c9cfc080090b05a259505bf4532e2465b3434e1d))
+* **internal:** minor cleanup ([0d6c18b](https://github.com/CaseMark/casedev-go/commit/0d6c18b770a3f03f11c4e5de81a326b5841d0c7f))
+* **internal:** move custom custom `json` tags to `api` ([ea01e54](https://github.com/CaseMark/casedev-go/commit/ea01e540dd4d5d0f69ed071aede788830ed8f3fc))
+* **internal:** remove mock server code ([7eda4bf](https://github.com/CaseMark/casedev-go/commit/7eda4bf3102be26ebf63b2d5922039718c63c15f))
+* **internal:** tweak CI branches ([ffa120b](https://github.com/CaseMark/casedev-go/commit/ffa120bebe21b4fb44f77fd351ed373f36661288))
+* **internal:** update gitignore ([31c6a26](https://github.com/CaseMark/casedev-go/commit/31c6a26caa9c3002000fa82c4c0676b90661956a))
+* **internal:** use explicit returns ([b5064da](https://github.com/CaseMark/casedev-go/commit/b5064da8418ae33777fc7409995d50dd3207978d))
+* **internal:** use explicit returns in more places ([d18e664](https://github.com/CaseMark/casedev-go/commit/d18e66452824bd92e28efd282f8588393b6d8596))
+* replace PR open Slack alert with CI failure alert ([4205ab2](https://github.com/CaseMark/casedev-go/commit/4205ab250582b99f7abffc25518cee593d00c9d6))
+* **test:** do not count install time for mock server timeout ([b3b6edd](https://github.com/CaseMark/casedev-go/commit/b3b6eddf983b5ef109960761e954292de97bb4bd))
+* **tests:** bump steady to v0.19.4 ([5cb8307](https://github.com/CaseMark/casedev-go/commit/5cb8307444a590521513410a6987c4ac7ad9043c))
+* **tests:** bump steady to v0.19.5 ([845bb82](https://github.com/CaseMark/casedev-go/commit/845bb8292f6b92a677e18de2fd5bde9284d349a6))
+* **tests:** bump steady to v0.19.6 ([9e27792](https://github.com/CaseMark/casedev-go/commit/9e27792d38a3851378fc4b6bed38e6202ad6add1))
+* **tests:** bump steady to v0.20.1 ([fbc3d45](https://github.com/CaseMark/casedev-go/commit/fbc3d454407c055b1b6964ac4c2923d6c6323ced))
+* **tests:** bump steady to v0.20.2 ([e46a0ee](https://github.com/CaseMark/casedev-go/commit/e46a0ee97b2f9e626bb426a934675d880e18d257))
+* trigger CI for auto-merge ([fb59d9e](https://github.com/CaseMark/casedev-go/commit/fb59d9e3a584b99252889706fd34c549484dcbb7))
+* update mock server docs ([6b3cfb0](https://github.com/CaseMark/casedev-go/commit/6b3cfb0a9846066aef84aa5ad651c631760fa1bc))
+
+
+### Refactors
+
+* **tests:** switch from prism to steady ([bb6b8f0](https://github.com/CaseMark/casedev-go/commit/bb6b8f0c914da0e3db4d2e94381464ae1d56590a))
+
 ## 0.27.0 (2026-04-05)
 
 Full Changelog: [v0.26.0...v0.27.0](https://github.com/CaseMark/casedev-go/compare/v0.26.0...v0.27.0)
