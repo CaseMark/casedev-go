@@ -37,6 +37,7 @@ type Client struct {
 	Search    *SearchService
 	Superdoc  *SuperdocService
 	Translate *TranslateService
+	Usage     *UsageService
 	// Secure document storage with semantic search and GraphRAG
 	Vault *VaultService
 	Voice *VoiceService
@@ -81,6 +82,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Search = NewSearchService(opts...)
 	r.Superdoc = NewSuperdocService(opts...)
 	r.Translate = NewTranslateService(opts...)
+	r.Usage = NewUsageService(opts...)
 	r.Vault = NewVaultService(opts...)
 	r.Voice = NewVoiceService(opts...)
 
