@@ -626,6 +626,24 @@ Methods:
 - <code title="get /translate/v1/languages">client.Translate.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#TranslateV1Service.ListLanguages">ListLanguages</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#TranslateV1ListLanguagesParams">TranslateV1ListLanguagesParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#TranslateV1ListLanguagesResponse">TranslateV1ListLanguagesResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="post /translate/v1/translate">client.Translate.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#TranslateV1Service.Translate">Translate</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#TranslateV1TranslateParams">TranslateV1TranslateParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#TranslateV1TranslateResponse">TranslateV1TranslateResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
+# Usage
+
+## V1
+
+Methods:
+
+- <code title="get /usage/v1">client.Usage.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1Service.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1GetParams">UsageV1GetParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
+### Subscriptions
+
+Methods:
+
+- <code title="post /usage/v1/subscriptions">client.Usage.V1.Subscriptions.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1SubscriptionService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1SubscriptionNewParams">UsageV1SubscriptionNewParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="patch /usage/v1/subscriptions/{subscriptionId}">client.Usage.V1.Subscriptions.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1SubscriptionService.Update">Update</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, subscriptionID <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1SubscriptionUpdateParams">UsageV1SubscriptionUpdateParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /usage/v1/subscriptions">client.Usage.V1.Subscriptions.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1SubscriptionService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="delete /usage/v1/subscriptions/{subscriptionId}">client.Usage.V1.Subscriptions.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1SubscriptionService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, subscriptionID <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /usage/v1/subscriptions/{subscriptionId}/test">client.Usage.V1.Subscriptions.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1SubscriptionService.Test">Test</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, subscriptionID <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#UsageV1SubscriptionTestParams">UsageV1SubscriptionTestParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
 # Vault
 
 Response Types:
