@@ -210,7 +210,7 @@ type VoiceTranscriptionNewParams struct {
 	// How much to boost custom vocabulary
 	BoostParam param.Field[VoiceTranscriptionNewParamsBoostParam] `json:"boost_param"`
 	// Enable content moderation and safety labeling
-	ContentSafetyLabels param.Field[bool] `json:"content_safety_labels"`
+	ContentSafety param.Field[bool] `json:"content_safety"`
 	// Output format for the transcript when using vault mode
 	Format param.Field[VoiceTranscriptionNewParamsFormat] `json:"format"`
 	// Format text with proper capitalization
