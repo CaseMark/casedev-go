@@ -232,6 +232,8 @@ type VaultObjectGetResponse struct {
 	SizeBytes int64 `json:"sizeBytes"`
 	// Length of extracted text
 	TextLength int64 `json:"textLength"`
+	// Object ID of the completed transcript (if available)
+	TranscriptObjectID string `json:"transcript_object_id" api:"nullable"`
 	// Number of embedding vectors generated
 	VectorCount int64                      `json:"vectorCount"`
 	JSON        vaultObjectGetResponseJSON `json:"-"`
@@ -240,24 +242,25 @@ type VaultObjectGetResponse struct {
 // vaultObjectGetResponseJSON contains the JSON metadata for the struct
 // [VaultObjectGetResponse]
 type vaultObjectGetResponseJSON struct {
-	ID              apijson.Field
-	ContentType     apijson.Field
-	CreatedAt       apijson.Field
-	DownloadURL     apijson.Field
-	ExpiresIn       apijson.Field
-	Filename        apijson.Field
-	IngestionStatus apijson.Field
-	VaultID         apijson.Field
-	ChunkCount      apijson.Field
-	IngestionError  apijson.Field
-	Metadata        apijson.Field
-	PageCount       apijson.Field
-	Path            apijson.Field
-	SizeBytes       apijson.Field
-	TextLength      apijson.Field
-	VectorCount     apijson.Field
-	raw             string
-	ExtraFields     map[string]apijson.Field
+	ID                 apijson.Field
+	ContentType        apijson.Field
+	CreatedAt          apijson.Field
+	DownloadURL        apijson.Field
+	ExpiresIn          apijson.Field
+	Filename           apijson.Field
+	IngestionStatus    apijson.Field
+	VaultID            apijson.Field
+	ChunkCount         apijson.Field
+	IngestionError     apijson.Field
+	Metadata           apijson.Field
+	PageCount          apijson.Field
+	Path               apijson.Field
+	SizeBytes          apijson.Field
+	TextLength         apijson.Field
+	TranscriptObjectID apijson.Field
+	VectorCount        apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
 }
 
 func (r *VaultObjectGetResponse) UnmarshalJSON(data []byte) (err error) {
