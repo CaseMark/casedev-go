@@ -78,6 +78,19 @@ func (r *AgentV2ChatService) Cancel(ctx context.Context, id string, opts ...opti
 	return res, err
 }
 
+// Returns a short-lived token that allows browser clients to connect directly to
+// the agent chat SSE stream without exposing the underlying org API key.
+func (r *AgentV2ChatService) NewStreamToken(ctx context.Context, id string, opts ...option.RequestOption) (res *AgentV2ChatNewStreamTokenResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("agent/v2/chat/%s/stream-token", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	return res, err
+}
+
 // Answers a pending OpenCode question for the Daytona-backed chat session and
 // resumes or recovers the runtime if needed.
 func (r *AgentV2ChatService) ReplyToQuestion(ctx context.Context, id string, requestID string, body AgentV2ChatReplyToQuestionParams, opts ...option.RequestOption) (err error) {
@@ -150,7 +163,8 @@ func (r *AgentV2ChatService) SendMessage(ctx context.Context, id string, body Ag
 
 // Relays OpenCode SSE events for this Daytona-backed chat runtime. Supports replay
 // from buffered events using Last-Event-ID and transparently reconnects stopped or
-// archived runtimes.
+// archived runtimes. Accepts either Bearer token auth or a short-lived stream
+// token via query parameter. When both are provided, Bearer auth takes precedence.
 func (r *AgentV2ChatService) StreamStreaming(ctx context.Context, id string, query AgentV2ChatStreamParams, opts ...option.RequestOption) (stream *ssestream.Stream[string]) {
 	var (
 		raw *http.Response
@@ -266,6 +280,31 @@ func (r agentV2ChatCancelResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+type AgentV2ChatNewStreamTokenResponse struct {
+	Token     string                                `json:"token" api:"required"`
+	ExpiresAt time.Time                             `json:"expiresAt" api:"required" format:"date-time"`
+	StreamURL string                                `json:"streamUrl" api:"required" format:"uri"`
+	JSON      agentV2ChatNewStreamTokenResponseJSON `json:"-"`
+}
+
+// agentV2ChatNewStreamTokenResponseJSON contains the JSON metadata for the struct
+// [AgentV2ChatNewStreamTokenResponse]
+type agentV2ChatNewStreamTokenResponseJSON struct {
+	Token       apijson.Field
+	ExpiresAt   apijson.Field
+	StreamURL   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *AgentV2ChatNewStreamTokenResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r agentV2ChatNewStreamTokenResponseJSON) RawJSON() string {
+	return r.raw
+}
+
 type AgentV2ChatNewParams struct {
 	// Idle timeout before the runtime is eligible to stop. Defaults to 15 minutes.
 	IdleTimeoutMs param.Field[int64] `json:"idleTimeoutMs"`
@@ -369,6 +408,9 @@ func (r AgentV2ChatSendMessageParamsPartsType) IsKnown() bool {
 }
 
 type AgentV2ChatStreamParams struct {
+	// Short-lived stream token from POST /agent/v2/chat/:id/stream-token. If provided,
+	// Bearer auth is not required.
+	Token param.Field[string] `query:"token"`
 	// Replay events after this sequence number
 	LastEventID param.Field[int64] `query:"lastEventId"`
 }
