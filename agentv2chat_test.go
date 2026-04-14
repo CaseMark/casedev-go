@@ -27,6 +27,7 @@ func TestAgentV2ChatNewWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Agent.V2.Chat.New(context.TODO(), githubcomcasemarkcasedevgo.AgentV2ChatNewParams{
 		IdleTimeoutMs: githubcomcasemarkcasedevgo.F(int64(0)),
+		Instructions:  githubcomcasemarkcasedevgo.F("instructions"),
 		Model:         githubcomcasemarkcasedevgo.F("model"),
 		Title:         githubcomcasemarkcasedevgo.F("title"),
 		VaultIDs:      githubcomcasemarkcasedevgo.F([]string{"string"}),
