@@ -308,6 +308,9 @@ func (r agentV2ChatNewStreamTokenResponseJSON) RawJSON() string {
 type AgentV2ChatNewParams struct {
 	// Idle timeout before the runtime is eligible to stop. Defaults to 15 minutes.
 	IdleTimeoutMs param.Field[int64] `json:"idleTimeoutMs"`
+	// Optional hidden app instructions merged into the chat runtime bootstrap and
+	// never exposed as a user message. Only accepted for privileged C3 system keys.
+	Instructions param.Field[string] `json:"instructions"`
 	// Optional model override for the OpenCode session
 	Model param.Field[string] `json:"model"`
 	// Optional human-readable session title
