@@ -88,7 +88,7 @@ func (r *ApplicationV1DeploymentService) Cancel(ctx context.Context, id string, 
 	return err
 }
 
-// Create a deployment from raw file contents (for Thurgood sandbox deployments)
+// Create a deployment from raw file contents for application deployments
 func (r *ApplicationV1DeploymentService) NewFromFiles(ctx context.Context, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)

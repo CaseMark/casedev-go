@@ -66,8 +66,8 @@ func (r *DatabaseV1ProjectService) Get(ctx context.Context, id string, opts ...o
 }
 
 // Retrieves all serverless Postgres database projects for the authenticated
-// organization. Includes storage and compute metrics, plus linked deployments from
-// Thurgood apps and Compute instances.
+// organization. Includes storage and compute metrics, plus linked application
+// deployments and Compute instances.
 func (r *DatabaseV1ProjectService) List(ctx context.Context, opts ...option.RequestOption) (res *DatabaseV1ProjectListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "database/v1/projects"
@@ -382,13 +382,12 @@ func (r databaseV1ProjectGetResponseLinkedDeploymentJSON) RawJSON() string {
 type DatabaseV1ProjectGetResponseLinkedDeploymentsType string
 
 const (
-	DatabaseV1ProjectGetResponseLinkedDeploymentsTypeThurgood DatabaseV1ProjectGetResponseLinkedDeploymentsType = "thurgood"
-	DatabaseV1ProjectGetResponseLinkedDeploymentsTypeCompute  DatabaseV1ProjectGetResponseLinkedDeploymentsType = "compute"
+	DatabaseV1ProjectGetResponseLinkedDeploymentsTypeCompute DatabaseV1ProjectGetResponseLinkedDeploymentsType = "compute"
 )
 
 func (r DatabaseV1ProjectGetResponseLinkedDeploymentsType) IsKnown() bool {
 	switch r {
-	case DatabaseV1ProjectGetResponseLinkedDeploymentsTypeThurgood, DatabaseV1ProjectGetResponseLinkedDeploymentsTypeCompute:
+	case DatabaseV1ProjectGetResponseLinkedDeploymentsTypeCompute:
 		return true
 	}
 	return false
@@ -491,7 +490,7 @@ type DatabaseV1ProjectListResponseProjectsLinkedDeployment struct {
 	Name string `json:"name"`
 	// Type of deployment
 	Type DatabaseV1ProjectListResponseProjectsLinkedDeploymentsType `json:"type"`
-	// Deployment URL (for Thurgood apps)
+	// Deployment URL
 	URL  string                                                    `json:"url"`
 	JSON databaseV1ProjectListResponseProjectsLinkedDeploymentJSON `json:"-"`
 }
@@ -519,13 +518,12 @@ func (r databaseV1ProjectListResponseProjectsLinkedDeploymentJSON) RawJSON() str
 type DatabaseV1ProjectListResponseProjectsLinkedDeploymentsType string
 
 const (
-	DatabaseV1ProjectListResponseProjectsLinkedDeploymentsTypeThurgood DatabaseV1ProjectListResponseProjectsLinkedDeploymentsType = "thurgood"
-	DatabaseV1ProjectListResponseProjectsLinkedDeploymentsTypeCompute  DatabaseV1ProjectListResponseProjectsLinkedDeploymentsType = "compute"
+	DatabaseV1ProjectListResponseProjectsLinkedDeploymentsTypeCompute DatabaseV1ProjectListResponseProjectsLinkedDeploymentsType = "compute"
 )
 
 func (r DatabaseV1ProjectListResponseProjectsLinkedDeploymentsType) IsKnown() bool {
 	switch r {
-	case DatabaseV1ProjectListResponseProjectsLinkedDeploymentsTypeThurgood, DatabaseV1ProjectListResponseProjectsLinkedDeploymentsTypeCompute:
+	case DatabaseV1ProjectListResponseProjectsLinkedDeploymentsTypeCompute:
 		return true
 	}
 	return false
