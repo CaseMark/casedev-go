@@ -17,7 +17,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestOcrV1Get(t *testing.T) {
+func TestOcrV1GetWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -29,7 +29,13 @@ func TestOcrV1Get(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Ocr.V1.Get(context.TODO(), "id")
+	_, err := client.Ocr.V1.Get(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.OcrV1GetParams{
+			IncludeText: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.OcrV1GetParamsIncludeTextTrue),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

@@ -45,8 +45,9 @@ func NewAgentV1ChatService(opts ...option.RequestOption) (r *AgentV1ChatService)
 	return
 }
 
-// Creates a persistent OpenCode chat session in a Modal sandbox. Session state is
-// retained and can be resumed across requests.
+// Creates a persistent OpenCode chat session backed by a Daytona or Vercel
+// runtime. Session state is retained and can be resumed or recovered across
+// requests.
 func (r *AgentV1ChatService) New(ctx context.Context, body AgentV1ChatNewParams, opts ...option.RequestOption) (res *AgentV1ChatNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/chat"
