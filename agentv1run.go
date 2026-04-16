@@ -354,15 +354,23 @@ type AgentV1RunGetDetailsResponse struct {
 	CompletedAt time.Time `json:"completedAt" api:"nullable" format:"date-time"`
 	CreatedAt   time.Time `json:"createdAt" format:"date-time"`
 	Guidance    string    `json:"guidance" api:"nullable"`
-	// Modal sandbox ID (available once sandbox is created)
+	// Deprecated legacy Modal sandbox ID. Prefer `provider` and `runtimeId`.
+	//
+	// Deprecated: deprecated
 	ModalSandboxID string `json:"modalSandboxId" api:"nullable"`
 	Model          string `json:"model" api:"nullable"`
 	Prompt         string `json:"prompt"`
+	// Runtime provider for this run
+	Provider AgentV1RunGetDetailsResponseProvider `json:"provider" api:"nullable"`
 	// Final output from the agent
-	Result    AgentV1RunGetDetailsResponseResult `json:"result" api:"nullable"`
-	StartedAt time.Time                          `json:"startedAt" api:"nullable" format:"date-time"`
-	Status    AgentV1RunGetDetailsResponseStatus `json:"status"`
-	Steps     []AgentV1RunGetDetailsResponseStep `json:"steps"`
+	Result AgentV1RunGetDetailsResponseResult `json:"result" api:"nullable"`
+	// Provider-specific runtime identifier
+	RuntimeID string `json:"runtimeId" api:"nullable"`
+	// Current runtime state, when available
+	RuntimeState AgentV1RunGetDetailsResponseRuntimeState `json:"runtimeState" api:"nullable"`
+	StartedAt    time.Time                                `json:"startedAt" api:"nullable" format:"date-time"`
+	Status       AgentV1RunGetDetailsResponseStatus       `json:"status"`
+	Steps        []AgentV1RunGetDetailsResponseStep       `json:"steps"`
 	// Token usage statistics
 	Usage AgentV1RunGetDetailsResponseUsage `json:"usage" api:"nullable"`
 	// Durable workflow run ID
@@ -381,7 +389,10 @@ type agentV1RunGetDetailsResponseJSON struct {
 	ModalSandboxID apijson.Field
 	Model          apijson.Field
 	Prompt         apijson.Field
+	Provider       apijson.Field
 	Result         apijson.Field
+	RuntimeID      apijson.Field
+	RuntimeState   apijson.Field
 	StartedAt      apijson.Field
 	Status         apijson.Field
 	Steps          apijson.Field
@@ -397,6 +408,22 @@ func (r *AgentV1RunGetDetailsResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r agentV1RunGetDetailsResponseJSON) RawJSON() string {
 	return r.raw
+}
+
+// Runtime provider for this run
+type AgentV1RunGetDetailsResponseProvider string
+
+const (
+	AgentV1RunGetDetailsResponseProviderDaytona AgentV1RunGetDetailsResponseProvider = "daytona"
+	AgentV1RunGetDetailsResponseProviderVercel  AgentV1RunGetDetailsResponseProvider = "vercel"
+)
+
+func (r AgentV1RunGetDetailsResponseProvider) IsKnown() bool {
+	switch r {
+	case AgentV1RunGetDetailsResponseProviderDaytona, AgentV1RunGetDetailsResponseProviderVercel:
+		return true
+	}
+	return false
 }
 
 // Final output from the agent
@@ -479,6 +506,25 @@ func (r *AgentV1RunGetDetailsResponseResultLogs) UnmarshalJSON(data []byte) (err
 
 func (r agentV1RunGetDetailsResponseResultLogsJSON) RawJSON() string {
 	return r.raw
+}
+
+// Current runtime state, when available
+type AgentV1RunGetDetailsResponseRuntimeState string
+
+const (
+	AgentV1RunGetDetailsResponseRuntimeStateRunning  AgentV1RunGetDetailsResponseRuntimeState = "running"
+	AgentV1RunGetDetailsResponseRuntimeStateStopped  AgentV1RunGetDetailsResponseRuntimeState = "stopped"
+	AgentV1RunGetDetailsResponseRuntimeStateArchived AgentV1RunGetDetailsResponseRuntimeState = "archived"
+	AgentV1RunGetDetailsResponseRuntimeStateEnded    AgentV1RunGetDetailsResponseRuntimeState = "ended"
+	AgentV1RunGetDetailsResponseRuntimeStateError    AgentV1RunGetDetailsResponseRuntimeState = "error"
+)
+
+func (r AgentV1RunGetDetailsResponseRuntimeState) IsKnown() bool {
+	switch r {
+	case AgentV1RunGetDetailsResponseRuntimeStateRunning, AgentV1RunGetDetailsResponseRuntimeStateStopped, AgentV1RunGetDetailsResponseRuntimeStateArchived, AgentV1RunGetDetailsResponseRuntimeStateEnded, AgentV1RunGetDetailsResponseRuntimeStateError:
+		return true
+	}
+	return false
 }
 
 type AgentV1RunGetDetailsResponseStatus string
