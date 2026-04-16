@@ -7,10 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"slices"
 	"time"
 
 	"github.com/CaseMark/casedev-go/internal/apijson"
+	"github.com/CaseMark/casedev-go/internal/apiquery"
 	"github.com/CaseMark/casedev-go/internal/param"
 	"github.com/CaseMark/casedev-go/internal/requestconfig"
 	"github.com/CaseMark/casedev-go/option"
@@ -39,14 +41,14 @@ func NewOcrV1Service(opts ...option.RequestOption) (r *OcrV1Service) {
 
 // Retrieve the status and results of an OCR job. Returns job progress, extracted
 // text, and metadata when processing is complete.
-func (r *OcrV1Service) Get(ctx context.Context, id string, opts ...option.RequestOption) (res *OcrV1GetResponse, err error) {
+func (r *OcrV1Service) Get(ctx context.Context, id string, query OcrV1GetParams, opts ...option.RequestOption) (res *OcrV1GetResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return nil, err
 	}
 	path := fmt.Sprintf("ocr/v1/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return res, err
 }
 
@@ -186,6 +188,35 @@ const (
 func (r OcrV1ProcessResponseStatus) IsKnown() bool {
 	switch r {
 	case OcrV1ProcessResponseStatusQueued, OcrV1ProcessResponseStatusProcessing, OcrV1ProcessResponseStatusCompleted, OcrV1ProcessResponseStatusFailed:
+		return true
+	}
+	return false
+}
+
+type OcrV1GetParams struct {
+	// Include full OCR text in completed responses (default: true)
+	IncludeText param.Field[OcrV1GetParamsIncludeText] `query:"include_text"`
+}
+
+// URLQuery serializes [OcrV1GetParams]'s query parameters as `url.Values`.
+func (r OcrV1GetParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Include full OCR text in completed responses (default: true)
+type OcrV1GetParamsIncludeText string
+
+const (
+	OcrV1GetParamsIncludeTextTrue  OcrV1GetParamsIncludeText = "true"
+	OcrV1GetParamsIncludeTextFalse OcrV1GetParamsIncludeText = "false"
+)
+
+func (r OcrV1GetParamsIncludeText) IsKnown() bool {
+	switch r {
+	case OcrV1GetParamsIncludeTextTrue, OcrV1GetParamsIncludeTextFalse:
 		return true
 	}
 	return false
