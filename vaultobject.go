@@ -144,6 +144,25 @@ func (r *VaultObjectService) Download(ctx context.Context, id string, objectID s
 	return res, err
 }
 
+// Retrieves full extracted chunk text for a processed vault object. Use this after
+// search when a truncated preview is not enough and you need the exact chunk text
+// or adjacent chunks for surrounding context such as tables, exhibit lists, or
+// multi-part passages.
+func (r *VaultObjectService) GetChunks(ctx context.Context, id string, objectID string, query VaultObjectGetChunksParams, opts ...option.RequestOption) (res *VaultObjectGetChunksResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	if objectID == "" {
+		err = errors.New("missing required objectId parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("vault/%s/objects/%s/chunks", id, objectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
+}
+
 // Retrieves word-level OCR bounding box data for a processed PDF document. Each
 // word includes its text, normalized bounding box coordinates (0-1 range),
 // confidence score, and global word index. Use this data to highlight specific
@@ -543,6 +562,74 @@ func (r vaultObjectNewPresignedURLResponseMetadataJSON) RawJSON() string {
 	return r.raw
 }
 
+type VaultObjectGetChunksResponse struct {
+	// Full chunk objects for the requested range
+	Chunks []VaultObjectGetChunksResponseChunk `json:"chunks" api:"required"`
+	// The object ID
+	ObjectID string `json:"object_id" api:"required"`
+	// Total number of chunks stored for the object
+	TotalChunks int64 `json:"total_chunks" api:"required"`
+	// The vault ID
+	VaultID string                           `json:"vault_id" api:"required"`
+	JSON    vaultObjectGetChunksResponseJSON `json:"-"`
+}
+
+// vaultObjectGetChunksResponseJSON contains the JSON metadata for the struct
+// [VaultObjectGetChunksResponse]
+type vaultObjectGetChunksResponseJSON struct {
+	Chunks      apijson.Field
+	ObjectID    apijson.Field
+	TotalChunks apijson.Field
+	VaultID     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultObjectGetChunksResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectGetChunksResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type VaultObjectGetChunksResponseChunk struct {
+	// Chunk index within the document
+	Index int64 `json:"index" api:"required"`
+	// Last page covered by the chunk, if page mapping is available
+	PageEnd int64 `json:"page_end" api:"required,nullable"`
+	// First page covered by the chunk, if page mapping is available
+	PageStart int64 `json:"page_start" api:"required,nullable"`
+	// Full text for the chunk
+	Text string `json:"text" api:"required"`
+	// Last OCR word index covered by the chunk, if available
+	WordEndIndex int64 `json:"word_end_index" api:"required,nullable"`
+	// First OCR word index covered by the chunk, if available
+	WordStartIndex int64                                 `json:"word_start_index" api:"required,nullable"`
+	JSON           vaultObjectGetChunksResponseChunkJSON `json:"-"`
+}
+
+// vaultObjectGetChunksResponseChunkJSON contains the JSON metadata for the struct
+// [VaultObjectGetChunksResponseChunk]
+type vaultObjectGetChunksResponseChunkJSON struct {
+	Index          apijson.Field
+	PageEnd        apijson.Field
+	PageStart      apijson.Field
+	Text           apijson.Field
+	WordEndIndex   apijson.Field
+	WordStartIndex apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *VaultObjectGetChunksResponseChunk) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectGetChunksResponseChunkJSON) RawJSON() string {
+	return r.raw
+}
+
 type VaultObjectGetOcrWordsResponse struct {
 	// When the OCR data was extracted
 	CreatedAt time.Time `json:"createdAt" format:"date-time"`
@@ -834,6 +921,23 @@ func (r VaultObjectNewPresignedURLParamsOperation) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type VaultObjectGetChunksParams struct {
+	// The last chunk index to return (inclusive). If omitted, only the `start` chunk
+	// is returned. Ranges are limited to 10 chunks.
+	End param.Field[int64] `query:"end"`
+	// The first chunk index to return (0-based). Defaults to 0.
+	Start param.Field[int64] `query:"start"`
+}
+
+// URLQuery serializes [VaultObjectGetChunksParams]'s query parameters as
+// `url.Values`.
+func (r VaultObjectGetChunksParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type VaultObjectGetOcrWordsParams struct {
