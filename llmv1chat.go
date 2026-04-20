@@ -165,8 +165,7 @@ type LlmV1ChatNewCompletionParams struct {
 	FrequencyPenalty param.Field[float64] `json:"frequency_penalty"`
 	// Maximum number of tokens to generate
 	MaxTokens param.Field[int64] `json:"max_tokens"`
-	// Model to use for completion. Defaults to casemark/casemark-core-6 if not
-	// specified
+	// Model to use for completion. Defaults to casemark/core-large if not specified
 	Model param.Field[string] `json:"model"`
 	// Presence penalty parameter
 	PresencePenalty param.Field[float64] `json:"presence_penalty"`

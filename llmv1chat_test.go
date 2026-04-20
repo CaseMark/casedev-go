@@ -33,7 +33,7 @@ func TestLlmV1ChatNewCompletionWithOptionalParams(t *testing.T) {
 		CasemarkShowReasoning: githubcomcasemarkcasedevgo.F(false),
 		FrequencyPenalty:      githubcomcasemarkcasedevgo.F(0.000000),
 		MaxTokens:             githubcomcasemarkcasedevgo.F(int64(1000)),
-		Model:                 githubcomcasemarkcasedevgo.F("casemark/casemark-core-6"),
+		Model:                 githubcomcasemarkcasedevgo.F("casemark/core-large"),
 		PresencePenalty:       githubcomcasemarkcasedevgo.F(0.000000),
 		Stream:                githubcomcasemarkcasedevgo.F(false),
 		Temperature:           githubcomcasemarkcasedevgo.F(0.700000),
