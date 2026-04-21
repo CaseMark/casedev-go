@@ -195,6 +195,8 @@ type VaultNewResponse struct {
 	CreatedAt time.Time `json:"createdAt" format:"date-time"`
 	// Vault description
 	Description string `json:"description"`
+	// The resolved embedding profile for this vault. Null for storage-only vaults.
+	EmbeddingProfile VaultNewResponseEmbeddingProfile `json:"embeddingProfile" api:"nullable"`
 	// Whether vector indexing is enabled for this vault
 	EnableIndexing bool `json:"enableIndexing"`
 	// S3 bucket name for document storage
@@ -213,17 +215,18 @@ type VaultNewResponse struct {
 // vaultNewResponseJSON contains the JSON metadata for the struct
 // [VaultNewResponse]
 type vaultNewResponseJSON struct {
-	ID             apijson.Field
-	CreatedAt      apijson.Field
-	Description    apijson.Field
-	EnableIndexing apijson.Field
-	FilesBucket    apijson.Field
-	IndexName      apijson.Field
-	Name           apijson.Field
-	Region         apijson.Field
-	VectorBucket   apijson.Field
-	raw            string
-	ExtraFields    map[string]apijson.Field
+	ID               apijson.Field
+	CreatedAt        apijson.Field
+	Description      apijson.Field
+	EmbeddingProfile apijson.Field
+	EnableIndexing   apijson.Field
+	FilesBucket      apijson.Field
+	IndexName        apijson.Field
+	Name             apijson.Field
+	Region           apijson.Field
+	VectorBucket     apijson.Field
+	raw              string
+	ExtraFields      map[string]apijson.Field
 }
 
 func (r *VaultNewResponse) UnmarshalJSON(data []byte) (err error) {
@@ -231,6 +234,35 @@ func (r *VaultNewResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r vaultNewResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// The resolved embedding profile for this vault. Null for storage-only vaults.
+type VaultNewResponseEmbeddingProfile struct {
+	// Vector dimension used by this vault
+	Dimensions int64 `json:"dimensions"`
+	// Embedding model catalog key
+	Model string `json:"model"`
+	// Embedding provider
+	Provider string                               `json:"provider"`
+	JSON     vaultNewResponseEmbeddingProfileJSON `json:"-"`
+}
+
+// vaultNewResponseEmbeddingProfileJSON contains the JSON metadata for the struct
+// [VaultNewResponseEmbeddingProfile]
+type vaultNewResponseEmbeddingProfileJSON struct {
+	Dimensions  apijson.Field
+	Model       apijson.Field
+	Provider    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultNewResponseEmbeddingProfile) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultNewResponseEmbeddingProfileJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -813,6 +845,12 @@ type VaultNewParams struct {
 	Name param.Field[string] `json:"name" api:"required"`
 	// Optional description of the vault's purpose
 	Description param.Field[string] `json:"description"`
+	// Optional embedding model for this vault. Defaults to
+	// openai/text-embedding-3-small. Determines the S3 Vectors index dimension and
+	// which model is used at both ingest and search time. The vault is locked to this
+	// model after creation — use a re-embed flow to change later. Ignored when
+	// enableIndexing is false.
+	EmbeddingModel param.Field[VaultNewParamsEmbeddingModel] `json:"embeddingModel"`
 	// Enable knowledge graph for entity relationship mapping. Only applies when
 	// enableIndexing is true.
 	EnableGraph param.Field[bool] `json:"enableGraph"`
@@ -829,6 +867,31 @@ type VaultNewParams struct {
 
 func (r VaultNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Optional embedding model for this vault. Defaults to
+// openai/text-embedding-3-small. Determines the S3 Vectors index dimension and
+// which model is used at both ingest and search time. The vault is locked to this
+// model after creation — use a re-embed flow to change later. Ignored when
+// enableIndexing is false.
+type VaultNewParamsEmbeddingModel string
+
+const (
+	VaultNewParamsEmbeddingModelOpenAITextEmbedding3Small        VaultNewParamsEmbeddingModel = "openai/text-embedding-3-small"
+	VaultNewParamsEmbeddingModelOpenAITextEmbedding3Large        VaultNewParamsEmbeddingModel = "openai/text-embedding-3-large"
+	VaultNewParamsEmbeddingModelVoyageVoyage3_5                  VaultNewParamsEmbeddingModel = "voyage/voyage-3.5"
+	VaultNewParamsEmbeddingModelVoyageVoyageLaw2                 VaultNewParamsEmbeddingModel = "voyage/voyage-law-2"
+	VaultNewParamsEmbeddingModelCohereEmbedV4_0                  VaultNewParamsEmbeddingModel = "cohere/embed-v4.0"
+	VaultNewParamsEmbeddingModelGoogleGeminiEmbedding2           VaultNewParamsEmbeddingModel = "google/gemini-embedding-2"
+	VaultNewParamsEmbeddingModelCasemarkLlamaNemotronEmbedVl1bV2 VaultNewParamsEmbeddingModel = "casemark/llama-nemotron-embed-vl-1b-v2"
+)
+
+func (r VaultNewParamsEmbeddingModel) IsKnown() bool {
+	switch r {
+	case VaultNewParamsEmbeddingModelOpenAITextEmbedding3Small, VaultNewParamsEmbeddingModelOpenAITextEmbedding3Large, VaultNewParamsEmbeddingModelVoyageVoyage3_5, VaultNewParamsEmbeddingModelVoyageVoyageLaw2, VaultNewParamsEmbeddingModelCohereEmbedV4_0, VaultNewParamsEmbeddingModelGoogleGeminiEmbedding2, VaultNewParamsEmbeddingModelCasemarkLlamaNemotronEmbedVl1bV2:
+		return true
+	}
+	return false
 }
 
 type VaultUpdateParams struct {
