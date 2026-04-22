@@ -19,13 +19,12 @@ type Client struct {
 	Options []option.RequestOption
 	Agent   *AgentService
 	// Public system metadata and discovery endpoints
-	System       *SystemService
-	Applications *ApplicationService
-	Compute      *ComputeService
-	Database     *DatabaseService
-	Format       *FormatService
-	Legal        *LegalService
-	Matters      *MatterService
+	System   *SystemService
+	Compute  *ComputeService
+	Database *DatabaseService
+	Format   *FormatService
+	Legal    *LegalService
+	Matters  *MatterService
 	// Access 40+ language models through a unified API
 	Llm       *LlmService
 	Memory    *MemoryService
@@ -67,7 +66,6 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 
 	r.Agent = NewAgentService(opts...)
 	r.System = NewSystemService(opts...)
-	r.Applications = NewApplicationService(opts...)
 	r.Compute = NewComputeService(opts...)
 	r.Database = NewDatabaseService(opts...)
 	r.Format = NewFormatService(opts...)
