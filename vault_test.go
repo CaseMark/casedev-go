@@ -29,7 +29,7 @@ func TestVaultNewWithOptionalParams(t *testing.T) {
 	_, err := client.Vault.New(context.TODO(), githubcomcasemarkcasedevgo.VaultNewParams{
 		Name:           githubcomcasemarkcasedevgo.F("Contract Review Archive"),
 		Description:    githubcomcasemarkcasedevgo.F("Repository for all client contract reviews and analysis"),
-		EmbeddingModel: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultNewParamsEmbeddingModelCasemarkLlamaNemotronEmbedVl1bV2),
+		EmbeddingModel: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultNewParamsEmbeddingModelCasemarkEmbedV1),
 		EnableGraph:    githubcomcasemarkcasedevgo.F(true),
 		EnableIndexing: githubcomcasemarkcasedevgo.F(true),
 		GroupID:        githubcomcasemarkcasedevgo.F("grp_abc123"),

@@ -849,7 +849,9 @@ type VaultNewParams struct {
 	// openai/text-embedding-3-small. Determines the S3 Vectors index dimension and
 	// which model is used at both ingest and search time. The vault is locked to this
 	// model after creation — use a re-embed flow to change later. Ignored when
-	// enableIndexing is false.
+	// enableIndexing is false. Note: `casemark/llama-nemotron-embed-vl-1b-v2` is a
+	// deprecated alias for `casemark/embed-v1` (retained for SDK backward
+	// compatibility); new integrations should use `casemark/embed-v1` directly.
 	EmbeddingModel param.Field[VaultNewParamsEmbeddingModel] `json:"embeddingModel"`
 	// Enable knowledge graph for entity relationship mapping. Only applies when
 	// enableIndexing is true.
@@ -873,7 +875,9 @@ func (r VaultNewParams) MarshalJSON() (data []byte, err error) {
 // openai/text-embedding-3-small. Determines the S3 Vectors index dimension and
 // which model is used at both ingest and search time. The vault is locked to this
 // model after creation — use a re-embed flow to change later. Ignored when
-// enableIndexing is false.
+// enableIndexing is false. Note: `casemark/llama-nemotron-embed-vl-1b-v2` is a
+// deprecated alias for `casemark/embed-v1` (retained for SDK backward
+// compatibility); new integrations should use `casemark/embed-v1` directly.
 type VaultNewParamsEmbeddingModel string
 
 const (
@@ -883,12 +887,13 @@ const (
 	VaultNewParamsEmbeddingModelVoyageVoyageLaw2                 VaultNewParamsEmbeddingModel = "voyage/voyage-law-2"
 	VaultNewParamsEmbeddingModelCohereEmbedV4_0                  VaultNewParamsEmbeddingModel = "cohere/embed-v4.0"
 	VaultNewParamsEmbeddingModelGoogleGeminiEmbedding2           VaultNewParamsEmbeddingModel = "google/gemini-embedding-2"
+	VaultNewParamsEmbeddingModelCasemarkEmbedV1                  VaultNewParamsEmbeddingModel = "casemark/embed-v1"
 	VaultNewParamsEmbeddingModelCasemarkLlamaNemotronEmbedVl1bV2 VaultNewParamsEmbeddingModel = "casemark/llama-nemotron-embed-vl-1b-v2"
 )
 
 func (r VaultNewParamsEmbeddingModel) IsKnown() bool {
 	switch r {
-	case VaultNewParamsEmbeddingModelOpenAITextEmbedding3Small, VaultNewParamsEmbeddingModelOpenAITextEmbedding3Large, VaultNewParamsEmbeddingModelVoyageVoyage3_5, VaultNewParamsEmbeddingModelVoyageVoyageLaw2, VaultNewParamsEmbeddingModelCohereEmbedV4_0, VaultNewParamsEmbeddingModelGoogleGeminiEmbedding2, VaultNewParamsEmbeddingModelCasemarkLlamaNemotronEmbedVl1bV2:
+	case VaultNewParamsEmbeddingModelOpenAITextEmbedding3Small, VaultNewParamsEmbeddingModelOpenAITextEmbedding3Large, VaultNewParamsEmbeddingModelVoyageVoyage3_5, VaultNewParamsEmbeddingModelVoyageVoyageLaw2, VaultNewParamsEmbeddingModelCohereEmbedV4_0, VaultNewParamsEmbeddingModelGoogleGeminiEmbedding2, VaultNewParamsEmbeddingModelCasemarkEmbedV1, VaultNewParamsEmbeddingModelCasemarkLlamaNemotronEmbedVl1bV2:
 		return true
 	}
 	return false
