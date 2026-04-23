@@ -162,6 +162,7 @@ Response Types:
 
 Methods:
 
+- <code title="get /compute/v1/pricing">client.Compute.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1Service.GetPricing">GetPricing</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
 - <code title="get /compute/v1/usage">client.Compute.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1Service.GetUsage">GetUsage</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1GetUsageParams">ComputeV1GetUsageParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1GetUsageResponse">ComputeV1GetUsageResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 ### Environments
@@ -181,6 +182,32 @@ Methods:
 - <code title="get /compute/v1/environments">client.Compute.V1.Environments.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1EnvironmentService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1EnvironmentListResponse">ComputeV1EnvironmentListResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="delete /compute/v1/environments/{name}">client.Compute.V1.Environments.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1EnvironmentService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, name <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1EnvironmentDeleteResponse">ComputeV1EnvironmentDeleteResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="post /compute/v1/environments/{name}/default">client.Compute.V1.Environments.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1EnvironmentService.SetDefault">SetDefault</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, name <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1EnvironmentSetDefaultResponse">ComputeV1EnvironmentSetDefaultResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
+### InstanceTypes
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceTypeListResponse">ComputeV1InstanceTypeListResponse</a>
+
+Methods:
+
+- <code title="get /compute/v1/instance-types">client.Compute.V1.InstanceTypes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceTypeService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceTypeListResponse">ComputeV1InstanceTypeListResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
+### Instances
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceNewResponse">ComputeV1InstanceNewResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceGetResponse">ComputeV1InstanceGetResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceListResponse">ComputeV1InstanceListResponse</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceDeleteResponse">ComputeV1InstanceDeleteResponse</a>
+
+Methods:
+
+- <code title="post /compute/v1/instances">client.Compute.V1.Instances.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceNewParams">ComputeV1InstanceNewParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceNewResponse">ComputeV1InstanceNewResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /compute/v1/instances/{id}">client.Compute.V1.Instances.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceGetResponse">ComputeV1InstanceGetResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /compute/v1/instances">client.Compute.V1.Instances.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceListResponse">ComputeV1InstanceListResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="delete /compute/v1/instances/{id}">client.Compute.V1.Instances.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ComputeV1InstanceDeleteResponse">ComputeV1InstanceDeleteResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 ### Secrets
 

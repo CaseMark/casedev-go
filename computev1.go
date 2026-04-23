@@ -28,6 +28,10 @@ type ComputeV1Service struct {
 	// Serverless GPU and CPU infrastructure
 	Environments *ComputeV1EnvironmentService
 	// Serverless GPU and CPU infrastructure
+	InstanceTypes *ComputeV1InstanceTypeService
+	// Serverless GPU and CPU infrastructure
+	Instances *ComputeV1InstanceService
+	// Serverless GPU and CPU infrastructure
 	Secrets *ComputeV1SecretService
 }
 
@@ -38,8 +42,21 @@ func NewComputeV1Service(opts ...option.RequestOption) (r *ComputeV1Service) {
 	r = &ComputeV1Service{}
 	r.Options = opts
 	r.Environments = NewComputeV1EnvironmentService(opts...)
+	r.InstanceTypes = NewComputeV1InstanceTypeService(opts...)
+	r.Instances = NewComputeV1InstanceService(opts...)
 	r.Secrets = NewComputeV1SecretService(opts...)
 	return
+}
+
+// Returns current pricing for GPU instances. Prices are fetched in real-time and
+// include a 20% platform fee. For detailed instance types and availability, use
+// GET /compute/v1/instance-types.
+func (r *ComputeV1Service) GetPricing(ctx context.Context, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	path := "compute/v1/pricing"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
+	return err
 }
 
 // Returns detailed compute usage statistics and billing information for your
