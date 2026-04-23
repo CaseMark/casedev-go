@@ -768,3 +768,33 @@ Methods:
 Methods:
 
 - <code title="post /voice/v1/speak">client.Voice.V1.Speak.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#VoiceV1SpeakService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#VoiceV1SpeakNewParams">VoiceV1SpeakNewParams</a>) (\*http.Response, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
+# Webhooks
+
+## V1
+
+### Endpoints
+
+Methods:
+
+- <code title="post /webhooks/v1/endpoints">client.Webhooks.V1.Endpoints.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointNewParams">WebhookV1EndpointNewParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /webhooks/v1/endpoints/{id}">client.Webhooks.V1.Endpoints.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="patch /webhooks/v1/endpoints/{id}">client.Webhooks.V1.Endpoints.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointService.Update">Update</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointUpdateParams">WebhookV1EndpointUpdateParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /webhooks/v1/endpoints">client.Webhooks.V1.Endpoints.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointListParams">WebhookV1EndpointListParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="delete /webhooks/v1/endpoints/{id}">client.Webhooks.V1.Endpoints.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /webhooks/v1/endpoints/{id}/rotate_secret">client.Webhooks.V1.Endpoints.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointService.RotateSecret">RotateSecret</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointRotateSecretParams">WebhookV1EndpointRotateSecretParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /webhooks/v1/endpoints/{id}/test">client.Webhooks.V1.Endpoints.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointService.Test">Test</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EndpointTestParams">WebhookV1EndpointTestParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
+### Deliveries
+
+Methods:
+
+- <code title="get /webhooks/v1/deliveries/{id}">client.Webhooks.V1.Deliveries.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1DeliveryService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /webhooks/v1/deliveries">client.Webhooks.V1.Deliveries.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1DeliveryService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1DeliveryListParams">WebhookV1DeliveryListParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /webhooks/v1/deliveries/{id}/replay">client.Webhooks.V1.Deliveries.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1DeliveryService.Replay">Replay</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1DeliveryReplayParams">WebhookV1DeliveryReplayParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
+### EventTypes
+
+Methods:
+
+- <code title="get /webhooks/v1/event_types">client.Webhooks.V1.EventTypes.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WebhookV1EventTypeService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>

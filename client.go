@@ -38,8 +38,9 @@ type Client struct {
 	Translate *TranslateService
 	Usage     *UsageService
 	// Secure document storage with semantic search and GraphRAG
-	Vault *VaultService
-	Voice *VoiceService
+	Vault    *VaultService
+	Voice    *VoiceService
+	Webhooks *WebhookService
 }
 
 // DefaultClientOptions read from the environment (CASEDEV_API_KEY,
@@ -83,6 +84,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Usage = NewUsageService(opts...)
 	r.Vault = NewVaultService(opts...)
 	r.Voice = NewVoiceService(opts...)
+	r.Webhooks = NewWebhookService(opts...)
 
 	return
 }
