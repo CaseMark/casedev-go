@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.40.1 (2026-04-23)
+
+Full Changelog: [v0.40.0...v0.40.1](https://github.com/CaseMark/casedev-go/compare/v0.40.0...v0.40.1)
+
+### Chores
+
+* **internal:** more robust bootstrap script ([0d3a71d](https://github.com/CaseMark/casedev-go/commit/0d3a71dbeca8afd8eb8083dd4df657aced4f2f57))
+
 ## 0.40.0 (2026-04-22)
 
 Full Changelog: [v0.39.0...v0.40.0](https://github.com/CaseMark/casedev-go/compare/v0.39.0...v0.40.0)
