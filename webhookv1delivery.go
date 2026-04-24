@@ -62,8 +62,8 @@ func (r *WebhookV1DeliveryService) List(ctx context.Context, query WebhookV1Deli
 }
 
 // Re-sends the original event to its endpoint. The payload is reconstructed from
-// the delivery record (same eventId, eventType, and occurred_at). The signature
-// header includes `svix-delivery-attempt: replay` so receivers can distinguish
+// the delivery record (same eventId, eventType, and occurred_at). Replay
+// deliveries include a Case.dev replay marker header so receivers can distinguish
 // replays from first-time deliveries. Uses the endpoint's current signing secret —
 // not the one in force at the original delivery time.
 func (r *WebhookV1DeliveryService) Replay(ctx context.Context, id string, body WebhookV1DeliveryReplayParams, opts ...option.RequestOption) (err error) {
