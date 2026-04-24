@@ -846,13 +846,13 @@ type VaultNewParams struct {
 	Name param.Field[string] `json:"name" api:"required"`
 	// Optional description of the vault's purpose
 	Description param.Field[string] `json:"description"`
-	// Optional embedding model for this vault. Defaults to
-	// openai/text-embedding-3-small. Determines the S3 Vectors index dimension and
-	// which model is used at both ingest and search time. The vault is locked to this
-	// model after creation — use a re-embed flow to change later. Ignored when
-	// enableIndexing is false. Note: `casemark/llama-nemotron-embed-vl-1b-v2` is a
-	// deprecated alias for `casemark/embed-v1` (retained for SDK backward
-	// compatibility); new integrations should use `casemark/embed-v1` directly.
+	// Optional embedding model for this vault. Defaults to casemark/embed-v1.
+	// Determines the S3 Vectors index dimension and which model is used at both ingest
+	// and search time. The vault is locked to this model after creation — use a
+	// re-embed flow to change later. Ignored when enableIndexing is false. Note:
+	// `casemark/llama-nemotron-embed-vl-1b-v2` is a deprecated alias for
+	// `casemark/embed-v1` (retained for SDK backward compatibility); new integrations
+	// should use `casemark/embed-v1` directly.
 	EmbeddingModel param.Field[VaultNewParamsEmbeddingModel] `json:"embeddingModel"`
 	// Enable knowledge graph for entity relationship mapping. Only applies when
 	// enableIndexing is true.
@@ -872,13 +872,13 @@ func (r VaultNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// Optional embedding model for this vault. Defaults to
-// openai/text-embedding-3-small. Determines the S3 Vectors index dimension and
-// which model is used at both ingest and search time. The vault is locked to this
-// model after creation — use a re-embed flow to change later. Ignored when
-// enableIndexing is false. Note: `casemark/llama-nemotron-embed-vl-1b-v2` is a
-// deprecated alias for `casemark/embed-v1` (retained for SDK backward
-// compatibility); new integrations should use `casemark/embed-v1` directly.
+// Optional embedding model for this vault. Defaults to casemark/embed-v1.
+// Determines the S3 Vectors index dimension and which model is used at both ingest
+// and search time. The vault is locked to this model after creation — use a
+// re-embed flow to change later. Ignored when enableIndexing is false. Note:
+// `casemark/llama-nemotron-embed-vl-1b-v2` is a deprecated alias for
+// `casemark/embed-v1` (retained for SDK backward compatibility); new integrations
+// should use `casemark/embed-v1` directly.
 type VaultNewParamsEmbeddingModel string
 
 const (
