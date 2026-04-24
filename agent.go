@@ -15,7 +15,6 @@ import (
 type AgentService struct {
 	Options []option.RequestOption
 	V1      *AgentV1Service
-	V2      *AgentV2Service
 }
 
 // NewAgentService generates a new service that applies the given options to each
@@ -25,6 +24,5 @@ func NewAgentService(opts ...option.RequestOption) (r *AgentService) {
 	r = &AgentService{}
 	r.Options = opts
 	r.V1 = NewAgentV1Service(opts...)
-	r.V2 = NewAgentV2Service(opts...)
 	return
 }
