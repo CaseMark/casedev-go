@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.45.0 (2026-04-28)
+
+Full Changelog: [v0.44.0...v0.45.0](https://github.com/CaseMark/casedev-go/compare/v0.44.0...v0.45.0)
+
+### Features
+
+* **go:** add default http client with timeout ([4da5035](https://github.com/CaseMark/casedev-go/commit/4da5035e55f3f4e867b5ed879a9abf9d29450ccb))
+* support setting headers via env ([3e1c2f2](https://github.com/CaseMark/casedev-go/commit/3e1c2f27a51577d6f168c30fb5f32092e93ed5b2))
+
 ## 0.44.0 (2026-04-24)
 
 Full Changelog: [v0.43.0...v0.44.0](https://github.com/CaseMark/casedev-go/compare/v0.43.0...v0.44.0)
