@@ -45,9 +45,8 @@ func NewAgentV1ChatService(opts ...option.RequestOption) (r *AgentV1ChatService)
 	return
 }
 
-// Creates a persistent OpenCode chat session backed by a Daytona or Vercel
-// runtime. Session state is retained and can be resumed or recovered across
-// requests.
+// Creates a persistent chat session backed by a Daytona or Vercel runtime. Session
+// state is retained and can be resumed or recovered across requests.
 func (r *AgentV1ChatService) New(ctx context.Context, body AgentV1ChatNewParams, opts ...option.RequestOption) (res *AgentV1ChatNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "agent/v1/chat"
@@ -68,7 +67,7 @@ func (r *AgentV1ChatService) Delete(ctx context.Context, id string, opts ...opti
 	return res, err
 }
 
-// Aborts the active OpenCode generation for this chat session.
+// Aborts the active generation for this chat session.
 func (r *AgentV1ChatService) Cancel(ctx context.Context, id string, opts ...option.RequestOption) (res *AgentV1ChatCancelResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
@@ -80,7 +79,7 @@ func (r *AgentV1ChatService) Cancel(ctx context.Context, id string, opts ...opti
 	return res, err
 }
 
-// Answers a pending OpenCode question for the chat session bound to this agent
+// Answers a pending runtime question for the chat session bound to this agent
 // chat.
 func (r *AgentV1ChatService) ReplyToQuestion(ctx context.Context, id string, requestID string, body AgentV1ChatReplyToQuestionParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -150,7 +149,7 @@ func (r *AgentV1ChatService) SendMessage(ctx context.Context, id string, body Ag
 	return err
 }
 
-// Relays OpenCode SSE events for this chat. Supports replay from buffered events
+// Relays runtime SSE events for this chat. Supports replay from buffered events
 // using Last-Event-ID.
 func (r *AgentV1ChatService) StreamStreaming(ctx context.Context, id string, query AgentV1ChatStreamParams, opts ...option.RequestOption) (stream *ssestream.Stream[string]) {
 	var (
@@ -251,7 +250,7 @@ type AgentV1ChatNewParams struct {
 	// Idle timeout before session is eligible for snapshot/termination. Defaults to 15
 	// minutes.
 	IdleTimeoutMs param.Field[int64] `json:"idleTimeoutMs"`
-	// Optional model override for the OpenCode session
+	// Optional model override for the chat runtime session
 	Model param.Field[string] `json:"model"`
 	// Optional human-readable session title
 	Title param.Field[string] `json:"title"`

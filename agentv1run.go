@@ -430,7 +430,7 @@ func (r AgentV1RunGetDetailsResponseProvider) IsKnown() bool {
 type AgentV1RunGetDetailsResponseResult struct {
 	// Compact agent-facing result summary and execution issues
 	FinalResponse AgentV1RunGetDetailsResponseResultFinalResponse `json:"finalResponse" api:"nullable"`
-	// Sandbox execution logs (OpenCode server + runner script)
+	// Sandbox execution logs (runtime server + runner script)
 	Logs            AgentV1RunGetDetailsResponseResultLogs `json:"logs" api:"nullable"`
 	Output          string                                 `json:"output"`
 	OutputObjectIDs []string                               `json:"outputObjectIds"`
@@ -482,13 +482,15 @@ func (r agentV1RunGetDetailsResponseResultFinalResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-// Sandbox execution logs (OpenCode server + runner script)
+// Sandbox execution logs (runtime server + runner script)
 type AgentV1RunGetDetailsResponseResultLogs struct {
-	// OpenCode server stdout/stderr
+	// Legacy runtime server stdout/stderr
 	Opencode string `json:"opencode"`
 	// Runner script stdout/stderr
-	Runner string                                     `json:"runner"`
-	JSON   agentV1RunGetDetailsResponseResultLogsJSON `json:"-"`
+	Runner string `json:"runner"`
+	// Runtime server stdout/stderr
+	Runtime string                                     `json:"runtime"`
+	JSON    agentV1RunGetDetailsResponseResultLogsJSON `json:"-"`
 }
 
 // agentV1RunGetDetailsResponseResultLogsJSON contains the JSON metadata for the
@@ -496,6 +498,7 @@ type AgentV1RunGetDetailsResponseResultLogs struct {
 type agentV1RunGetDetailsResponseResultLogsJSON struct {
 	Opencode    apijson.Field
 	Runner      apijson.Field
+	Runtime     apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

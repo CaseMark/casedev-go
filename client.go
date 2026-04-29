@@ -21,6 +21,7 @@ type Client struct {
 	Agent   *AgentService
 	// Public system metadata and discovery endpoints
 	System   *SystemService
+	Worker   *WorkerService
 	Compute  *ComputeService
 	Database *DatabaseService
 	Format   *FormatService
@@ -76,6 +77,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 
 	r.Agent = NewAgentService(opts...)
 	r.System = NewSystemService(opts...)
+	r.Worker = NewWorkerService(opts...)
 	r.Compute = NewComputeService(opts...)
 	r.Database = NewDatabaseService(opts...)
 	r.Format = NewFormatService(opts...)
