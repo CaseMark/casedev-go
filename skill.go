@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"reflect"
 	"slices"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/CaseMark/casedev-go/internal/param"
 	"github.com/CaseMark/casedev-go/internal/requestconfig"
 	"github.com/CaseMark/casedev-go/option"
+	"github.com/tidwall/gjson"
 )
 
 // Search and read legal AI skills for agents
@@ -195,6 +197,8 @@ func (r skillDeleteResponseJSON) RawJSON() string {
 type SkillReadResponse struct {
 	// Skill author
 	AuthorName string `json:"author_name"`
+	// Skill bundle metadata for root skills and companion file rows
+	Bundle SkillReadResponseBundle `json:"bundle" api:"nullable"`
 	// Full skill content in markdown
 	Content string `json:"content"`
 	// Skill license
@@ -220,6 +224,7 @@ type SkillReadResponse struct {
 // [SkillReadResponse]
 type skillReadResponseJSON struct {
 	AuthorName  apijson.Field
+	Bundle      apijson.Field
 	Content     apijson.Field
 	License     apijson.Field
 	Metadata    apijson.Field
@@ -239,6 +244,156 @@ func (r *SkillReadResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r skillReadResponseJSON) RawJSON() string {
 	return r.raw
+}
+
+// Skill bundle metadata for root skills and companion file rows
+type SkillReadResponseBundle struct {
+	Role        SkillReadResponseBundleRole `json:"role" api:"required"`
+	ContentType string                      `json:"content_type" api:"nullable"`
+	// This field can have the runtime type of [[]SkillReadResponseBundleObjectFile].
+	Files    interface{}                 `json:"files"`
+	Path     string                      `json:"path"`
+	RootSlug string                      `json:"root_slug"`
+	JSON     skillReadResponseBundleJSON `json:"-"`
+	union    SkillReadResponseBundleUnion
+}
+
+// skillReadResponseBundleJSON contains the JSON metadata for the struct
+// [SkillReadResponseBundle]
+type skillReadResponseBundleJSON struct {
+	Role        apijson.Field
+	ContentType apijson.Field
+	Files       apijson.Field
+	Path        apijson.Field
+	RootSlug    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r skillReadResponseBundleJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r *SkillReadResponseBundle) UnmarshalJSON(data []byte) (err error) {
+	*r = SkillReadResponseBundle{}
+	err = apijson.UnmarshalRoot(data, &r.union)
+	if err != nil {
+		return err
+	}
+	return apijson.Port(r.union, &r)
+}
+
+// AsUnion returns a [SkillReadResponseBundleUnion] interface which you can cast to
+// the specific types for more type safety.
+//
+// Possible runtime types of the union are [SkillReadResponseBundleObject],
+// [SkillReadResponseBundleObject].
+func (r SkillReadResponseBundle) AsUnion() SkillReadResponseBundleUnion {
+	return r.union
+}
+
+// Skill bundle metadata for root skills and companion file rows
+//
+// Union satisfied by [SkillReadResponseBundleObject] or
+// [SkillReadResponseBundleObject].
+type SkillReadResponseBundleUnion interface {
+	implementsSkillReadResponseBundle()
+}
+
+func init() {
+	apijson.RegisterUnion(
+		reflect.TypeOf((*SkillReadResponseBundleUnion)(nil)).Elem(),
+		"",
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SkillReadResponseBundleObject{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SkillReadResponseBundleObject{}),
+		},
+	)
+}
+
+type SkillReadResponseBundleObject struct {
+	Files []SkillReadResponseBundleObjectFile `json:"files" api:"required"`
+	Role  SkillReadResponseBundleObjectRole   `json:"role" api:"required"`
+	JSON  skillReadResponseBundleObjectJSON   `json:"-"`
+}
+
+// skillReadResponseBundleObjectJSON contains the JSON metadata for the struct
+// [SkillReadResponseBundleObject]
+type skillReadResponseBundleObjectJSON struct {
+	Files       apijson.Field
+	Role        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SkillReadResponseBundleObject) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillReadResponseBundleObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+func (r SkillReadResponseBundleObject) implementsSkillReadResponseBundle() {}
+
+type SkillReadResponseBundleObjectFile struct {
+	Path        string                                `json:"path" api:"required"`
+	Slug        string                                `json:"slug" api:"required"`
+	ContentType string                                `json:"content_type" api:"nullable"`
+	Name        string                                `json:"name" api:"nullable"`
+	JSON        skillReadResponseBundleObjectFileJSON `json:"-"`
+}
+
+// skillReadResponseBundleObjectFileJSON contains the JSON metadata for the struct
+// [SkillReadResponseBundleObjectFile]
+type skillReadResponseBundleObjectFileJSON struct {
+	Path        apijson.Field
+	Slug        apijson.Field
+	ContentType apijson.Field
+	Name        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SkillReadResponseBundleObjectFile) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillReadResponseBundleObjectFileJSON) RawJSON() string {
+	return r.raw
+}
+
+type SkillReadResponseBundleObjectRole string
+
+const (
+	SkillReadResponseBundleObjectRoleRoot SkillReadResponseBundleObjectRole = "root"
+)
+
+func (r SkillReadResponseBundleObjectRole) IsKnown() bool {
+	switch r {
+	case SkillReadResponseBundleObjectRoleRoot:
+		return true
+	}
+	return false
+}
+
+type SkillReadResponseBundleRole string
+
+const (
+	SkillReadResponseBundleRoleRoot SkillReadResponseBundleRole = "root"
+	SkillReadResponseBundleRoleFile SkillReadResponseBundleRole = "file"
+)
+
+func (r SkillReadResponseBundleRole) IsKnown() bool {
+	switch r {
+	case SkillReadResponseBundleRoleRoot, SkillReadResponseBundleRoleFile:
+		return true
+	}
+	return false
 }
 
 // Skill source (authenticated requests only)
