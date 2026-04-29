@@ -68,6 +68,21 @@ func (r *WorkerV1Service) Delete(ctx context.Context, id string, opts ...option.
 	return err
 }
 
+// Starts or resumes the worker sandbox and OpenCode server. Native
+// /worker/v1/:id/\* proxy routes require this lifecycle primitive to have
+// completed first.
+func (r *WorkerV1Service) Boot(ctx context.Context, id string, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return err
+	}
+	path := fmt.Sprintf("worker/v1/%s/boot", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
+	return err
+}
+
 // Forwards a DELETE request to the worker runtime without translating response
 // shapes.
 func (r *WorkerV1Service) ProxyDelete(ctx context.Context, id string, workerPath string, opts ...option.RequestOption) (err error) {
