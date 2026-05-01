@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.48.1 (2026-05-01)
+
+Full Changelog: [v0.48.0...v0.48.1](https://github.com/CaseMark/casedev-go/compare/v0.48.0...v0.48.1)
+
+### Chores
+
+* avoid embedding reflect.Type for dead code elimination ([27b28c2](https://github.com/CaseMark/casedev-go/commit/27b28c23d72686c4aab3314bde41f275af9b779f))
+
 ## 0.48.0 (2026-04-29)
 
 Full Changelog: [v0.47.0...v0.48.0](https://github.com/CaseMark/casedev-go/compare/v0.47.0...v0.48.0)
