@@ -182,6 +182,33 @@ func (r *VaultObjectService) GetOcrWords(ctx context.Context, id string, objectI
 	return res, err
 }
 
+// Retrieves the raw text of a processed vault object split by page. The object
+// must have completed ingestion before pages can be retrieved — for PDFs this
+// requires the OCR pipeline to have finished writing the per-page sidecar, so
+// freshly uploaded PDFs return 400 with the current `ingestionStatus` until
+// processing completes. For PDFs this returns the per-page OCR text. For plain
+// text files (txt, md, source code, court reporter transcripts) the text is split
+// using right-aligned page-number markers when present (preserving the original
+// document numbering, including continuations like Volume 2 starting at page 234),
+// falling back to form-feed (\f) page-break characters, and finally a single page
+// if neither signal is present. Use the optional `start` and `end` query
+// parameters to fetch a specific inclusive page range. Pages with no text are
+// omitted.
+func (r *VaultObjectService) GetPages(ctx context.Context, id string, objectID string, query VaultObjectGetPagesParams, opts ...option.RequestOption) (res *VaultObjectGetPagesResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	if objectID == "" {
+		err = errors.New("missing required objectId parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("vault/%s/objects/%s/pages", id, objectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
+}
+
 // Get the status of a CaseMark summary workflow job.
 func (r *VaultObjectService) GetSummarizeJob(ctx context.Context, id string, objectID string, jobID string, opts ...option.RequestOption) (res *VaultObjectGetSummarizeJobResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -719,6 +746,113 @@ func (r vaultObjectGetOcrWordsResponsePagesWordJSON) RawJSON() string {
 	return r.raw
 }
 
+type VaultObjectGetPagesResponse struct {
+	Metadata VaultObjectGetPagesResponseMetadata `json:"metadata" api:"required"`
+	// Per-page OCR text in ascending page order
+	Pages []VaultObjectGetPagesResponsePage `json:"pages" api:"required"`
+	JSON  vaultObjectGetPagesResponseJSON   `json:"-"`
+}
+
+// vaultObjectGetPagesResponseJSON contains the JSON metadata for the struct
+// [VaultObjectGetPagesResponse]
+type vaultObjectGetPagesResponseJSON struct {
+	Metadata    apijson.Field
+	Pages       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultObjectGetPagesResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectGetPagesResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type VaultObjectGetPagesResponseMetadata struct {
+	Filename string `json:"filename" api:"required"`
+	ObjectID string `json:"object_id" api:"required"`
+	// Total number of pages with extracted text in the document
+	PageCount int64 `json:"page_count" api:"required"`
+	// Number of pages returned after applying the range filter
+	ReturnedPages int64 `json:"returned_pages" api:"required"`
+	// Where the page text came from. `ocr` for PDFs (per-page OCR sidecar). `txt` for
+	// plain-text files split on form-feed (\f) characters.
+	Source  VaultObjectGetPagesResponseMetadataSource `json:"source" api:"required"`
+	VaultID string                                    `json:"vault_id" api:"required"`
+	// Echoes the end query param if provided
+	End int64 `json:"end" api:"nullable"`
+	// Echoes the start query param if provided
+	Start int64                                   `json:"start" api:"nullable"`
+	JSON  vaultObjectGetPagesResponseMetadataJSON `json:"-"`
+}
+
+// vaultObjectGetPagesResponseMetadataJSON contains the JSON metadata for the
+// struct [VaultObjectGetPagesResponseMetadata]
+type vaultObjectGetPagesResponseMetadataJSON struct {
+	Filename      apijson.Field
+	ObjectID      apijson.Field
+	PageCount     apijson.Field
+	ReturnedPages apijson.Field
+	Source        apijson.Field
+	VaultID       apijson.Field
+	End           apijson.Field
+	Start         apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *VaultObjectGetPagesResponseMetadata) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectGetPagesResponseMetadataJSON) RawJSON() string {
+	return r.raw
+}
+
+// Where the page text came from. `ocr` for PDFs (per-page OCR sidecar). `txt` for
+// plain-text files split on form-feed (\f) characters.
+type VaultObjectGetPagesResponseMetadataSource string
+
+const (
+	VaultObjectGetPagesResponseMetadataSourceOcr VaultObjectGetPagesResponseMetadataSource = "ocr"
+	VaultObjectGetPagesResponseMetadataSourceTxt VaultObjectGetPagesResponseMetadataSource = "txt"
+)
+
+func (r VaultObjectGetPagesResponseMetadataSource) IsKnown() bool {
+	switch r {
+	case VaultObjectGetPagesResponseMetadataSourceOcr, VaultObjectGetPagesResponseMetadataSourceTxt:
+		return true
+	}
+	return false
+}
+
+type VaultObjectGetPagesResponsePage struct {
+	// Page number (1-indexed)
+	Page int64 `json:"page" api:"required"`
+	// OCR text for this page
+	Text string                              `json:"text" api:"required"`
+	JSON vaultObjectGetPagesResponsePageJSON `json:"-"`
+}
+
+// vaultObjectGetPagesResponsePageJSON contains the JSON metadata for the struct
+// [VaultObjectGetPagesResponsePage]
+type vaultObjectGetPagesResponsePageJSON struct {
+	Page        apijson.Field
+	Text        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultObjectGetPagesResponsePage) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectGetPagesResponsePageJSON) RawJSON() string {
+	return r.raw
+}
+
 type VaultObjectGetSummarizeJobResponse struct {
 	// When the job completed
 	CompletedAt time.Time `json:"completedAt" api:"nullable" format:"date-time"`
@@ -954,6 +1088,24 @@ type VaultObjectGetOcrWordsParams struct {
 // URLQuery serializes [VaultObjectGetOcrWordsParams]'s query parameters as
 // `url.Values`.
 func (r VaultObjectGetOcrWordsParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type VaultObjectGetPagesParams struct {
+	// Last page to return (inclusive, 1-indexed). If omitted, returns through the last
+	// page with text.
+	End param.Field[int64] `query:"end"`
+	// First page to return (inclusive, 1-indexed). If omitted, starts at the first
+	// page with text.
+	Start param.Field[int64] `query:"start"`
+}
+
+// URLQuery serializes [VaultObjectGetPagesParams]'s query parameters as
+// `url.Values`.
+func (r VaultObjectGetPagesParams) URLQuery() (v url.Values) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
