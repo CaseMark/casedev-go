@@ -468,6 +468,8 @@ Methods:
 
 Response Types:
 
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ReadResponseFileBundle">ReadResponseFileBundle</a>
+- <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#ReadResponseRootBundle">ReadResponseRootBundle</a>
 - <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillNewResponse">SkillNewResponse</a>
 - <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillUpdateResponse">SkillUpdateResponse</a>
 - <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SkillDeleteResponse">SkillDeleteResponse</a>
