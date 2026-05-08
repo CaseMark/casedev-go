@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.52.2 (2026-05-08)
+
+Full Changelog: [v0.52.1...v0.52.2](https://github.com/CaseMark/casedev-go/compare/v0.52.1...v0.52.2)
+
+### Bug Fixes
+
+* **go:** avoid panic when http.DefaultTransport is wrapped ([ef63f6b](https://github.com/CaseMark/casedev-go/commit/ef63f6be81dd175ac5652eb575098f0fccd5aeb0))
+
 ## 0.52.1 (2026-05-08)
 
 Full Changelog: [v0.52.0...v0.52.1](https://github.com/CaseMark/casedev-go/compare/v0.52.0...v0.52.1)
