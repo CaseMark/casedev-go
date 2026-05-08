@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.52.1 (2026-05-08)
+
+Full Changelog: [v0.52.0...v0.52.1](https://github.com/CaseMark/casedev-go/compare/v0.52.0...v0.52.1)
+
+### Chores
+
+* redact api-key headers in debug logs ([847fafe](https://github.com/CaseMark/casedev-go/commit/847fafe5f26cec968dabb3ac87accf547b045cd4))
+
 ## 0.52.0 (2026-05-07)
 
 Full Changelog: [v0.51.0...v0.52.0](https://github.com/CaseMark/casedev-go/compare/v0.51.0...v0.52.0)
