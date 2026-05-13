@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.52.3 (2026-05-13)
+
+Full Changelog: [v0.52.2...v0.52.3](https://github.com/CaseMark/casedev-go/compare/v0.52.2...v0.52.3)
+
 ## 0.52.2 (2026-05-08)
 
 Full Changelog: [v0.52.1...v0.52.2](https://github.com/CaseMark/casedev-go/compare/v0.52.1...v0.52.2)
