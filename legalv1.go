@@ -1735,8 +1735,7 @@ type LegalV1DocketParams struct {
 	DateFiledBefore param.Field[time.Time] `json:"dateFiledBefore" format:"date"`
 	// Docket ID (required for lookup)
 	DocketID param.Field[string] `json:"docketId"`
-	// Include docket entries/filings in lookup responses. Coming soon — currently
-	// returns 501. The parameter is accepted for forward compatibility.
+	// Include docket entries/filings in lookup responses.
 	IncludeEntries param.Field[bool] `json:"includeEntries"`
 	// Page size for search results or entry list (default 25 for search, 50 for
 	// lookup)
