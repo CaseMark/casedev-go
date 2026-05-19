@@ -1,5 +1,19 @@
 # Agent
 
+## Skills
+
+### Namespaces
+
+Methods:
+
+- <code title="post /agent/skills/namespaces">client.Agent.Skills.Namespaces.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentSkillNamespaceService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentSkillNamespaceNewParams">AgentSkillNamespaceNewParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /agent/skills/namespaces/{id}">client.Agent.Skills.Namespaces.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentSkillNamespaceService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /agent/skills/namespaces">client.Agent.Skills.Namespaces.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentSkillNamespaceService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="delete /agent/skills/namespaces/{id}">client.Agent.Skills.Namespaces.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentSkillNamespaceService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /agent/skills/namespaces/{id}/publish">client.Agent.Skills.Namespaces.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentSkillNamespaceService.Publish">Publish</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentSkillNamespacePublishParams">AgentSkillNamespacePublishParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /agent/skills/namespaces/{id}/pull">client.Agent.Skills.Namespaces.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentSkillNamespaceService.Pull">Pull</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /agent/skills/namespaces/{id}/rotate-token">client.Agent.Skills.Namespaces.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#AgentSkillNamespaceService.RotateToken">RotateToken</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
 ## V1
 
 ### Agents
@@ -91,22 +105,6 @@ Response Types:
 Methods:
 
 - <code title="get /services">client.System.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SystemService.ListServices">ListServices</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#SystemListServicesResponse">SystemListServicesResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-
-# Worker
-
-## V1
-
-Methods:
-
-- <code title="post /worker/v1">client.Worker.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WorkerV1Service.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
-- <code title="get /worker/v1/{id}">client.Worker.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WorkerV1Service.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
-- <code title="delete /worker/v1/{id}">client.Worker.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WorkerV1Service.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
-- <code title="post /worker/v1/{id}/boot">client.Worker.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WorkerV1Service.Boot">Boot</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
-- <code title="delete /worker/v1/{id}/{workerPath}">client.Worker.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WorkerV1Service.ProxyDelete">ProxyDelete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, workerPath <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
-- <code title="get /worker/v1/{id}/{workerPath}">client.Worker.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WorkerV1Service.ProxyGet">ProxyGet</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, workerPath <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
-- <code title="patch /worker/v1/{id}/{workerPath}">client.Worker.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WorkerV1Service.ProxyPatch">ProxyPatch</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, workerPath <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
-- <code title="post /worker/v1/{id}/{workerPath}">client.Worker.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WorkerV1Service.ProxyPost">ProxyPost</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, workerPath <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
-- <code title="put /worker/v1/{id}/{workerPath}">client.Worker.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#WorkerV1Service.ProxyPut">ProxyPut</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>, workerPath <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
 
 # Compute
 
