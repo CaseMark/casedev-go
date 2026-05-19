@@ -38,9 +38,9 @@ func NewComputeV1InstanceService(opts ...option.RequestOption) (r *ComputeV1Inst
 }
 
 // Launches a new GPU compute instance with automatic SSH key generation. Supports
-// mounting Case.dev Vaults as filesystems and configurable auto-shutdown. Instance
-// boots in ~2-5 minutes. Perfect for batch OCR processing, AI model training, and
-// intensive document analysis workloads.
+// mounting Case.dev Vaults as filesystems. Instance boots in ~2-5 minutes. Perfect
+// for batch OCR processing, AI model training, and intensive document analysis
+// workloads.
 func (r *ComputeV1InstanceService) New(ctx context.Context, body ComputeV1InstanceNewParams, opts ...option.RequestOption) (res *ComputeV1InstanceNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/instances"
@@ -63,9 +63,8 @@ func (r *ComputeV1InstanceService) Get(ctx context.Context, id string, opts ...o
 }
 
 // Retrieves all GPU compute instances for your organization with real-time status
-// updates from Lambda Labs. Includes pricing, runtime metrics, and auto-shutdown
-// configuration. Perfect for monitoring AI workloads, document processing jobs,
-// and cost tracking.
+// updates from Lambda Labs. Includes pricing and runtime metrics. Perfect for
+// monitoring AI workloads, document processing jobs, and cost tracking.
 func (r *ComputeV1InstanceService) List(ctx context.Context, opts ...option.RequestOption) (res *ComputeV1InstanceListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "compute/v1/instances"
@@ -88,38 +87,36 @@ func (r *ComputeV1InstanceService) Delete(ctx context.Context, id string, opts .
 }
 
 type ComputeV1InstanceNewResponse struct {
-	ID                  string                           `json:"id"`
-	AutoShutdownMinutes int64                            `json:"autoShutdownMinutes" api:"nullable"`
-	CreatedAt           string                           `json:"createdAt"`
-	GPU                 string                           `json:"gpu"`
-	InstanceType        string                           `json:"instanceType"`
-	Message             string                           `json:"message"`
-	Name                string                           `json:"name"`
-	PricePerHour        string                           `json:"pricePerHour"`
-	Region              string                           `json:"region"`
-	Specs               interface{}                      `json:"specs"`
-	Status              string                           `json:"status"`
-	Vaults              []interface{}                    `json:"vaults"`
-	JSON                computeV1InstanceNewResponseJSON `json:"-"`
+	ID           string                           `json:"id"`
+	CreatedAt    string                           `json:"createdAt"`
+	GPU          string                           `json:"gpu"`
+	InstanceType string                           `json:"instanceType"`
+	Message      string                           `json:"message"`
+	Name         string                           `json:"name"`
+	PricePerHour string                           `json:"pricePerHour"`
+	Region       string                           `json:"region"`
+	Specs        interface{}                      `json:"specs"`
+	Status       string                           `json:"status"`
+	Vaults       []interface{}                    `json:"vaults"`
+	JSON         computeV1InstanceNewResponseJSON `json:"-"`
 }
 
 // computeV1InstanceNewResponseJSON contains the JSON metadata for the struct
 // [ComputeV1InstanceNewResponse]
 type computeV1InstanceNewResponseJSON struct {
-	ID                  apijson.Field
-	AutoShutdownMinutes apijson.Field
-	CreatedAt           apijson.Field
-	GPU                 apijson.Field
-	InstanceType        apijson.Field
-	Message             apijson.Field
-	Name                apijson.Field
-	PricePerHour        apijson.Field
-	Region              apijson.Field
-	Specs               apijson.Field
-	Status              apijson.Field
-	Vaults              apijson.Field
-	raw                 string
-	ExtraFields         map[string]apijson.Field
+	ID           apijson.Field
+	CreatedAt    apijson.Field
+	GPU          apijson.Field
+	InstanceType apijson.Field
+	Message      apijson.Field
+	Name         apijson.Field
+	PricePerHour apijson.Field
+	Region       apijson.Field
+	Specs        apijson.Field
+	Status       apijson.Field
+	Vaults       apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
 }
 
 func (r *ComputeV1InstanceNewResponse) UnmarshalJSON(data []byte) (err error) {
@@ -132,7 +129,6 @@ func (r computeV1InstanceNewResponseJSON) RawJSON() string {
 
 type ComputeV1InstanceGetResponse struct {
 	ID                    string                           `json:"id"`
-	AutoShutdownMinutes   int64                            `json:"autoShutdownMinutes" api:"nullable"`
 	CreatedAt             string                           `json:"createdAt"`
 	CurrentCost           string                           `json:"currentCost"`
 	CurrentRuntimeSeconds int64                            `json:"currentRuntimeSeconds"`
@@ -154,7 +150,6 @@ type ComputeV1InstanceGetResponse struct {
 // [ComputeV1InstanceGetResponse]
 type computeV1InstanceGetResponseJSON struct {
 	ID                    apijson.Field
-	AutoShutdownMinutes   apijson.Field
 	CreatedAt             apijson.Field
 	CurrentCost           apijson.Field
 	CurrentRuntimeSeconds apijson.Field
@@ -235,7 +230,6 @@ func (r computeV1InstanceListResponseJSON) RawJSON() string {
 
 type ComputeV1InstanceListResponseInstance struct {
 	ID                  string                                       `json:"id"`
-	AutoShutdownMinutes int64                                        `json:"autoShutdownMinutes" api:"nullable"`
 	CreatedAt           time.Time                                    `json:"createdAt" format:"date-time"`
 	GPU                 string                                       `json:"gpu"`
 	InstanceType        string                                       `json:"instanceType"`
@@ -254,7 +248,6 @@ type ComputeV1InstanceListResponseInstance struct {
 // struct [ComputeV1InstanceListResponseInstance]
 type computeV1InstanceListResponseInstanceJSON struct {
 	ID                  apijson.Field
-	AutoShutdownMinutes apijson.Field
 	CreatedAt           apijson.Field
 	GPU                 apijson.Field
 	InstanceType        apijson.Field
@@ -335,8 +328,6 @@ type ComputeV1InstanceNewParams struct {
 	Name param.Field[string] `json:"name" api:"required"`
 	// Region (e.g., 'us-west-1')
 	Region param.Field[string] `json:"region" api:"required"`
-	// Auto-shutdown timer (null = never)
-	AutoShutdownMinutes param.Field[int64] `json:"autoShutdownMinutes"`
 	// Vault IDs to mount
 	VaultIDs param.Field[[]string] `json:"vaultIds"`
 }

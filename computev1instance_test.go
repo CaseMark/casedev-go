@@ -26,11 +26,10 @@ func TestComputeV1InstanceNewWithOptionalParams(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Compute.V1.Instances.New(context.TODO(), githubcomcasemarkcasedevgo.ComputeV1InstanceNewParams{
-		InstanceType:        githubcomcasemarkcasedevgo.F("gpu_1x_a10"),
-		Name:                githubcomcasemarkcasedevgo.F("ocr-batch-job"),
-		Region:              githubcomcasemarkcasedevgo.F("us-west-1"),
-		AutoShutdownMinutes: githubcomcasemarkcasedevgo.F(int64(120)),
-		VaultIDs:            githubcomcasemarkcasedevgo.F([]string{"vault_abc123"}),
+		InstanceType: githubcomcasemarkcasedevgo.F("gpu_1x_a10"),
+		Name:         githubcomcasemarkcasedevgo.F("ocr-batch-job"),
+		Region:       githubcomcasemarkcasedevgo.F("us-west-1"),
+		VaultIDs:     githubcomcasemarkcasedevgo.F([]string{"vault_abc123"}),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error

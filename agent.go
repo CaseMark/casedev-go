@@ -14,6 +14,7 @@ import (
 // the [NewAgentService] method instead.
 type AgentService struct {
 	Options []option.RequestOption
+	Skills  *AgentSkillService
 	V1      *AgentV1Service
 }
 
@@ -23,6 +24,7 @@ type AgentService struct {
 func NewAgentService(opts ...option.RequestOption) (r *AgentService) {
 	r = &AgentService{}
 	r.Options = opts
+	r.Skills = NewAgentSkillService(opts...)
 	r.V1 = NewAgentV1Service(opts...)
 	return
 }
