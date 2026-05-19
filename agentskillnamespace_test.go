@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestWorkerV1New(t *testing.T) {
+func TestAgentSkillNamespaceNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,12 @@ func TestWorkerV1New(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Worker.V1.New(context.TODO())
+	err := client.Agent.Skills.Namespaces.New(context.TODO(), githubcomcasemarkcasedevgo.AgentSkillNamespaceNewParams{
+		NamespaceID: githubcomcasemarkcasedevgo.F("namespaceId"),
+		Description: githubcomcasemarkcasedevgo.F("description"),
+		Label:       githubcomcasemarkcasedevgo.F("label"),
+		Metadata:    githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
+	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -35,7 +40,7 @@ func TestWorkerV1New(t *testing.T) {
 	}
 }
 
-func TestWorkerV1Get(t *testing.T) {
+func TestAgentSkillNamespaceGet(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -47,7 +52,7 @@ func TestWorkerV1Get(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Worker.V1.Get(context.TODO(), "id")
+	err := client.Agent.Skills.Namespaces.Get(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -57,7 +62,7 @@ func TestWorkerV1Get(t *testing.T) {
 	}
 }
 
-func TestWorkerV1Delete(t *testing.T) {
+func TestAgentSkillNamespaceList(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -69,7 +74,7 @@ func TestWorkerV1Delete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Worker.V1.Delete(context.TODO(), "id")
+	err := client.Agent.Skills.Namespaces.List(context.TODO())
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -79,7 +84,7 @@ func TestWorkerV1Delete(t *testing.T) {
 	}
 }
 
-func TestWorkerV1Boot(t *testing.T) {
+func TestAgentSkillNamespaceDelete(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -91,7 +96,7 @@ func TestWorkerV1Boot(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Worker.V1.Boot(context.TODO(), "id")
+	err := client.Agent.Skills.Namespaces.Delete(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -101,7 +106,7 @@ func TestWorkerV1Boot(t *testing.T) {
 	}
 }
 
-func TestWorkerV1ProxyDelete(t *testing.T) {
+func TestAgentSkillNamespacePublish(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -113,10 +118,17 @@ func TestWorkerV1ProxyDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Worker.V1.ProxyDelete(
+	err := client.Agent.Skills.Namespaces.Publish(
 		context.TODO(),
 		"id",
-		"workerPath",
+		githubcomcasemarkcasedevgo.AgentSkillNamespacePublishParams{
+			Files: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.AgentSkillNamespacePublishParamsFile{{
+				Content:     githubcomcasemarkcasedevgo.F("content"),
+				Encoding:    githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.AgentSkillNamespacePublishParamsFilesEncodingUtf8),
+				Path:        githubcomcasemarkcasedevgo.F("path"),
+				ContentType: githubcomcasemarkcasedevgo.F("contentType"),
+			}}),
+		},
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -127,7 +139,7 @@ func TestWorkerV1ProxyDelete(t *testing.T) {
 	}
 }
 
-func TestWorkerV1ProxyGet(t *testing.T) {
+func TestAgentSkillNamespacePull(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -139,11 +151,7 @@ func TestWorkerV1ProxyGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Worker.V1.ProxyGet(
-		context.TODO(),
-		"id",
-		"workerPath",
-	)
+	err := client.Agent.Skills.Namespaces.Pull(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -153,7 +161,7 @@ func TestWorkerV1ProxyGet(t *testing.T) {
 	}
 }
 
-func TestWorkerV1ProxyPatch(t *testing.T) {
+func TestAgentSkillNamespaceRotateToken(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -165,63 +173,7 @@ func TestWorkerV1ProxyPatch(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Worker.V1.ProxyPatch(
-		context.TODO(),
-		"id",
-		"workerPath",
-	)
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestWorkerV1ProxyPost(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	err := client.Worker.V1.ProxyPost(
-		context.TODO(),
-		"id",
-		"workerPath",
-	)
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestWorkerV1ProxyPut(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	err := client.Worker.V1.ProxyPut(
-		context.TODO(),
-		"id",
-		"workerPath",
-	)
+	err := client.Agent.Skills.Namespaces.RotateToken(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
