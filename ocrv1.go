@@ -52,9 +52,8 @@ func (r *OcrV1Service) Get(ctx context.Context, id string, query OcrV1GetParams,
 	return res, err
 }
 
-// Download OCR processing results in various formats. Returns the processed
-// document as text extraction, structured JSON with coordinates, searchable PDF
-// with text layer, or the original uploaded document.
+// Download OCR processing results in various formats by redirecting to the OCR
+// service download URL.
 func (r *OcrV1Service) Download(ctx context.Context, id string, type_ OcrV1DownloadParamsType, opts ...option.RequestOption) (res *http.Response, err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/octet-stream")}, opts...)

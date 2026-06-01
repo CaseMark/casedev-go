@@ -1050,7 +1050,8 @@ type VaultSearchParams struct {
 	// Search method: 'global' for comprehensive questions, 'entity' for specific
 	// entities, 'fast' for quick similarity search, 'hybrid' for combined approach
 	Method param.Field[VaultSearchParamsMethod] `json:"method"`
-	// Maximum number of results to return
+	// Maximum number of results to return. Hybrid search supports 1 to 50; other
+	// methods may support up to 100.
 	TopK param.Field[int64] `json:"topK"`
 }
 
