@@ -415,6 +415,25 @@ Methods:
 - <code title="delete /memory/v1">client.Memory.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MemoryV1Service.DeleteAll">DeleteAll</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MemoryV1DeleteAllParams">MemoryV1DeleteAllParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MemoryV1DeleteAllResponse">MemoryV1DeleteAllResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="post /memory/v1/search">client.Memory.V1.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MemoryV1Service.Search">Search</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MemoryV1SearchParams">MemoryV1SearchParams</a>) (\*<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go">githubcomcasemarkcasedevgo</a>.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MemoryV1SearchResponse">MemoryV1SearchResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
+# Media
+
+## V1
+
+### Clips
+
+Methods:
+
+- <code title="post /media/v1/clips">client.Media.V1.Clips.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MediaV1ClipService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="get /media/v1/clips/{id}">client.Media.V1.Clips.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MediaV1ClipService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, id <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
+### Transcripts
+
+#### Search
+
+Methods:
+
+- <code title="post /media/v1/transcripts/search">client.Media.V1.Transcripts.Search.<a href="https://pkg.go.dev/github.com/CaseMark/casedev-go#MediaV1TranscriptSearchService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
 # Ocr
 
 ## V1

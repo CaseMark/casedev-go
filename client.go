@@ -29,6 +29,7 @@ type Client struct {
 	// Access 40+ language models through a unified API
 	Llm       *LlmService
 	Memory    *MemoryService
+	Media     *MediaService
 	Ocr       *OcrService
 	Privilege *PrivilegeService
 	Mail      *MailService
@@ -83,6 +84,7 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 	r.Matters = NewMatterService(opts...)
 	r.Llm = NewLlmService(opts...)
 	r.Memory = NewMemoryService(opts...)
+	r.Media = NewMediaService(opts...)
 	r.Ocr = NewOcrService(opts...)
 	r.Privilege = NewPrivilegeService(opts...)
 	r.Mail = NewMailService(opts...)
