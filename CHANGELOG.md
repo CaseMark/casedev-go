@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.55.1 (2026-06-02)
+
+Full Changelog: [v0.55.0...v0.55.1](https://github.com/CaseMark/casedev-go/compare/v0.55.0...v0.55.1)
+
+### Chores
+
+* use stable release metadata ([#97](https://github.com/CaseMark/casedev-go/issues/97)) ([18b53fd](https://github.com/CaseMark/casedev-go/commit/18b53fdc97f8d3d8820fba2238826eee2b1bc1a9))
+
 ## [0.55.0](https://github.com/CaseMark/casedev-go/compare/v0.54.0...v0.55.0) (2026-06-01)
 
 
