@@ -23,9 +23,6 @@ type AgentV1Service struct {
 	// Create, manage, and execute AI agents with tool access, sandbox environments,
 	// and async run workflows
 	Execute *AgentV1ExecuteService
-	// Create, manage, and execute AI agents with tool access, sandbox environments,
-	// and async run workflows
-	Chat *AgentV1ChatService
 }
 
 // NewAgentV1Service generates a new service that applies the given options to each
@@ -37,6 +34,5 @@ func NewAgentV1Service(opts ...option.RequestOption) (r *AgentV1Service) {
 	r.Agents = NewAgentV1AgentService(opts...)
 	r.Run = NewAgentV1RunService(opts...)
 	r.Execute = NewAgentV1ExecuteService(opts...)
-	r.Chat = NewAgentV1ChatService(opts...)
 	return
 }

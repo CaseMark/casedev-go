@@ -79,6 +79,19 @@ func (r *SkillService) Delete(ctx context.Context, slug string, opts ...option.R
 	return res, err
 }
 
+// Export a skill as an installable filesystem tree for sandbox runtimes.
+// Authenticated org-scoped custom skills are resolved before curated skills.
+func (r *SkillService) Export(ctx context.Context, slug string, query SkillExportParams, opts ...option.RequestOption) (res *SkillExportResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if slug == "" {
+		err = errors.New("missing required slug parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("skills/%s/export", slug)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
+}
+
 // Read the full content of a legal skill by its slug. Returns markdown content,
 // tags, and metadata.
 func (r *SkillService) Read(ctx context.Context, slug string, opts ...option.RequestOption) (res *SkillReadResponse, err error) {
@@ -211,6 +224,7 @@ func (r ReadResponseRootBundleRole) IsKnown() bool {
 }
 
 type SkillNewResponse struct {
+	Bundle    interface{}          `json:"bundle" api:"nullable"`
 	Content   string               `json:"content"`
 	CreatedAt time.Time            `json:"created_at" format:"date-time"`
 	Metadata  interface{}          `json:"metadata"`
@@ -225,6 +239,7 @@ type SkillNewResponse struct {
 // skillNewResponseJSON contains the JSON metadata for the struct
 // [SkillNewResponse]
 type skillNewResponseJSON struct {
+	Bundle      apijson.Field
 	Content     apijson.Field
 	CreatedAt   apijson.Field
 	Metadata    apijson.Field
@@ -246,6 +261,7 @@ func (r skillNewResponseJSON) RawJSON() string {
 }
 
 type SkillUpdateResponse struct {
+	Bundle    interface{}             `json:"bundle" api:"nullable"`
 	Content   string                  `json:"content"`
 	Metadata  interface{}             `json:"metadata"`
 	Name      string                  `json:"name"`
@@ -260,6 +276,7 @@ type SkillUpdateResponse struct {
 // skillUpdateResponseJSON contains the JSON metadata for the struct
 // [SkillUpdateResponse]
 type skillUpdateResponseJSON struct {
+	Bundle      apijson.Field
 	Content     apijson.Field
 	Metadata    apijson.Field
 	Name        apijson.Field
@@ -301,6 +318,79 @@ func (r *SkillDeleteResponse) UnmarshalJSON(data []byte) (err error) {
 
 func (r skillDeleteResponseJSON) RawJSON() string {
 	return r.raw
+}
+
+type SkillExportResponse struct {
+	Files  []SkillExportResponseFile `json:"files"`
+	Root   string                    `json:"root"`
+	Slug   string                    `json:"slug"`
+	Source SkillExportResponseSource `json:"source"`
+	Target string                    `json:"target"`
+	JSON   skillExportResponseJSON   `json:"-"`
+}
+
+// skillExportResponseJSON contains the JSON metadata for the struct
+// [SkillExportResponse]
+type skillExportResponseJSON struct {
+	Files       apijson.Field
+	Root        apijson.Field
+	Slug        apijson.Field
+	Source      apijson.Field
+	Target      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SkillExportResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillExportResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type SkillExportResponseFile struct {
+	Content     string                      `json:"content"`
+	ContentType string                      `json:"content_type"`
+	Path        string                      `json:"path"`
+	Sha256      string                      `json:"sha256"`
+	SizeBytes   int64                       `json:"size_bytes"`
+	JSON        skillExportResponseFileJSON `json:"-"`
+}
+
+// skillExportResponseFileJSON contains the JSON metadata for the struct
+// [SkillExportResponseFile]
+type skillExportResponseFileJSON struct {
+	Content     apijson.Field
+	ContentType apijson.Field
+	Path        apijson.Field
+	Sha256      apijson.Field
+	SizeBytes   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SkillExportResponseFile) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillExportResponseFileJSON) RawJSON() string {
+	return r.raw
+}
+
+type SkillExportResponseSource string
+
+const (
+	SkillExportResponseSourceCustom  SkillExportResponseSource = "custom"
+	SkillExportResponseSourceCurated SkillExportResponseSource = "curated"
+)
+
+func (r SkillExportResponseSource) IsKnown() bool {
+	switch r {
+	case SkillExportResponseSourceCustom, SkillExportResponseSourceCurated:
+		return true
+	}
+	return false
 }
 
 type SkillReadResponse struct {
@@ -536,6 +626,9 @@ type SkillNewParams struct {
 	Content param.Field[string] `json:"content" api:"required"`
 	// Skill name
 	Name param.Field[string] `json:"name" api:"required"`
+	// Optional bundled companion files installed alongside the skill as <slug>/<path>
+	// in sandbox skill directories.
+	Files param.Field[[]SkillNewParamsFile] `json:"files"`
 	// Arbitrary metadata (author, license, etc.)
 	Metadata param.Field[interface{}] `json:"metadata"`
 	// URL-safe slug. Auto-generated from name if omitted.
@@ -550,10 +643,29 @@ func (r SkillNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+type SkillNewParamsFile struct {
+	Content param.Field[string] `json:"content" api:"required"`
+	// Relative path inside the skill directory. SKILL.md is reserved for the root
+	// skill content.
+	Path        param.Field[string]      `json:"path" api:"required"`
+	ContentType param.Field[string]      `json:"contentType"`
+	Metadata    param.Field[interface{}] `json:"metadata"`
+	Name        param.Field[string]      `json:"name"`
+	Summary     param.Field[string]      `json:"summary"`
+	Tags        param.Field[[]string]    `json:"tags"`
+}
+
+func (r SkillNewParamsFile) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 type SkillUpdateParams struct {
-	Content  param.Field[string]      `json:"content"`
-	Metadata param.Field[interface{}] `json:"metadata"`
-	Name     param.Field[string]      `json:"name"`
+	Content param.Field[string] `json:"content"`
+	// Optional replacement companion file tree. Omit to leave existing bundled files
+	// unchanged; send [] to remove bundled files.
+	Files    param.Field[[]SkillUpdateParamsFile] `json:"files"`
+	Metadata param.Field[interface{}]             `json:"metadata"`
+	Name     param.Field[string]                  `json:"name"`
 	// New slug (renames the skill)
 	Slug    param.Field[string]   `json:"slug"`
 	Summary param.Field[string]   `json:"summary"`
@@ -562,6 +674,34 @@ type SkillUpdateParams struct {
 
 func (r SkillUpdateParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type SkillUpdateParamsFile struct {
+	Content     param.Field[string]      `json:"content" api:"required"`
+	Path        param.Field[string]      `json:"path" api:"required"`
+	ContentType param.Field[string]      `json:"contentType"`
+	Metadata    param.Field[interface{}] `json:"metadata"`
+	Name        param.Field[string]      `json:"name"`
+	Summary     param.Field[string]      `json:"summary"`
+	Tags        param.Field[[]string]    `json:"tags"`
+}
+
+func (r SkillUpdateParamsFile) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type SkillExportParams struct {
+	// Agent runtime skill directory convention to export for. Most callers should omit
+	// this and pass skillSlugs when creating a runtime.
+	Target param.Field[string] `query:"target"`
+}
+
+// URLQuery serializes [SkillExportParams]'s query parameters as `url.Values`.
+func (r SkillExportParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type SkillResolveParams struct {
