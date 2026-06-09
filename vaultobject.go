@@ -631,8 +631,14 @@ type VaultObjectGetChunksResponseChunk struct {
 	// Last OCR word index covered by the chunk, if available
 	WordEndIndex int64 `json:"word_end_index" api:"required,nullable"`
 	// First OCR word index covered by the chunk, if available
-	WordStartIndex int64                                 `json:"word_start_index" api:"required,nullable"`
-	JSON           vaultObjectGetChunksResponseChunkJSON `json:"-"`
+	WordStartIndex int64 `json:"word_start_index" api:"required,nullable"`
+	// Source media timestamp for the last word in the chunk. Present only for
+	// media-backed transcripts with real word timing.
+	EndMs int64 `json:"end_ms"`
+	// Source media timestamp for the first word in the chunk. Present only for
+	// media-backed transcripts with real word timing.
+	StartMs int64                                 `json:"start_ms"`
+	JSON    vaultObjectGetChunksResponseChunkJSON `json:"-"`
 }
 
 // vaultObjectGetChunksResponseChunkJSON contains the JSON metadata for the struct
@@ -644,6 +650,8 @@ type vaultObjectGetChunksResponseChunkJSON struct {
 	Text           apijson.Field
 	WordEndIndex   apijson.Field
 	WordStartIndex apijson.Field
+	EndMs          apijson.Field
+	StartMs        apijson.Field
 	raw            string
 	ExtraFields    map[string]apijson.Field
 }

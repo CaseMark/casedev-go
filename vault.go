@@ -688,6 +688,9 @@ type VaultSearchResponseChunk struct {
 	ChunkIndex int64 `json:"chunk_index"`
 	// Vector similarity distance (lower is more similar)
 	Distance float64 `json:"distance"`
+	// Source media timestamp for the last word in the chunk. Present only for
+	// media-backed transcripts with real word timing.
+	EndMs int64 `json:"end_ms"`
 	// ID of the source document
 	ObjectID string `json:"object_id"`
 	// PDF page number where the chunk ends (1-indexed). Null for non-PDF documents or
@@ -700,6 +703,9 @@ type VaultSearchResponseChunk struct {
 	Score float64 `json:"score"`
 	// Source identifier (deprecated, use object_id)
 	Source string `json:"source"`
+	// Source media timestamp for the first word in the chunk. Present only for
+	// media-backed transcripts with real word timing.
+	StartMs int64 `json:"start_ms"`
 	// Preview of the chunk text (up to 500 characters)
 	Text string `json:"text"`
 	// Ending word index (0-based) in the OCR word list. Use with GET
@@ -718,11 +724,13 @@ type VaultSearchResponseChunk struct {
 type vaultSearchResponseChunkJSON struct {
 	ChunkIndex     apijson.Field
 	Distance       apijson.Field
+	EndMs          apijson.Field
 	ObjectID       apijson.Field
 	PageEnd        apijson.Field
 	PageStart      apijson.Field
 	Score          apijson.Field
 	Source         apijson.Field
+	StartMs        apijson.Field
 	Text           apijson.Field
 	WordEndIndex   apijson.Field
 	WordStartIndex apijson.Field
