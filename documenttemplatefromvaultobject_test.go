@@ -7,14 +7,13 @@ import (
 	"errors"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/CaseMark/casedev-go"
 	"github.com/CaseMark/casedev-go/internal/testutil"
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestUsageV1GetWithOptionalParams(t *testing.T) {
+func TestDocumentTemplateFromVaultObjectNew(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -26,13 +25,7 @@ func TestUsageV1GetWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Usage.V1.Get(context.TODO(), githubcomcasemarkcasedevgo.UsageV1GetParams{
-		Granularity:   githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.UsageV1GetParamsGranularitySummary),
-		GroupBy:       githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.UsageV1GetParamsGroupByLincSessionID),
-		LincSessionID: githubcomcasemarkcasedevgo.F("lincSessionId"),
-		PeriodEnd:     githubcomcasemarkcasedevgo.F(time.Now()),
-		PeriodStart:   githubcomcasemarkcasedevgo.F(time.Now()),
-	})
+	err := client.DocumentTemplates.FromVaultObject.New(context.TODO())
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

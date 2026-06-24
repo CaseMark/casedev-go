@@ -137,13 +137,13 @@ func (r *VaultService) ConfirmUpload(ctx context.Context, id string, objectID st
 }
 
 // Triggers ingestion workflow for a vault object to extract text, generate chunks,
-// and create embeddings. For supported file types (PDF, DOCX, PPTX, TXT, RTF, XML,
-// HTML, Markdown, CSV/TSV, JSON/YAML/TOML, common source code files, ZIP, audio,
-// video), processing happens asynchronously. ZIP archives are unpacked recursively
-// up to 5 levels, and each extracted file is created as an independent vault
-// object and ingested via the normal pipeline. For unsupported types (images,
-// etc.), the file is marked as completed immediately without text extraction.
-// GraphRAG indexing must be triggered separately via POST
+// and create embeddings. For supported file types (PDF, DOCX, PPTX, XLSX, TXT,
+// RTF, XML, HTML, Markdown, CSV/TSV, JSON/YAML/TOML, common source code files,
+// ZIP, audio, video), processing happens asynchronously. ZIP archives are unpacked
+// recursively up to 5 levels, and each extracted file is created as an independent
+// vault object and ingested via the normal pipeline. For unsupported types
+// (images, etc.), the file is marked as completed immediately without text
+// extraction. GraphRAG indexing must be triggered separately via POST
 // /vault/:id/graphrag/:objectId.
 func (r *VaultService) Ingest(ctx context.Context, id string, objectID string, opts ...option.RequestOption) (res *VaultIngestResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
@@ -553,17 +553,20 @@ func (r vaultDeleteResponseDeletedVaultJSON) RawJSON() string {
 }
 
 type VaultConfirmUploadResponse struct {
-	AlreadyConfirmed bool                             `json:"alreadyConfirmed"`
-	ObjectID         string                           `json:"objectId"`
-	Status           VaultConfirmUploadResponseStatus `json:"status"`
-	VaultID          string                           `json:"vaultId"`
-	JSON             vaultConfirmUploadResponseJSON   `json:"-"`
+	AlreadyConfirmed bool `json:"alreadyConfirmed"`
+	// Present when autoIngest was requested on a successful confirmation
+	Ingest   VaultConfirmUploadResponseIngest `json:"ingest"`
+	ObjectID string                           `json:"objectId"`
+	Status   VaultConfirmUploadResponseStatus `json:"status"`
+	VaultID  string                           `json:"vaultId"`
+	JSON     vaultConfirmUploadResponseJSON   `json:"-"`
 }
 
 // vaultConfirmUploadResponseJSON contains the JSON metadata for the struct
 // [VaultConfirmUploadResponse]
 type vaultConfirmUploadResponseJSON struct {
 	AlreadyConfirmed apijson.Field
+	Ingest           apijson.Field
 	ObjectID         apijson.Field
 	Status           apijson.Field
 	VaultID          apijson.Field
@@ -576,6 +579,32 @@ func (r *VaultConfirmUploadResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r vaultConfirmUploadResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// Present when autoIngest was requested on a successful confirmation
+type VaultConfirmUploadResponseIngest struct {
+	Error      string                               `json:"error"`
+	Triggered  bool                                 `json:"triggered"`
+	WorkflowID string                               `json:"workflowId" api:"nullable"`
+	JSON       vaultConfirmUploadResponseIngestJSON `json:"-"`
+}
+
+// vaultConfirmUploadResponseIngestJSON contains the JSON metadata for the struct
+// [VaultConfirmUploadResponseIngest]
+type vaultConfirmUploadResponseIngestJSON struct {
+	Error       apijson.Field
+	Triggered   apijson.Field
+	WorkflowID  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultConfirmUploadResponseIngest) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultConfirmUploadResponseIngestJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -787,6 +816,8 @@ type VaultUploadResponse struct {
 	// URL expiration time in seconds
 	ExpiresIn    float64                         `json:"expiresIn"`
 	Instructions VaultUploadResponseInstructions `json:"instructions"`
+	// Whether the file is marked as AI-generated work product
+	IsAIGenerated bool `json:"is_ai_generated"`
 	// Next API endpoint to call for processing
 	NextStep string `json:"next_step" api:"nullable"`
 	// Unique identifier for the uploaded object
@@ -807,6 +838,7 @@ type vaultUploadResponseJSON struct {
 	EnableIndexing apijson.Field
 	ExpiresIn      apijson.Field
 	Instructions   apijson.Field
+	IsAIGenerated  apijson.Field
 	NextStep       apijson.Field
 	ObjectID       apijson.Field
 	Path           apijson.Field
@@ -949,6 +981,11 @@ func (r VaultConfirmUploadParams) MarshalJSON() (data []byte, err error) {
 type VaultConfirmUploadParamsBody struct {
 	// Whether the upload succeeded
 	Success param.Field[VaultConfirmUploadParamsBodySuccess] `json:"success" api:"required"`
+	// When true and the object was uploaded with auto_index, trigger ingestion
+	// immediately after a successful confirmation (no separate ingest call needed).
+	// The ingest outcome is reported in the `ingest` response field; an ingest failure
+	// does not fail the confirmation.
+	AutoIngest param.Field[bool] `json:"autoIngest"`
 	// Client-side error code
 	ErrorCode param.Field[string] `json:"errorCode"`
 	// Client-side error message
@@ -977,6 +1014,11 @@ type VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess struct {
 	SizeBytes param.Field[int64] `json:"sizeBytes" api:"required"`
 	// Whether the upload succeeded
 	Success param.Field[VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess] `json:"success" api:"required"`
+	// When true and the object was uploaded with auto_index, trigger ingestion
+	// immediately after a successful confirmation (no separate ingest call needed).
+	// The ingest outcome is reported in the `ingest` response field; an ingest failure
+	// does not fail the confirmation.
+	AutoIngest param.Field[bool] `json:"autoIngest"`
 	// S3 ETag for the uploaded object (optional if client cannot access ETag header)
 	Etag param.Field[string] `json:"etag"`
 }
@@ -1120,6 +1162,10 @@ type VaultUploadParams struct {
 	Filename param.Field[string] `json:"filename" api:"required"`
 	// Whether to automatically process and index the file for search
 	AutoIndex param.Field[bool] `json:"auto_index"`
+	// Marks the file as AI-generated work product (e.g. uploaded by an agent) rather
+	// than a user-provided source document. Persisted on the object and returned by
+	// object listings so clients can distinguish provenance.
+	IsAIGenerated param.Field[bool] `json:"is_ai_generated"`
 	// Additional metadata to associate with the file
 	Metadata param.Field[interface{}] `json:"metadata"`
 	// Optional folder path for hierarchy preservation. Allows integrations to maintain

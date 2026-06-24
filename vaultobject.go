@@ -77,14 +77,14 @@ func (r *VaultObjectService) Update(ctx context.Context, id string, objectID str
 
 // Retrieve all objects stored in a specific vault, including document metadata,
 // ingestion status, and processing statistics.
-func (r *VaultObjectService) List(ctx context.Context, id string, opts ...option.RequestOption) (res *VaultObjectListResponse, err error) {
+func (r *VaultObjectService) List(ctx context.Context, id string, query VaultObjectListParams, opts ...option.RequestOption) (res *VaultObjectListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return res, err
 }
 
@@ -102,6 +102,26 @@ func (r *VaultObjectService) Delete(ctx context.Context, id string, objectID str
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s", id, objectID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, &res, opts...)
+	return res, err
+}
+
+// Merges one or more PDF vault objects onto the end of an existing PDF vault
+// object, overwriting the target in place before returning. Optionally rewrites
+// citation links in the original target into internal PDF jumps and adds back
+// links on appended pages. The target object’s ingestion state is not affected;
+// appended pages are not searchable.
+func (r *VaultObjectService) Append(ctx context.Context, id string, objectID string, body VaultObjectAppendParams, opts ...option.RequestOption) (res *VaultObjectAppendResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	if objectID == "" {
+		err = errors.New("missing required objectId parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("vault/%s/objects/%s/append", id, objectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return res, err
 }
 
@@ -246,6 +266,24 @@ func (r *VaultObjectService) GetText(ctx context.Context, id string, objectID st
 	return res, err
 }
 
+// Triggers a CaseMark AI workflow to summarize or analyze a document stored in the
+// vault. The workflow processes the document asynchronously and stores the result
+// as a new object in the same vault, linked to the original document.
+func (r *VaultObjectService) Summarize(ctx context.Context, id string, objectID string, body VaultObjectSummarizeParams, opts ...option.RequestOption) (res *VaultObjectSummarizeResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	if objectID == "" {
+		err = errors.New("missing required objectId parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("vault/%s/objects/%s/summarize", id, objectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
 type VaultObjectGetResponse struct {
 	// Object ID
 	ID string `json:"id" api:"required"`
@@ -267,6 +305,8 @@ type VaultObjectGetResponse struct {
 	ChunkCount int64 `json:"chunkCount"`
 	// Error details when ingestion fails
 	IngestionError string `json:"ingestionError" api:"nullable"`
+	// Whether the file was marked as AI-generated work product at upload time
+	IsAIGenerated bool `json:"is_ai_generated"`
 	// Additional metadata
 	Metadata interface{} `json:"metadata"`
 	// Number of pages (for documents)
@@ -297,6 +337,7 @@ type vaultObjectGetResponseJSON struct {
 	VaultID            apijson.Field
 	ChunkCount         apijson.Field
 	IngestionError     apijson.Field
+	IsAIGenerated      apijson.Field
 	Metadata           apijson.Field
 	PageCount          apijson.Field
 	Path               apijson.Field
@@ -410,6 +451,8 @@ type VaultObjectListResponseObject struct {
 	IngestionStartedAt time.Time `json:"ingestionStartedAt" api:"nullable" format:"date-time"`
 	// Durable workflow run ID for the active or last ingestion attempt
 	IngestionWorkflowID string `json:"ingestionWorkflowId" api:"nullable"`
+	// Whether the file was marked as AI-generated work product at upload time
+	IsAIGenerated bool `json:"is_ai_generated"`
 	// Custom metadata associated with the document
 	Metadata interface{} `json:"metadata"`
 	// Number of pages in the document
@@ -440,6 +483,7 @@ type vaultObjectListResponseObjectJSON struct {
 	IngestionError       apijson.Field
 	IngestionStartedAt   apijson.Field
 	IngestionWorkflowID  apijson.Field
+	IsAIGenerated        apijson.Field
 	Metadata             apijson.Field
 	PageCount            apijson.Field
 	Path                 apijson.Field
@@ -510,6 +554,49 @@ func (r *VaultObjectDeleteResponseDeletedObject) UnmarshalJSON(data []byte) (err
 }
 
 func (r vaultObjectDeleteResponseDeletedObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+type VaultObjectAppendResponse struct {
+	ID              string                        `json:"id"`
+	Checksum        string                        `json:"checksum"`
+	ContentType     string                        `json:"contentType"`
+	CreatedAt       time.Time                     `json:"createdAt" format:"date-time"`
+	DownloadURL     string                        `json:"downloadUrl"`
+	ExpiresIn       int64                         `json:"expiresIn"`
+	Filename        string                        `json:"filename"`
+	IngestionStatus string                        `json:"ingestionStatus"`
+	Metadata        interface{}                   `json:"metadata"`
+	PageCount       int64                         `json:"pageCount"`
+	SizeBytes       int64                         `json:"sizeBytes"`
+	VaultID         string                        `json:"vaultId"`
+	JSON            vaultObjectAppendResponseJSON `json:"-"`
+}
+
+// vaultObjectAppendResponseJSON contains the JSON metadata for the struct
+// [VaultObjectAppendResponse]
+type vaultObjectAppendResponseJSON struct {
+	ID              apijson.Field
+	Checksum        apijson.Field
+	ContentType     apijson.Field
+	CreatedAt       apijson.Field
+	DownloadURL     apijson.Field
+	ExpiresIn       apijson.Field
+	Filename        apijson.Field
+	IngestionStatus apijson.Field
+	Metadata        apijson.Field
+	PageCount       apijson.Field
+	SizeBytes       apijson.Field
+	VaultID         apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *VaultObjectAppendResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectAppendResponseJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -985,6 +1072,58 @@ func (r vaultObjectGetTextResponseMetadataJSON) RawJSON() string {
 	return r.raw
 }
 
+type VaultObjectSummarizeResponse struct {
+	// CaseMark workflow ID
+	CasemarkWorkflowID string `json:"casemarkWorkflowId"`
+	// Case.dev job ID for tracking
+	JobID string `json:"jobId"`
+	// Current job status
+	Status VaultObjectSummarizeResponseStatus `json:"status"`
+	// URL to check job status
+	StatusURL string `json:"statusUrl"`
+	// Type of workflow being executed
+	WorkflowType string                           `json:"workflowType"`
+	JSON         vaultObjectSummarizeResponseJSON `json:"-"`
+}
+
+// vaultObjectSummarizeResponseJSON contains the JSON metadata for the struct
+// [VaultObjectSummarizeResponse]
+type vaultObjectSummarizeResponseJSON struct {
+	CasemarkWorkflowID apijson.Field
+	JobID              apijson.Field
+	Status             apijson.Field
+	StatusURL          apijson.Field
+	WorkflowType       apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
+}
+
+func (r *VaultObjectSummarizeResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectSummarizeResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// Current job status
+type VaultObjectSummarizeResponseStatus string
+
+const (
+	VaultObjectSummarizeResponseStatusPending    VaultObjectSummarizeResponseStatus = "pending"
+	VaultObjectSummarizeResponseStatusProcessing VaultObjectSummarizeResponseStatus = "processing"
+	VaultObjectSummarizeResponseStatusCompleted  VaultObjectSummarizeResponseStatus = "completed"
+	VaultObjectSummarizeResponseStatusFailed     VaultObjectSummarizeResponseStatus = "failed"
+)
+
+func (r VaultObjectSummarizeResponseStatus) IsKnown() bool {
+	switch r {
+	case VaultObjectSummarizeResponseStatusPending, VaultObjectSummarizeResponseStatusProcessing, VaultObjectSummarizeResponseStatusCompleted, VaultObjectSummarizeResponseStatusFailed:
+		return true
+	}
+	return false
+}
+
 type VaultObjectUpdateParams struct {
 	// New filename for the document (affects display name and downloads)
 	Filename param.Field[string] `json:"filename"`
@@ -997,6 +1136,20 @@ type VaultObjectUpdateParams struct {
 
 func (r VaultObjectUpdateParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type VaultObjectListParams struct {
+	// Include placeholders for uploads that were never completed (awaiting_upload) or
+	// were cancelled (aborted). Excluded by default.
+	IncludeUnconfirmed param.Field[bool] `query:"includeUnconfirmed"`
+}
+
+// URLQuery serializes [VaultObjectListParams]'s query parameters as `url.Values`.
+func (r VaultObjectListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type VaultObjectDeleteParams struct {
@@ -1028,6 +1181,25 @@ func (r VaultObjectDeleteParamsForce) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type VaultObjectAppendParams struct {
+	// Vault object IDs whose pages will be appended onto the target object, in order.
+	// Must not include the target object itself.
+	AppendObjectIDs param.Field[[]string] `json:"appendObjectIds" api:"required"`
+	// Adds back links on appended pages
+	BackLinks param.Field[bool] `json:"backLinks"`
+	// Label text for the back link. Used only when backLinks is true and rendered
+	// centered at the bottom of each appended page.
+	BackLinksText param.Field[string] `json:"backLinksText"`
+	// When true, rewrites links in the target object to internal PDF jumps when the
+	// URL contains exactly one appended object ID as a standalone query parameter
+	// value or decoded path segment.
+	RewriteLinks param.Field[bool] `json:"rewriteLinks"`
+}
+
+func (r VaultObjectAppendParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
 
 type VaultObjectNewPresignedURLParams struct {
@@ -1117,4 +1289,31 @@ func (r VaultObjectGetPagesParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type VaultObjectSummarizeParams struct {
+	// Output format for the summary document
+	OutputFormat param.Field[VaultObjectSummarizeParamsOutputFormat] `json:"outputFormat"`
+	// Type of CaseMark workflow to run
+	WorkflowType param.Field[string] `json:"workflowType"`
+}
+
+func (r VaultObjectSummarizeParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Output format for the summary document
+type VaultObjectSummarizeParamsOutputFormat string
+
+const (
+	VaultObjectSummarizeParamsOutputFormatPdf  VaultObjectSummarizeParamsOutputFormat = "PDF"
+	VaultObjectSummarizeParamsOutputFormatWord VaultObjectSummarizeParamsOutputFormat = "WORD"
+)
+
+func (r VaultObjectSummarizeParamsOutputFormat) IsKnown() bool {
+	switch r {
+	case VaultObjectSummarizeParamsOutputFormatPdf, VaultObjectSummarizeParamsOutputFormatWord:
+		return true
+	}
+	return false
 }

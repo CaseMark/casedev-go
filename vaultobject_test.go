@@ -74,7 +74,7 @@ func TestVaultObjectUpdateWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultObjectList(t *testing.T) {
+func TestVaultObjectListWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -86,7 +86,13 @@ func TestVaultObjectList(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Objects.List(context.TODO(), "id")
+	_, err := client.Vault.Objects.List(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.VaultObjectListParams{
+			IncludeUnconfirmed: githubcomcasemarkcasedevgo.F(true),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -114,6 +120,38 @@ func TestVaultObjectDeleteWithOptionalParams(t *testing.T) {
 		"objectId",
 		githubcomcasemarkcasedevgo.VaultObjectDeleteParams{
 			Force: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectDeleteParamsForceTrue),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestVaultObjectAppendWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Vault.Objects.Append(
+		context.TODO(),
+		"id",
+		"objectId",
+		githubcomcasemarkcasedevgo.VaultObjectAppendParams{
+			AppendObjectIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
+			BackLinks:       githubcomcasemarkcasedevgo.F(true),
+			BackLinksText:   githubcomcasemarkcasedevgo.F("backLinksText"),
+			RewriteLinks:    githubcomcasemarkcasedevgo.F(true),
 		},
 	)
 	if err != nil {
@@ -329,6 +367,36 @@ func TestVaultObjectGetText(t *testing.T) {
 		context.TODO(),
 		"id",
 		"objectId",
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestVaultObjectSummarizeWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Vault.Objects.Summarize(
+		context.TODO(),
+		"id",
+		"objectId",
+		githubcomcasemarkcasedevgo.VaultObjectSummarizeParams{
+			OutputFormat: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectSummarizeParamsOutputFormatPdf),
+			WorkflowType: githubcomcasemarkcasedevgo.F("workflowType"),
+		},
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error

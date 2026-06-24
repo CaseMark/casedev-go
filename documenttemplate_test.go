@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestVaultMultipartAbort(t *testing.T) {
+func TestDocumentTemplateNew(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,14 +25,7 @@ func TestVaultMultipartAbort(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Vault.Multipart.Abort(
-		context.TODO(),
-		"id",
-		githubcomcasemarkcasedevgo.VaultMultipartAbortParams{
-			ObjectID: githubcomcasemarkcasedevgo.F("objectId"),
-			UploadID: githubcomcasemarkcasedevgo.F("uploadId"),
-		},
-	)
+	err := client.DocumentTemplates.New(context.TODO())
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -42,7 +35,7 @@ func TestVaultMultipartAbort(t *testing.T) {
 	}
 }
 
-func TestVaultMultipartComplete(t *testing.T) {
+func TestDocumentTemplateGet(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -54,19 +47,7 @@ func TestVaultMultipartComplete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Vault.Multipart.Complete(
-		context.TODO(),
-		"id",
-		githubcomcasemarkcasedevgo.VaultMultipartCompleteParams{
-			ObjectID: githubcomcasemarkcasedevgo.F("objectId"),
-			Parts: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.VaultMultipartCompleteParamsPart{{
-				Etag:       githubcomcasemarkcasedevgo.F("etag"),
-				PartNumber: githubcomcasemarkcasedevgo.F(int64(1)),
-			}}),
-			SizeBytes: githubcomcasemarkcasedevgo.F(int64(1)),
-			UploadID:  githubcomcasemarkcasedevgo.F("uploadId"),
-		},
-	)
+	err := client.DocumentTemplates.Get(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -76,7 +57,7 @@ func TestVaultMultipartComplete(t *testing.T) {
 	}
 }
 
-func TestVaultMultipartGetPartURLs(t *testing.T) {
+func TestDocumentTemplateUpdate(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -88,18 +69,7 @@ func TestVaultMultipartGetPartURLs(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Multipart.GetPartURLs(
-		context.TODO(),
-		"id",
-		githubcomcasemarkcasedevgo.VaultMultipartGetPartURLsParams{
-			ObjectID: githubcomcasemarkcasedevgo.F("objectId"),
-			Parts: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.VaultMultipartGetPartURLsParamsPart{{
-				PartNumber: githubcomcasemarkcasedevgo.F(int64(1)),
-				SizeBytes:  githubcomcasemarkcasedevgo.F(int64(1)),
-			}}),
-			UploadID: githubcomcasemarkcasedevgo.F("uploadId"),
-		},
-	)
+	err := client.DocumentTemplates.Update(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -109,7 +79,7 @@ func TestVaultMultipartGetPartURLs(t *testing.T) {
 	}
 }
 
-func TestVaultMultipartInitWithOptionalParams(t *testing.T) {
+func TestDocumentTemplateList(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -121,20 +91,51 @@ func TestVaultMultipartInitWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Multipart.Init(
-		context.TODO(),
-		"id",
-		githubcomcasemarkcasedevgo.VaultMultipartInitParams{
-			ContentType:   githubcomcasemarkcasedevgo.F("contentType"),
-			Filename:      githubcomcasemarkcasedevgo.F("filename"),
-			SizeBytes:     githubcomcasemarkcasedevgo.F(int64(1)),
-			AutoIndex:     githubcomcasemarkcasedevgo.F(true),
-			IsAIGenerated: githubcomcasemarkcasedevgo.F(true),
-			Metadata:      githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
-			PartSizeBytes: githubcomcasemarkcasedevgo.F(int64(5242880)),
-			Path:          githubcomcasemarkcasedevgo.F("path"),
-		},
+	err := client.DocumentTemplates.List(context.TODO())
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestDocumentTemplateDelete(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
 	)
+	err := client.DocumentTemplates.Delete(context.TODO(), "id")
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestDocumentTemplateConfirm(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.DocumentTemplates.Confirm(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

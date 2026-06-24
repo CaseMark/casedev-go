@@ -15,8 +15,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Create, manage, and execute AI agents with tool access, sandbox environments,
-// and async run workflows
+// Managed inboxes for agent email workflows
 //
 // MailV1InboxService contains methods and other services that help with
 // interacting with the casedev API.

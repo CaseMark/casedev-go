@@ -11,10 +11,9 @@ import (
 	"github.com/CaseMark/casedev-go"
 	"github.com/CaseMark/casedev-go/internal/testutil"
 	"github.com/CaseMark/casedev-go/option"
-	"github.com/CaseMark/casedev-go/shared"
 )
 
-func TestVaultNewWithOptionalParams(t *testing.T) {
+func TestLincV1SessionNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -26,17 +25,16 @@ func TestVaultNewWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.New(context.TODO(), githubcomcasemarkcasedevgo.VaultNewParams{
-		Name:           githubcomcasemarkcasedevgo.F("Contract Review Archive"),
-		Description:    githubcomcasemarkcasedevgo.F("Repository for all client contract reviews and analysis"),
-		EmbeddingModel: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultNewParamsEmbeddingModelCasemarkEmbedV1),
-		EnableGraph:    githubcomcasemarkcasedevgo.F(true),
-		EnableIndexing: githubcomcasemarkcasedevgo.F(true),
-		GroupID:        githubcomcasemarkcasedevgo.F("grp_abc123"),
-		Metadata: githubcomcasemarkcasedevgo.F[any](map[string]interface{}{
-			"containsPHI":    true,
-			"hipaaCompliant": true,
-		}),
+	err := client.Linc.V1.Sessions.New(context.TODO(), githubcomcasemarkcasedevgo.LincV1SessionNewParams{
+		DocumentTemplateSlugs:    githubcomcasemarkcasedevgo.F([]string{"string"}),
+		IdleTimeoutMs:            githubcomcasemarkcasedevgo.F(int64(0)),
+		IncludeDocumentTemplates: githubcomcasemarkcasedevgo.F(true),
+		Instructions:             githubcomcasemarkcasedevgo.F("instructions"),
+		Model:                    githubcomcasemarkcasedevgo.F("model"),
+		ScopedAPIKey:             githubcomcasemarkcasedevgo.F("scopedApiKey"),
+		SkillSlugs:               githubcomcasemarkcasedevgo.F([]string{"string"}),
+		Title:                    githubcomcasemarkcasedevgo.F("title"),
+		VaultIDs:                 githubcomcasemarkcasedevgo.F([]string{"string"}),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -47,7 +45,7 @@ func TestVaultNewWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultGet(t *testing.T) {
+func TestLincV1SessionDelete(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -59,7 +57,7 @@ func TestVaultGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Get(context.TODO(), "vault_abc123")
+	err := client.Linc.V1.Sessions.Delete(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -69,7 +67,7 @@ func TestVaultGet(t *testing.T) {
 	}
 }
 
-func TestVaultUpdateWithOptionalParams(t *testing.T) {
+func TestLincV1SessionCancel(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -81,14 +79,39 @@ func TestVaultUpdateWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Update(
+	err := client.Linc.V1.Sessions.Cancel(context.TODO(), "id")
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestLincV1SessionIngestEvents(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.Linc.V1.Sessions.IngestEvents(
 		context.TODO(),
 		"id",
-		githubcomcasemarkcasedevgo.VaultUpdateParams{
-			Description: githubcomcasemarkcasedevgo.F("description"),
-			EnableGraph: githubcomcasemarkcasedevgo.F(false),
-			GroupID:     githubcomcasemarkcasedevgo.F("groupId"),
-			Name:        githubcomcasemarkcasedevgo.F("Updated Vault Name"),
+		githubcomcasemarkcasedevgo.LincV1SessionIngestEventsParams{
+			Frames: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.LincV1SessionIngestEventsParamsFrame{{
+				Event: githubcomcasemarkcasedevgo.F(map[string]interface{}{
+					"foo": "bar",
+				}),
+				Seq:  githubcomcasemarkcasedevgo.F(int64(1)),
+				Type: githubcomcasemarkcasedevgo.F("type"),
+			}}),
 		},
 	)
 	if err != nil {
@@ -100,7 +123,7 @@ func TestVaultUpdateWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultList(t *testing.T) {
+func TestLincV1SessionGetEventsWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -112,33 +135,14 @@ func TestVaultList(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.List(context.TODO())
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestVaultDeleteWithOptionalParams(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Vault.Delete(
+	err := client.Linc.V1.Sessions.GetEvents(
 		context.TODO(),
 		"id",
-		githubcomcasemarkcasedevgo.VaultDeleteParams{
-			Async: githubcomcasemarkcasedevgo.F(true),
+		githubcomcasemarkcasedevgo.LincV1SessionGetEventsParams{
+			AfterSeq:          githubcomcasemarkcasedevgo.F(int64(0)),
+			Cursor:            githubcomcasemarkcasedevgo.F(int64(0)),
+			ExcludeEventTypes: githubcomcasemarkcasedevgo.F([]string{"string"}),
+			Limit:             githubcomcasemarkcasedevgo.F(int64(1)),
 		},
 	)
 	if err != nil {
@@ -150,7 +154,7 @@ func TestVaultDeleteWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultConfirmUploadWithOptionalParams(t *testing.T) {
+func TestLincV1SessionGetMessagesWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -162,17 +166,13 @@ func TestVaultConfirmUploadWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.ConfirmUpload(
+	err := client.Linc.V1.Sessions.GetMessages(
 		context.TODO(),
 		"id",
-		"objectId",
-		githubcomcasemarkcasedevgo.VaultConfirmUploadParams{
-			Body: githubcomcasemarkcasedevgo.VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess{
-				SizeBytes:  githubcomcasemarkcasedevgo.F(int64(1)),
-				Success:    githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccessTrue),
-				AutoIngest: githubcomcasemarkcasedevgo.F(true),
-				Etag:       githubcomcasemarkcasedevgo.F("etag"),
-			},
+		githubcomcasemarkcasedevgo.LincV1SessionGetMessagesParams{
+			AfterSeq: githubcomcasemarkcasedevgo.F(int64(0)),
+			Cursor:   githubcomcasemarkcasedevgo.F(int64(0)),
+			Limit:    githubcomcasemarkcasedevgo.F(int64(1)),
 		},
 	)
 	if err != nil {
@@ -184,7 +184,7 @@ func TestVaultConfirmUploadWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultIngest(t *testing.T) {
+func TestLincV1SessionGetState(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -196,11 +196,7 @@ func TestVaultIngest(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Ingest(
-		context.TODO(),
-		"id",
-		"objectId",
-	)
+	err := client.Linc.V1.Sessions.GetState(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -210,7 +206,7 @@ func TestVaultIngest(t *testing.T) {
 	}
 }
 
-func TestVaultSearchWithOptionalParams(t *testing.T) {
+func TestLincV1SessionSendRpcWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -222,50 +218,12 @@ func TestVaultSearchWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Search(
+	err := client.Linc.V1.Sessions.SendRpc(
 		context.TODO(),
 		"id",
-		githubcomcasemarkcasedevgo.VaultSearchParams{
-			Query: githubcomcasemarkcasedevgo.F("query"),
-			Filters: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultSearchParamsFilters{
-				ObjectID: githubcomcasemarkcasedevgo.F[githubcomcasemarkcasedevgo.VaultSearchParamsFiltersObjectIDUnion](shared.UnionString("string")),
-			}),
-			Method: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultSearchParamsMethodVector),
-			TopK:   githubcomcasemarkcasedevgo.F(int64(1)),
-		},
-	)
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestVaultUploadWithOptionalParams(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Vault.Upload(
-		context.TODO(),
-		"id",
-		githubcomcasemarkcasedevgo.VaultUploadParams{
-			ContentType:   githubcomcasemarkcasedevgo.F("contentType"),
-			Filename:      githubcomcasemarkcasedevgo.F("filename"),
-			AutoIndex:     githubcomcasemarkcasedevgo.F(true),
-			IsAIGenerated: githubcomcasemarkcasedevgo.F(true),
-			Metadata:      githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
-			Path:          githubcomcasemarkcasedevgo.F("path"),
-			SizeBytes:     githubcomcasemarkcasedevgo.F(int64(1)),
+		githubcomcasemarkcasedevgo.LincV1SessionSendRpcParams{
+			Type: githubcomcasemarkcasedevgo.F("type"),
+			ID:   githubcomcasemarkcasedevgo.F("id"),
 		},
 	)
 	if err != nil {
