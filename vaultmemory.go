@@ -16,7 +16,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Secure document storage with semantic search and GraphRAG
+// Vault-scoped persistent memory and semantic retrieval
 //
 // VaultMemoryService contains methods and other services that help with
 // interacting with the casedev API.

@@ -14,7 +14,10 @@ import (
 // the [NewMediaV1TranscriptService] method instead.
 type MediaV1TranscriptService struct {
 	Options []option.RequestOption
-	Search  *MediaV1TranscriptSearchService
+	// Transcript retrieval and captioned media clip generation
+	Search *MediaV1TranscriptSearchService
+	// Transcript retrieval and captioned media clip generation
+	Retrieve *MediaV1TranscriptRetrieveService
 }
 
 // NewMediaV1TranscriptService generates a new service that applies the given
@@ -24,5 +27,6 @@ func NewMediaV1TranscriptService(opts ...option.RequestOption) (r *MediaV1Transc
 	r = &MediaV1TranscriptService{}
 	r.Options = opts
 	r.Search = NewMediaV1TranscriptSearchService(opts...)
+	r.Retrieve = NewMediaV1TranscriptRetrieveService(opts...)
 	return
 }

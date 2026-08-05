@@ -14,7 +14,7 @@ import (
 // the [NewSearchService] method instead.
 type SearchService struct {
 	Options []option.RequestOption
-	// Web search, AI answers, and deep research
+	// Web search and AI answers
 	V1 *SearchV1Service
 }
 

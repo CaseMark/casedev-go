@@ -14,7 +14,7 @@ import (
 // the [NewVaultEventService] method instead.
 type VaultEventService struct {
 	Options []option.RequestOption
-	// Secure document storage with semantic search and GraphRAG
+	// Vault-scoped event subscriptions and delivery testing
 	Subscriptions *VaultEventSubscriptionService
 }
 

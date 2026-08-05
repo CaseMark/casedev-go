@@ -74,7 +74,7 @@ func TestVaultObjectUpdateWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultObjectList(t *testing.T) {
+func TestVaultObjectListWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -86,7 +86,13 @@ func TestVaultObjectList(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Objects.List(context.TODO(), "id")
+	_, err := client.Vault.Objects.List(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.VaultObjectListParams{
+			IncludeUnconfirmed: githubcomcasemarkcasedevgo.F(true),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -114,6 +120,45 @@ func TestVaultObjectDeleteWithOptionalParams(t *testing.T) {
 		"objectId",
 		githubcomcasemarkcasedevgo.VaultObjectDeleteParams{
 			Force: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectDeleteParamsForceTrue),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestVaultObjectAppendWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Vault.Objects.Append(
+		context.TODO(),
+		"id",
+		"objectId",
+		githubcomcasemarkcasedevgo.VaultObjectAppendParams{
+			AppendObjectIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
+			BackLinks:       githubcomcasemarkcasedevgo.F(true),
+			BackLinksText:   githubcomcasemarkcasedevgo.F("backLinksText"),
+			Bates: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectAppendParamsBates{
+				Enabled: githubcomcasemarkcasedevgo.F(true),
+				PadTo:   githubcomcasemarkcasedevgo.F(int64(0)),
+				Prefix:  githubcomcasemarkcasedevgo.F("prefix"),
+				Start:   githubcomcasemarkcasedevgo.F(int64(1)),
+				Suffix:  githubcomcasemarkcasedevgo.F("suffix"),
+			}),
+			RewriteLinks: githubcomcasemarkcasedevgo.F(true),
 		},
 	)
 	if err != nil {
@@ -286,33 +331,6 @@ func TestVaultObjectGetPagesWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultObjectGetSummarizeJob(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Vault.Objects.GetSummarizeJob(
-		context.TODO(),
-		"id",
-		"objectId",
-		"jobId",
-	)
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
 func TestVaultObjectGetText(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -329,6 +347,44 @@ func TestVaultObjectGetText(t *testing.T) {
 		context.TODO(),
 		"id",
 		"objectId",
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestVaultObjectMergeWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Vault.Objects.Merge(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.VaultObjectMergeParams{
+			Filename:        githubcomcasemarkcasedevgo.F("filename"),
+			SourceObjectIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
+			SourceRendition: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectMergeParamsSourceRenditionOriginal),
+			IdempotencyKey:  githubcomcasemarkcasedevgo.F("x"),
+			Bates: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectMergeParamsBates{
+				PadTo:  githubcomcasemarkcasedevgo.F(int64(0)),
+				Prefix: githubcomcasemarkcasedevgo.F("prefix"),
+				Start:  githubcomcasemarkcasedevgo.F(int64(1)),
+				Suffix: githubcomcasemarkcasedevgo.F("suffix"),
+			}),
+			ClientReference: githubcomcasemarkcasedevgo.F("clientReference"),
+		},
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error

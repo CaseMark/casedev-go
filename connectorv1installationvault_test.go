@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestFormatV1TemplateNewWithOptionalParams(t *testing.T) {
+func TestConnectorV1InstallationVaultList(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,15 +25,7 @@ func TestFormatV1TemplateNewWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Format.V1.Templates.New(context.TODO(), githubcomcasemarkcasedevgo.FormatV1TemplateNewParams{
-		Content:     githubcomcasemarkcasedevgo.F("content"),
-		Name:        githubcomcasemarkcasedevgo.F("name"),
-		Type:        githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.FormatV1TemplateNewParamsTypeCaption),
-		Description: githubcomcasemarkcasedevgo.F("description"),
-		Styles:      githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
-		Tags:        githubcomcasemarkcasedevgo.F([]string{"string"}),
-		Variables:   githubcomcasemarkcasedevgo.F([]string{"string"}),
-	})
+	err := client.Connectors.V1.Installations.Vaults.List(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -43,7 +35,7 @@ func TestFormatV1TemplateNewWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestFormatV1TemplateGet(t *testing.T) {
+func TestConnectorV1InstallationVaultGrantWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -55,7 +47,18 @@ func TestFormatV1TemplateGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Format.V1.Templates.Get(context.TODO(), "id")
+	err := client.Connectors.V1.Installations.Vaults.Grant(
+		context.TODO(),
+		"id",
+		"vaultId",
+		githubcomcasemarkcasedevgo.ConnectorV1InstallationVaultGrantParams{
+			CanManage:    githubcomcasemarkcasedevgo.F(true),
+			CanRead:      githubcomcasemarkcasedevgo.F(true),
+			CanWrite:     githubcomcasemarkcasedevgo.F(true),
+			Relationship: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1InstallationVaultGrantParamsRelationshipOwned),
+			Source:       githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1InstallationVaultGrantParamsSourceProvisioning),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -65,7 +68,7 @@ func TestFormatV1TemplateGet(t *testing.T) {
 	}
 }
 
-func TestFormatV1TemplateListWithOptionalParams(t *testing.T) {
+func TestConnectorV1InstallationVaultRevoke(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -77,9 +80,11 @@ func TestFormatV1TemplateListWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Format.V1.Templates.List(context.TODO(), githubcomcasemarkcasedevgo.FormatV1TemplateListParams{
-		Type: githubcomcasemarkcasedevgo.F("type"),
-	})
+	err := client.Connectors.V1.Installations.Vaults.Revoke(
+		context.TODO(),
+		"id",
+		"vaultId",
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

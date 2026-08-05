@@ -42,6 +42,40 @@ func TestVaultMultipartAbort(t *testing.T) {
 	}
 }
 
+func TestVaultMultipartComplete(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.Vault.Multipart.Complete(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.VaultMultipartCompleteParams{
+			ObjectID: githubcomcasemarkcasedevgo.F("objectId"),
+			Parts: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.VaultMultipartCompleteParamsPart{{
+				Etag:       githubcomcasemarkcasedevgo.F("etag"),
+				PartNumber: githubcomcasemarkcasedevgo.F(int64(1)),
+			}}),
+			SizeBytes: githubcomcasemarkcasedevgo.F(int64(1)),
+			UploadID:  githubcomcasemarkcasedevgo.F("uploadId"),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestVaultMultipartGetPartURLs(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -64,6 +98,41 @@ func TestVaultMultipartGetPartURLs(t *testing.T) {
 				SizeBytes:  githubcomcasemarkcasedevgo.F(int64(1)),
 			}}),
 			UploadID: githubcomcasemarkcasedevgo.F("uploadId"),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestVaultMultipartInitWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Vault.Multipart.Init(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.VaultMultipartInitParams{
+			ContentType:   githubcomcasemarkcasedevgo.F("contentType"),
+			Filename:      githubcomcasemarkcasedevgo.F("filename"),
+			SizeBytes:     githubcomcasemarkcasedevgo.F(int64(1)),
+			AutoIndex:     githubcomcasemarkcasedevgo.F(true),
+			IsAIGenerated: githubcomcasemarkcasedevgo.F(true),
+			Metadata:      githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
+			PartSizeBytes: githubcomcasemarkcasedevgo.F(int64(5242880)),
+			Path:          githubcomcasemarkcasedevgo.F("path"),
 		},
 	)
 	if err != nil {

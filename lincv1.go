@@ -6,23 +6,24 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// AgentService contains methods and other services that help with interacting with
-// the casedev API.
+// LincV1Service contains methods and other services that help with interacting
+// with the casedev API.
 //
 // Note, unlike clients, this service does not read variables from the environment
 // automatically. You should not instantiate this service directly, and instead use
-// the [NewAgentService] method instead.
-type AgentService struct {
+// the [NewLincV1Service] method instead.
+type LincV1Service struct {
 	Options []option.RequestOption
-	V1      *AgentV1Service
+	// Durable, stateful legal agent sessions with sandboxed tools and files
+	Sessions *LincV1SessionService
 }
 
-// NewAgentService generates a new service that applies the given options to each
+// NewLincV1Service generates a new service that applies the given options to each
 // request. These options are applied after the parent client's options (if there
 // is one), and before any request-specific options.
-func NewAgentService(opts ...option.RequestOption) (r *AgentService) {
-	r = &AgentService{}
+func NewLincV1Service(opts ...option.RequestOption) (r *LincV1Service) {
+	r = &LincV1Service{}
 	r.Options = opts
-	r.V1 = NewAgentV1Service(opts...)
+	r.Sessions = NewLincV1SessionService(opts...)
 	return
 }

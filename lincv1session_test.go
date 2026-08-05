@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestMailV1InboxNewWithOptionalParams(t *testing.T) {
+func TestLincV1SessionNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,9 +25,17 @@ func TestMailV1InboxNewWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Mail.V1.Inboxes.New(context.TODO(), githubcomcasemarkcasedevgo.MailV1InboxNewParams{
-		Address:     githubcomcasemarkcasedevgo.F("address"),
-		DisplayName: githubcomcasemarkcasedevgo.F("displayName"),
+	err := client.Linc.V1.Sessions.New(context.TODO(), githubcomcasemarkcasedevgo.LincV1SessionNewParams{
+		DocumentTemplateSlugs:    githubcomcasemarkcasedevgo.F([]string{"string"}),
+		IdleTimeoutMs:            githubcomcasemarkcasedevgo.F(int64(0)),
+		IncludeDocumentTemplates: githubcomcasemarkcasedevgo.F(true),
+		Instructions:             githubcomcasemarkcasedevgo.F("instructions"),
+		Model:                    githubcomcasemarkcasedevgo.F("model"),
+		ScopedAPIKey:             githubcomcasemarkcasedevgo.F("scopedApiKey"),
+		ServiceTier:              githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LincV1SessionNewParamsServiceTierDefault),
+		SkillSlugs:               githubcomcasemarkcasedevgo.F([]string{"string"}),
+		Title:                    githubcomcasemarkcasedevgo.F("title"),
+		VaultIDs:                 githubcomcasemarkcasedevgo.F([]string{"string"}),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -38,7 +46,7 @@ func TestMailV1InboxNewWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestMailV1InboxGet(t *testing.T) {
+func TestLincV1SessionDelete(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -50,7 +58,7 @@ func TestMailV1InboxGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Mail.V1.Inboxes.Get(context.TODO(), "inboxId")
+	err := client.Linc.V1.Sessions.Delete(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -60,7 +68,7 @@ func TestMailV1InboxGet(t *testing.T) {
 	}
 }
 
-func TestMailV1InboxList(t *testing.T) {
+func TestLincV1SessionCancelWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -72,55 +80,12 @@ func TestMailV1InboxList(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Mail.V1.Inboxes.List(context.TODO())
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestMailV1InboxDelete(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	err := client.Mail.V1.Inboxes.Delete(context.TODO(), "inboxId")
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestMailV1InboxGetAttachment(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	err := client.Mail.V1.Inboxes.GetAttachment(
+	err := client.Linc.V1.Sessions.Cancel(
 		context.TODO(),
-		"inboxId",
-		"messageId",
-		"attachmentId",
+		"id",
+		githubcomcasemarkcasedevgo.LincV1SessionCancelParams{
+			ClearQueue: githubcomcasemarkcasedevgo.F(true),
+		},
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -131,7 +96,7 @@ func TestMailV1InboxGetAttachment(t *testing.T) {
 	}
 }
 
-func TestMailV1InboxGetMessage(t *testing.T) {
+func TestLincV1SessionIngestEvents(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -143,10 +108,18 @@ func TestMailV1InboxGetMessage(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Mail.V1.Inboxes.GetMessage(
+	err := client.Linc.V1.Sessions.IngestEvents(
 		context.TODO(),
-		"inboxId",
-		"messageId",
+		"id",
+		githubcomcasemarkcasedevgo.LincV1SessionIngestEventsParams{
+			Frames: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.LincV1SessionIngestEventsParamsFrame{{
+				Event: githubcomcasemarkcasedevgo.F(map[string]interface{}{
+					"foo": "bar",
+				}),
+				Seq:  githubcomcasemarkcasedevgo.F(int64(1)),
+				Type: githubcomcasemarkcasedevgo.F("type"),
+			}}),
+		},
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -157,7 +130,7 @@ func TestMailV1InboxGetMessage(t *testing.T) {
 	}
 }
 
-func TestMailV1InboxGetPolicy(t *testing.T) {
+func TestLincV1SessionGetEventsWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -169,54 +142,15 @@ func TestMailV1InboxGetPolicy(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Mail.V1.Inboxes.GetPolicy(context.TODO(), "inboxId")
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestMailV1InboxListMessages(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	err := client.Mail.V1.Inboxes.ListMessages(context.TODO(), "inboxId")
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestMailV1InboxReply(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	err := client.Mail.V1.Inboxes.Reply(
+	err := client.Linc.V1.Sessions.GetEvents(
 		context.TODO(),
-		"inboxId",
-		"messageId",
+		"id",
+		githubcomcasemarkcasedevgo.LincV1SessionGetEventsParams{
+			AfterSeq:          githubcomcasemarkcasedevgo.F(int64(0)),
+			Cursor:            githubcomcasemarkcasedevgo.F(int64(0)),
+			ExcludeEventTypes: githubcomcasemarkcasedevgo.F([]string{"string"}),
+			Limit:             githubcomcasemarkcasedevgo.F(int64(1)),
+		},
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -227,7 +161,7 @@ func TestMailV1InboxReply(t *testing.T) {
 	}
 }
 
-func TestMailV1InboxSend(t *testing.T) {
+func TestLincV1SessionGetMessagesWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -239,37 +173,64 @@ func TestMailV1InboxSend(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Mail.V1.Inboxes.Send(context.TODO(), "inboxId")
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestMailV1InboxSetPolicyWithOptionalParams(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	err := client.Mail.V1.Inboxes.SetPolicy(
+	err := client.Linc.V1.Sessions.GetMessages(
 		context.TODO(),
-		"inboxId",
-		githubcomcasemarkcasedevgo.MailV1InboxSetPolicyParams{
-			AllowedSenderPatterns:  githubcomcasemarkcasedevgo.F([]string{"string"}),
-			EnforceSenderAllowlist: githubcomcasemarkcasedevgo.F(true),
-			ReadAccessRules:        githubcomcasemarkcasedevgo.F([]string{"string"}),
-			ReplyAccessRules:       githubcomcasemarkcasedevgo.F([]string{"string"}),
-			SendAccessRules:        githubcomcasemarkcasedevgo.F([]string{"string"}),
+		"id",
+		githubcomcasemarkcasedevgo.LincV1SessionGetMessagesParams{
+			AfterSeq: githubcomcasemarkcasedevgo.F(int64(0)),
+			Cursor:   githubcomcasemarkcasedevgo.F(int64(0)),
+			Limit:    githubcomcasemarkcasedevgo.F(int64(1)),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestLincV1SessionGetState(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.Linc.V1.Sessions.GetState(context.TODO(), "id")
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestLincV1SessionSendRpcWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.Linc.V1.Sessions.SendRpc(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.LincV1SessionSendRpcParams{
+			Type: githubcomcasemarkcasedevgo.F("type"),
+			ID:   githubcomcasemarkcasedevgo.F("id"),
 		},
 	)
 	if err != nil {

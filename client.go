@@ -17,26 +17,23 @@ import (
 // interacting with the casedev API. You should not instantiate this client
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
-	Options []option.RequestOption
-	Agent   *AgentService
+	Options    []option.RequestOption
+	Connectors *ConnectorService
 	// Public system metadata and discovery endpoints
-	System   *SystemService
-	Compute  *ComputeService
-	Database *DatabaseService
-	Format   *FormatService
-	Legal    *LegalService
-	Matters  *MatterService
+	System  *SystemService
+	Compute *ComputeService
+	Legal   *LegalService
+	Linc    *LincService
+	Matters *MatterService
 	// Access 40+ language models through a unified API
 	Llm       *LlmService
 	Memory    *MemoryService
 	Media     *MediaService
 	Ocr       *OcrService
 	Privilege *PrivilegeService
-	Mail      *MailService
 	// Search and read legal AI skills for agents
 	Skills    *SkillService
 	Search    *SearchService
-	Superdoc  *SuperdocService
 	Translate *TranslateService
 	Usage     *UsageService
 	// Secure document storage with semantic search and GraphRAG
@@ -75,22 +72,19 @@ func NewClient(opts ...option.RequestOption) (r *Client) {
 
 	r = &Client{Options: opts}
 
-	r.Agent = NewAgentService(opts...)
+	r.Connectors = NewConnectorService(opts...)
 	r.System = NewSystemService(opts...)
 	r.Compute = NewComputeService(opts...)
-	r.Database = NewDatabaseService(opts...)
-	r.Format = NewFormatService(opts...)
 	r.Legal = NewLegalService(opts...)
+	r.Linc = NewLincService(opts...)
 	r.Matters = NewMatterService(opts...)
 	r.Llm = NewLlmService(opts...)
 	r.Memory = NewMemoryService(opts...)
 	r.Media = NewMediaService(opts...)
 	r.Ocr = NewOcrService(opts...)
 	r.Privilege = NewPrivilegeService(opts...)
-	r.Mail = NewMailService(opts...)
 	r.Skills = NewSkillService(opts...)
 	r.Search = NewSearchService(opts...)
-	r.Superdoc = NewSuperdocService(opts...)
 	r.Translate = NewTranslateService(opts...)
 	r.Usage = NewUsageService(opts...)
 	r.Vault = NewVaultService(opts...)

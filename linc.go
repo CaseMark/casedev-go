@@ -6,25 +6,23 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// MailV1Service contains methods and other services that help with interacting
-// with the casedev API.
+// LincService contains methods and other services that help with interacting with
+// the casedev API.
 //
 // Note, unlike clients, this service does not read variables from the environment
 // automatically. You should not instantiate this service directly, and instead use
-// the [NewMailV1Service] method instead.
-type MailV1Service struct {
+// the [NewLincService] method instead.
+type LincService struct {
 	Options []option.RequestOption
-	// Create, manage, and execute AI agents with tool access, sandbox environments,
-	// and async run workflows
-	Inboxes *MailV1InboxService
+	V1      *LincV1Service
 }
 
-// NewMailV1Service generates a new service that applies the given options to each
+// NewLincService generates a new service that applies the given options to each
 // request. These options are applied after the parent client's options (if there
 // is one), and before any request-specific options.
-func NewMailV1Service(opts ...option.RequestOption) (r *MailV1Service) {
-	r = &MailV1Service{}
+func NewLincService(opts ...option.RequestOption) (r *LincService) {
+	r = &LincService{}
 	r.Options = opts
-	r.Inboxes = NewMailV1InboxService(opts...)
+	r.V1 = NewLincV1Service(opts...)
 	return
 }

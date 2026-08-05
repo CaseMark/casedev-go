@@ -167,11 +167,12 @@ func TestVaultConfirmUploadWithOptionalParams(t *testing.T) {
 		"id",
 		"objectId",
 		githubcomcasemarkcasedevgo.VaultConfirmUploadParams{
-			Body: githubcomcasemarkcasedevgo.VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess{
-				SizeBytes: githubcomcasemarkcasedevgo.F(int64(1)),
-				Success:   githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccessTrue),
-				Etag:      githubcomcasemarkcasedevgo.F("etag"),
-			},
+			Success:      githubcomcasemarkcasedevgo.F(true),
+			AutoIngest:   githubcomcasemarkcasedevgo.F(true),
+			ErrorCode:    githubcomcasemarkcasedevgo.F("errorCode"),
+			ErrorMessage: githubcomcasemarkcasedevgo.F("errorMessage"),
+			Etag:         githubcomcasemarkcasedevgo.F("etag"),
+			SizeBytes:    githubcomcasemarkcasedevgo.F(int64(1)),
 		},
 	)
 	if err != nil {
@@ -258,12 +259,14 @@ func TestVaultUploadWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.VaultUploadParams{
-			ContentType: githubcomcasemarkcasedevgo.F("contentType"),
-			Filename:    githubcomcasemarkcasedevgo.F("filename"),
-			AutoIndex:   githubcomcasemarkcasedevgo.F(true),
-			Metadata:    githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
-			Path:        githubcomcasemarkcasedevgo.F("path"),
-			SizeBytes:   githubcomcasemarkcasedevgo.F(int64(1)),
+			ContentType:    githubcomcasemarkcasedevgo.F("contentType"),
+			Filename:       githubcomcasemarkcasedevgo.F("filename"),
+			AutoIndex:      githubcomcasemarkcasedevgo.F(true),
+			IsAIGenerated:  githubcomcasemarkcasedevgo.F(true),
+			Metadata:       githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
+			Path:           githubcomcasemarkcasedevgo.F("path"),
+			SizeBytes:      githubcomcasemarkcasedevgo.F(int64(1)),
+			IdempotencyKey: githubcomcasemarkcasedevgo.F("Idempotency-Key"),
 		},
 	)
 	if err != nil {

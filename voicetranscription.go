@@ -38,11 +38,13 @@ func NewVoiceTranscriptionService(opts ...option.RequestOption) (r *VoiceTranscr
 	return
 }
 
-// Creates an asynchronous transcription job for audio files. Supports two modes:
+// Creates an asynchronous transcription job for audio or video files. Supports two
+// modes:
 //
 // **Vault-based (recommended)**: Pass `vault_id` and `object_id` to transcribe
-// audio from your vault. The transcript will automatically be saved back to the
-// vault when complete.
+// media from your vault. Large videos are converted to an internal MP3 derivative
+// before transcription while the original video remains the transcript source. The
+// transcript is automatically saved back to the vault when complete.
 //
 // **Direct URL (legacy)**: Pass `audio_url` for direct transcription without
 // automatic storage.
@@ -85,7 +87,10 @@ func (r *VoiceTranscriptionService) Delete(ctx context.Context, id string, opts 
 type VoiceTranscriptionNewResponse struct {
 	// Unique transcription job ID
 	ID string `json:"id"`
-	// Source audio object ID (only for vault-based transcription)
+	// Object submitted to the speech provider. For large videos, this is an internal
+	// audio derivative.
+	InputObjectID string `json:"input_object_id"`
+	// Original source media object ID (only for vault-based transcription)
 	SourceObjectID string `json:"source_object_id"`
 	// Current status of the transcription job
 	Status VoiceTranscriptionNewResponseStatus `json:"status"`
@@ -98,6 +103,7 @@ type VoiceTranscriptionNewResponse struct {
 // [VoiceTranscriptionNewResponse]
 type voiceTranscriptionNewResponseJSON struct {
 	ID             apijson.Field
+	InputObjectID  apijson.Field
 	SourceObjectID apijson.Field
 	Status         apijson.Field
 	VaultID        apijson.Field
@@ -117,15 +123,16 @@ func (r voiceTranscriptionNewResponseJSON) RawJSON() string {
 type VoiceTranscriptionNewResponseStatus string
 
 const (
-	VoiceTranscriptionNewResponseStatusQueued     VoiceTranscriptionNewResponseStatus = "queued"
-	VoiceTranscriptionNewResponseStatusProcessing VoiceTranscriptionNewResponseStatus = "processing"
-	VoiceTranscriptionNewResponseStatusCompleted  VoiceTranscriptionNewResponseStatus = "completed"
-	VoiceTranscriptionNewResponseStatusError      VoiceTranscriptionNewResponseStatus = "error"
+	VoiceTranscriptionNewResponseStatusQueued        VoiceTranscriptionNewResponseStatus = "queued"
+	VoiceTranscriptionNewResponseStatusPreprocessing VoiceTranscriptionNewResponseStatus = "preprocessing"
+	VoiceTranscriptionNewResponseStatusProcessing    VoiceTranscriptionNewResponseStatus = "processing"
+	VoiceTranscriptionNewResponseStatusCompleted     VoiceTranscriptionNewResponseStatus = "completed"
+	VoiceTranscriptionNewResponseStatusError         VoiceTranscriptionNewResponseStatus = "error"
 )
 
 func (r VoiceTranscriptionNewResponseStatus) IsKnown() bool {
 	switch r {
-	case VoiceTranscriptionNewResponseStatusQueued, VoiceTranscriptionNewResponseStatusProcessing, VoiceTranscriptionNewResponseStatusCompleted, VoiceTranscriptionNewResponseStatusError:
+	case VoiceTranscriptionNewResponseStatusQueued, VoiceTranscriptionNewResponseStatusPreprocessing, VoiceTranscriptionNewResponseStatusProcessing, VoiceTranscriptionNewResponseStatusCompleted, VoiceTranscriptionNewResponseStatusError:
 		return true
 	}
 	return false
@@ -142,9 +149,12 @@ type VoiceTranscriptionGetResponse struct {
 	Confidence float64 `json:"confidence"`
 	// Error message (only present when status is failed)
 	Error string `json:"error"`
+	// Media object submitted to the speech provider. May be an internal audio
+	// derivative for large videos.
+	InputObjectID string `json:"input_object_id"`
 	// Result transcript object ID (vault-based jobs, when completed)
 	ResultObjectID string `json:"result_object_id"`
-	// Source audio object ID (vault-based jobs only)
+	// Original source media object ID (vault-based jobs only)
 	SourceObjectID string `json:"source_object_id"`
 	// Full transcription text (only included when include_text=true for vault-based
 	// jobs, or for legacy direct URL jobs)
@@ -166,6 +176,7 @@ type voiceTranscriptionGetResponseJSON struct {
 	AudioDuration  apijson.Field
 	Confidence     apijson.Field
 	Error          apijson.Field
+	InputObjectID  apijson.Field
 	ResultObjectID apijson.Field
 	SourceObjectID apijson.Field
 	Text           apijson.Field
@@ -188,15 +199,16 @@ func (r voiceTranscriptionGetResponseJSON) RawJSON() string {
 type VoiceTranscriptionGetResponseStatus string
 
 const (
-	VoiceTranscriptionGetResponseStatusQueued     VoiceTranscriptionGetResponseStatus = "queued"
-	VoiceTranscriptionGetResponseStatusProcessing VoiceTranscriptionGetResponseStatus = "processing"
-	VoiceTranscriptionGetResponseStatusCompleted  VoiceTranscriptionGetResponseStatus = "completed"
-	VoiceTranscriptionGetResponseStatusFailed     VoiceTranscriptionGetResponseStatus = "failed"
+	VoiceTranscriptionGetResponseStatusQueued        VoiceTranscriptionGetResponseStatus = "queued"
+	VoiceTranscriptionGetResponseStatusPreprocessing VoiceTranscriptionGetResponseStatus = "preprocessing"
+	VoiceTranscriptionGetResponseStatusProcessing    VoiceTranscriptionGetResponseStatus = "processing"
+	VoiceTranscriptionGetResponseStatusCompleted     VoiceTranscriptionGetResponseStatus = "completed"
+	VoiceTranscriptionGetResponseStatusFailed        VoiceTranscriptionGetResponseStatus = "failed"
 )
 
 func (r VoiceTranscriptionGetResponseStatus) IsKnown() bool {
 	switch r {
-	case VoiceTranscriptionGetResponseStatusQueued, VoiceTranscriptionGetResponseStatusProcessing, VoiceTranscriptionGetResponseStatusCompleted, VoiceTranscriptionGetResponseStatusFailed:
+	case VoiceTranscriptionGetResponseStatusQueued, VoiceTranscriptionGetResponseStatusPreprocessing, VoiceTranscriptionGetResponseStatusProcessing, VoiceTranscriptionGetResponseStatusCompleted, VoiceTranscriptionGetResponseStatusFailed:
 		return true
 	}
 	return false

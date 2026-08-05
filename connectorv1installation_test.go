@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestVaultGraphragGetStats(t *testing.T) {
+func TestConnectorV1InstallationListWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,10 @@ func TestVaultGraphragGetStats(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Graphrag.GetStats(context.TODO(), "id")
+	err := client.Connectors.V1.Installations.List(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1InstallationListParams{
+		Application:      githubcomcasemarkcasedevgo.F("application"),
+		ExternalTenantID: githubcomcasemarkcasedevgo.F("external_tenant_id"),
+	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -35,7 +38,7 @@ func TestVaultGraphragGetStats(t *testing.T) {
 	}
 }
 
-func TestVaultGraphragInit(t *testing.T) {
+func TestConnectorV1InstallationEnsure(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -47,33 +50,10 @@ func TestVaultGraphragInit(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.Graphrag.Init(context.TODO(), "id")
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestVaultGraphragProcessObject(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Vault.Graphrag.ProcessObject(
-		context.TODO(),
-		"id",
-		"objectId",
-	)
+	err := client.Connectors.V1.Installations.Ensure(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1InstallationEnsureParams{
+		Application:      githubcomcasemarkcasedevgo.F("application"),
+		ExternalTenantID: githubcomcasemarkcasedevgo.F("external_tenant_id"),
+	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

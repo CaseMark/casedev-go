@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestDatabaseV1GetUsage(t *testing.T) {
+func TestMediaV1TranscriptRetrieveNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,14 @@ func TestDatabaseV1GetUsage(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Database.V1.GetUsage(context.TODO())
+	_, err := client.Media.V1.Transcripts.Retrieve.New(context.TODO(), githubcomcasemarkcasedevgo.MediaV1TranscriptRetrieveNewParams{
+		ObjectID: githubcomcasemarkcasedevgo.F("object_id"),
+		VaultID:  githubcomcasemarkcasedevgo.F("vault_id"),
+		Transcript: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.MediaV1TranscriptRetrieveNewParamsTranscript{
+			ObjectID: githubcomcasemarkcasedevgo.F("object_id"),
+			VaultID:  githubcomcasemarkcasedevgo.F("vault_id"),
+		}),
+	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

@@ -54,6 +54,12 @@ func (r *UsageV1Service) Get(ctx context.Context, query UsageV1GetParams, opts .
 type UsageV1GetParams struct {
 	// Whether to return period totals only or include daily buckets.
 	Granularity param.Field[UsageV1GetParamsGranularity] `query:"granularity"`
+	// Optionally include usage groups keyed by native Linc session id. Only
+	// Linc-session-attributable usage is grouped.
+	GroupBy param.Field[UsageV1GetParamsGroupBy] `query:"groupBy"`
+	// Restrict usage to a native Linc session. The session must belong to the
+	// authenticated organization.
+	LincSessionID param.Field[string] `query:"lincSessionId"`
 	// Period end date. Defaults to now.
 	PeriodEnd param.Field[time.Time] `query:"periodEnd" format:"date-time"`
 	// Period start date. Defaults to the start of the current calendar month.
@@ -79,6 +85,22 @@ const (
 func (r UsageV1GetParamsGranularity) IsKnown() bool {
 	switch r {
 	case UsageV1GetParamsGranularitySummary, UsageV1GetParamsGranularityDaily:
+		return true
+	}
+	return false
+}
+
+// Optionally include usage groups keyed by native Linc session id. Only
+// Linc-session-attributable usage is grouped.
+type UsageV1GetParamsGroupBy string
+
+const (
+	UsageV1GetParamsGroupByLincSessionID UsageV1GetParamsGroupBy = "lincSessionId"
+)
+
+func (r UsageV1GetParamsGroupBy) IsKnown() bool {
+	switch r {
+	case UsageV1GetParamsGroupByLincSessionID:
 		return true
 	}
 	return false

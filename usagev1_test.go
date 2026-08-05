@@ -27,9 +27,11 @@ func TestUsageV1GetWithOptionalParams(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	err := client.Usage.V1.Get(context.TODO(), githubcomcasemarkcasedevgo.UsageV1GetParams{
-		Granularity: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.UsageV1GetParamsGranularitySummary),
-		PeriodEnd:   githubcomcasemarkcasedevgo.F(time.Now()),
-		PeriodStart: githubcomcasemarkcasedevgo.F(time.Now()),
+		Granularity:   githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.UsageV1GetParamsGranularitySummary),
+		GroupBy:       githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.UsageV1GetParamsGroupByLincSessionID),
+		LincSessionID: githubcomcasemarkcasedevgo.F("lincSessionId"),
+		PeriodEnd:     githubcomcasemarkcasedevgo.F(time.Now()),
+		PeriodStart:   githubcomcasemarkcasedevgo.F(time.Now()),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
