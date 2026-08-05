@@ -3,11 +3,15 @@
 package githubcomcasemarkcasedevgo
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"slices"
 
+	"github.com/CaseMark/casedev-go/internal/apiform"
 	"github.com/CaseMark/casedev-go/internal/apijson"
 	"github.com/CaseMark/casedev-go/internal/apiquery"
 	"github.com/CaseMark/casedev-go/internal/param"
@@ -15,6 +19,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Language detection and translation for multilingual legal workflows
+//
 // TranslateV1Service contains methods and other services that help with
 // interacting with the casedev API.
 //
@@ -58,6 +64,17 @@ func (r *TranslateV1Service) ListLanguages(ctx context.Context, query TranslateV
 func (r *TranslateV1Service) Translate(ctx context.Context, body TranslateV1TranslateParams, opts ...option.RequestOption) (res *TranslateV1TranslateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "translate/v1/translate"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
+// Translate one TXT, DOCX, or searchable PDF document. DOCX and PDF translations
+// preserve the source document format and retain as much layout and formatting as
+// possible.
+func (r *TranslateV1Service) TranslateDocument(ctx context.Context, body TranslateV1TranslateDocumentParams, opts ...option.RequestOption) (res *http.Response, err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/octet-stream")}, opts...)
+	path := "translate/v1/document"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return res, err
 }
@@ -384,4 +401,28 @@ func (r TranslateV1TranslateParamsModel) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type TranslateV1TranslateDocumentParams struct {
+	// TXT, DOCX, or searchable PDF document (max 20MB)
+	File param.Field[io.Reader] `json:"file" api:"required" format:"binary"`
+	// Target BCP-47 language code
+	Target param.Field[string] `json:"target" api:"required"`
+	// Optional source BCP-47 language code. Auto-detected when omitted.
+	Source param.Field[string] `json:"source"`
+}
+
+func (r TranslateV1TranslateDocumentParams) MarshalMultipart() (data []byte, contentType string, err error) {
+	buf := bytes.NewBuffer(nil)
+	writer := multipart.NewWriter(buf)
+	err = apiform.MarshalRoot(r, writer)
+	if err != nil {
+		writer.Close()
+		return nil, "", err
+	}
+	err = writer.Close()
+	if err != nil {
+		return nil, "", err
+	}
+	return buf.Bytes(), writer.FormDataContentType(), nil
 }

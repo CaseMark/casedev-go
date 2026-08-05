@@ -4,21 +4,17 @@ package githubcomcasemarkcasedevgo
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net/http"
-	"net/url"
 	"slices"
 	"time"
 
 	"github.com/CaseMark/casedev-go/internal/apijson"
-	"github.com/CaseMark/casedev-go/internal/apiquery"
 	"github.com/CaseMark/casedev-go/internal/param"
 	"github.com/CaseMark/casedev-go/internal/requestconfig"
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Web search, AI answers, and deep research
+// Web search and AI answers
 //
 // SearchV1Service contains methods and other services that help with interacting
 // with the casedev API.
@@ -57,31 +53,6 @@ func (r *SearchV1Service) Contents(ctx context.Context, body SearchV1ContentsPar
 	opts = slices.Concat(r.Options, opts)
 	path := "search/v1/contents"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return res, err
-}
-
-// Performs deep research by conducting multi-step analysis, gathering information
-// from multiple sources, and providing comprehensive insights. Ideal for legal
-// research, case analysis, and due diligence investigations.
-func (r *SearchV1Service) Research(ctx context.Context, body SearchV1ResearchParams, opts ...option.RequestOption) (res *SearchV1ResearchResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "search/v1/research"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return res, err
-}
-
-// Retrieve the status and results of a deep research task by ID. Supports both
-// standard JSON responses and streaming for real-time updates as the research
-// progresses. Research tasks analyze topics comprehensively using web search and
-// AI synthesis.
-func (r *SearchV1Service) GetResearch(ctx context.Context, id string, query SearchV1GetResearchParams, opts ...option.RequestOption) (res *SearchV1GetResearchResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
-	if id == "" {
-		err = errors.New("missing required id parameter")
-		return nil, err
-	}
-	path := fmt.Sprintf("search/v1/research/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return res, err
 }
 
@@ -221,216 +192,6 @@ func (r *SearchV1ContentsResponseResult) UnmarshalJSON(data []byte) (err error) 
 
 func (r searchV1ContentsResponseResultJSON) RawJSON() string {
 	return r.raw
-}
-
-type SearchV1ResearchResponse struct {
-	// Model used for research
-	Model string `json:"model"`
-	// Unique identifier for this research
-	ResearchID string `json:"researchId"`
-	// Research findings and analysis
-	Results interface{}                  `json:"results"`
-	JSON    searchV1ResearchResponseJSON `json:"-"`
-}
-
-// searchV1ResearchResponseJSON contains the JSON metadata for the struct
-// [SearchV1ResearchResponse]
-type searchV1ResearchResponseJSON struct {
-	Model       apijson.Field
-	ResearchID  apijson.Field
-	Results     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SearchV1ResearchResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r searchV1ResearchResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-type SearchV1GetResearchResponse struct {
-	// Research task ID
-	ID string `json:"id"`
-	// Task completion timestamp
-	CompletedAt time.Time `json:"completedAt" format:"date-time"`
-	// Task creation timestamp
-	CreatedAt time.Time `json:"createdAt" format:"date-time"`
-	// Research model used
-	Model SearchV1GetResearchResponseModel `json:"model"`
-	// Completion percentage (0-100)
-	Progress float64 `json:"progress"`
-	// Original research query
-	Query string `json:"query"`
-	// Research findings and analysis
-	Results SearchV1GetResearchResponseResults `json:"results"`
-	// Current status of the research task
-	Status SearchV1GetResearchResponseStatus `json:"status"`
-	JSON   searchV1GetResearchResponseJSON   `json:"-"`
-}
-
-// searchV1GetResearchResponseJSON contains the JSON metadata for the struct
-// [SearchV1GetResearchResponse]
-type searchV1GetResearchResponseJSON struct {
-	ID          apijson.Field
-	CompletedAt apijson.Field
-	CreatedAt   apijson.Field
-	Model       apijson.Field
-	Progress    apijson.Field
-	Query       apijson.Field
-	Results     apijson.Field
-	Status      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SearchV1GetResearchResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r searchV1GetResearchResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// Research model used
-type SearchV1GetResearchResponseModel string
-
-const (
-	SearchV1GetResearchResponseModelFast   SearchV1GetResearchResponseModel = "fast"
-	SearchV1GetResearchResponseModelNormal SearchV1GetResearchResponseModel = "normal"
-	SearchV1GetResearchResponseModelPro    SearchV1GetResearchResponseModel = "pro"
-)
-
-func (r SearchV1GetResearchResponseModel) IsKnown() bool {
-	switch r {
-	case SearchV1GetResearchResponseModelFast, SearchV1GetResearchResponseModelNormal, SearchV1GetResearchResponseModelPro:
-		return true
-	}
-	return false
-}
-
-// Research findings and analysis
-type SearchV1GetResearchResponseResults struct {
-	// Detailed research sections
-	Sections []SearchV1GetResearchResponseResultsSection `json:"sections"`
-	// All sources referenced in research
-	Sources []SearchV1GetResearchResponseResultsSource `json:"sources"`
-	// Executive summary of research findings
-	Summary string                                 `json:"summary"`
-	JSON    searchV1GetResearchResponseResultsJSON `json:"-"`
-}
-
-// searchV1GetResearchResponseResultsJSON contains the JSON metadata for the struct
-// [SearchV1GetResearchResponseResults]
-type searchV1GetResearchResponseResultsJSON struct {
-	Sections    apijson.Field
-	Sources     apijson.Field
-	Summary     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SearchV1GetResearchResponseResults) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r searchV1GetResearchResponseResultsJSON) RawJSON() string {
-	return r.raw
-}
-
-type SearchV1GetResearchResponseResultsSection struct {
-	Content string                                             `json:"content"`
-	Sources []SearchV1GetResearchResponseResultsSectionsSource `json:"sources"`
-	Title   string                                             `json:"title"`
-	JSON    searchV1GetResearchResponseResultsSectionJSON      `json:"-"`
-}
-
-// searchV1GetResearchResponseResultsSectionJSON contains the JSON metadata for the
-// struct [SearchV1GetResearchResponseResultsSection]
-type searchV1GetResearchResponseResultsSectionJSON struct {
-	Content     apijson.Field
-	Sources     apijson.Field
-	Title       apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SearchV1GetResearchResponseResultsSection) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r searchV1GetResearchResponseResultsSectionJSON) RawJSON() string {
-	return r.raw
-}
-
-type SearchV1GetResearchResponseResultsSectionsSource struct {
-	Snippet string                                               `json:"snippet"`
-	Title   string                                               `json:"title"`
-	URL     string                                               `json:"url"`
-	JSON    searchV1GetResearchResponseResultsSectionsSourceJSON `json:"-"`
-}
-
-// searchV1GetResearchResponseResultsSectionsSourceJSON contains the JSON metadata
-// for the struct [SearchV1GetResearchResponseResultsSectionsSource]
-type searchV1GetResearchResponseResultsSectionsSourceJSON struct {
-	Snippet     apijson.Field
-	Title       apijson.Field
-	URL         apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SearchV1GetResearchResponseResultsSectionsSource) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r searchV1GetResearchResponseResultsSectionsSourceJSON) RawJSON() string {
-	return r.raw
-}
-
-type SearchV1GetResearchResponseResultsSource struct {
-	Snippet string                                       `json:"snippet"`
-	Title   string                                       `json:"title"`
-	URL     string                                       `json:"url"`
-	JSON    searchV1GetResearchResponseResultsSourceJSON `json:"-"`
-}
-
-// searchV1GetResearchResponseResultsSourceJSON contains the JSON metadata for the
-// struct [SearchV1GetResearchResponseResultsSource]
-type searchV1GetResearchResponseResultsSourceJSON struct {
-	Snippet     apijson.Field
-	Title       apijson.Field
-	URL         apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
-}
-
-func (r *SearchV1GetResearchResponseResultsSource) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r searchV1GetResearchResponseResultsSourceJSON) RawJSON() string {
-	return r.raw
-}
-
-// Current status of the research task
-type SearchV1GetResearchResponseStatus string
-
-const (
-	SearchV1GetResearchResponseStatusPending   SearchV1GetResearchResponseStatus = "pending"
-	SearchV1GetResearchResponseStatusRunning   SearchV1GetResearchResponseStatus = "running"
-	SearchV1GetResearchResponseStatusCompleted SearchV1GetResearchResponseStatus = "completed"
-	SearchV1GetResearchResponseStatusFailed    SearchV1GetResearchResponseStatus = "failed"
-)
-
-func (r SearchV1GetResearchResponseStatus) IsKnown() bool {
-	switch r {
-	case SearchV1GetResearchResponseStatusPending, SearchV1GetResearchResponseStatusRunning, SearchV1GetResearchResponseStatusCompleted, SearchV1GetResearchResponseStatusFailed:
-		return true
-	}
-	return false
 }
 
 type SearchV1SearchResponse struct {
@@ -625,54 +386,6 @@ type SearchV1ContentsParams struct {
 
 func (r SearchV1ContentsParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-type SearchV1ResearchParams struct {
-	// Research instructions or query
-	Instructions param.Field[string] `json:"instructions" api:"required"`
-	// Research quality level - fast (quick), normal (balanced), pro (comprehensive)
-	Model param.Field[SearchV1ResearchParamsModel] `json:"model"`
-	// Optional JSON schema to structure the research output
-	OutputSchema param.Field[interface{}] `json:"outputSchema"`
-	// Alias for instructions (for convenience)
-	Query param.Field[string] `json:"query"`
-}
-
-func (r SearchV1ResearchParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-// Research quality level - fast (quick), normal (balanced), pro (comprehensive)
-type SearchV1ResearchParamsModel string
-
-const (
-	SearchV1ResearchParamsModelFast   SearchV1ResearchParamsModel = "fast"
-	SearchV1ResearchParamsModelNormal SearchV1ResearchParamsModel = "normal"
-	SearchV1ResearchParamsModelPro    SearchV1ResearchParamsModel = "pro"
-)
-
-func (r SearchV1ResearchParamsModel) IsKnown() bool {
-	switch r {
-	case SearchV1ResearchParamsModelFast, SearchV1ResearchParamsModelNormal, SearchV1ResearchParamsModelPro:
-		return true
-	}
-	return false
-}
-
-type SearchV1GetResearchParams struct {
-	// Filter specific event types for streaming
-	Events param.Field[string] `query:"events"`
-	// Enable streaming for real-time updates
-	Stream param.Field[bool] `query:"stream"`
-}
-
-// URLQuery serializes [SearchV1GetResearchParams]'s query parameters as
-// `url.Values`.
-func (r SearchV1GetResearchParams) URLQuery() (v url.Values) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatComma,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
 }
 
 type SearchV1SearchParams struct {

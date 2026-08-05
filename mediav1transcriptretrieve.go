@@ -13,6 +13,8 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+// Transcript retrieval and captioned media clip generation
+//
 // MediaV1TranscriptRetrieveService contains methods and other services that help
 // with interacting with the casedev API.
 //

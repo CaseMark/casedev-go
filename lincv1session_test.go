@@ -32,6 +32,7 @@ func TestLincV1SessionNewWithOptionalParams(t *testing.T) {
 		Instructions:             githubcomcasemarkcasedevgo.F("instructions"),
 		Model:                    githubcomcasemarkcasedevgo.F("model"),
 		ScopedAPIKey:             githubcomcasemarkcasedevgo.F("scopedApiKey"),
+		ServiceTier:              githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LincV1SessionNewParamsServiceTierDefault),
 		SkillSlugs:               githubcomcasemarkcasedevgo.F([]string{"string"}),
 		Title:                    githubcomcasemarkcasedevgo.F("title"),
 		VaultIDs:                 githubcomcasemarkcasedevgo.F([]string{"string"}),
@@ -67,7 +68,7 @@ func TestLincV1SessionDelete(t *testing.T) {
 	}
 }
 
-func TestLincV1SessionCancel(t *testing.T) {
+func TestLincV1SessionCancelWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -79,7 +80,13 @@ func TestLincV1SessionCancel(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Linc.V1.Sessions.Cancel(context.TODO(), "id")
+	err := client.Linc.V1.Sessions.Cancel(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.LincV1SessionCancelParams{
+			ClearQueue: githubcomcasemarkcasedevgo.F(true),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

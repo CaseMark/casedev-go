@@ -6,24 +6,24 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// DatabaseService contains methods and other services that help with interacting
+// ConnectorService contains methods and other services that help with interacting
 // with the casedev API.
 //
 // Note, unlike clients, this service does not read variables from the environment
 // automatically. You should not instantiate this service directly, and instead use
-// the [NewDatabaseService] method instead.
-type DatabaseService struct {
+// the [NewConnectorService] method instead.
+type ConnectorService struct {
 	Options []option.RequestOption
-	// Serverless PostgreSQL databases with instant branching
-	V1 *DatabaseV1Service
+	// Import and export between provider folders (Google Drive) and vaults
+	V1 *ConnectorV1Service
 }
 
-// NewDatabaseService generates a new service that applies the given options to
+// NewConnectorService generates a new service that applies the given options to
 // each request. These options are applied after the parent client's options (if
 // there is one), and before any request-specific options.
-func NewDatabaseService(opts ...option.RequestOption) (r *DatabaseService) {
-	r = &DatabaseService{}
+func NewConnectorService(opts ...option.RequestOption) (r *ConnectorService) {
+	r = &ConnectorService{}
 	r.Options = opts
-	r.V1 = NewDatabaseV1Service(opts...)
+	r.V1 = NewConnectorV1Service(opts...)
 	return
 }

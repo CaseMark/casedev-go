@@ -166,39 +166,12 @@ func TestMatterV1WorkItemDecideWithOptionalParams(t *testing.T) {
 		"id",
 		"workItemId",
 		githubcomcasemarkcasedevgo.MatterV1WorkItemDecideParams{
-			Decision:    githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.MatterV1WorkItemDecideParamsDecisionApprove),
-			AgentTypeID: githubcomcasemarkcasedevgo.F("agent_type_id"),
+			Decision: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.MatterV1WorkItemDecideParamsDecisionApprove),
 			Metadata: githubcomcasemarkcasedevgo.F(map[string]interface{}{
 				"foo": "bar",
 			}),
 			Reason: githubcomcasemarkcasedevgo.F("reason"),
 		},
-	)
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestMatterV1WorkItemListExecutions(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	err := client.Matters.V1.WorkItems.ListExecutions(
-		context.TODO(),
-		"id",
-		"workItemId",
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error

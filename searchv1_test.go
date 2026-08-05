@@ -81,62 +81,6 @@ func TestSearchV1ContentsWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestSearchV1ResearchWithOptionalParams(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Search.V1.Research(context.TODO(), githubcomcasemarkcasedevgo.SearchV1ResearchParams{
-		Instructions: githubcomcasemarkcasedevgo.F("instructions"),
-		Model:        githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.SearchV1ResearchParamsModelFast),
-		OutputSchema: githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
-		Query:        githubcomcasemarkcasedevgo.F("query"),
-	})
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestSearchV1GetResearchWithOptionalParams(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Search.V1.GetResearch(
-		context.TODO(),
-		"id",
-		githubcomcasemarkcasedevgo.SearchV1GetResearchParams{
-			Events: githubcomcasemarkcasedevgo.F("events"),
-			Stream: githubcomcasemarkcasedevgo.F(true),
-		},
-	)
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
 func TestSearchV1SearchWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {

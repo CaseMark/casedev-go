@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestAgentV1RunNewWithOptionalParams(t *testing.T) {
+func TestConnectorV1ConnectionNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,13 +25,10 @@ func TestAgentV1RunNewWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Agent.V1.Run.New(context.TODO(), githubcomcasemarkcasedevgo.AgentV1RunNewParams{
-		AgentID:     githubcomcasemarkcasedevgo.F("agentId"),
-		Prompt:      githubcomcasemarkcasedevgo.F("prompt"),
-		CallbackURL: githubcomcasemarkcasedevgo.F("https://example.com"),
-		Guidance:    githubcomcasemarkcasedevgo.F("guidance"),
-		Model:       githubcomcasemarkcasedevgo.F("model"),
-		ObjectIDs:   githubcomcasemarkcasedevgo.F([]string{"string"}),
+	_, err := client.Connectors.V1.Connections.New(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1ConnectionNewParams{
+		Provider:  githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1ConnectionNewParamsProviderClio),
+		ReturnURL: githubcomcasemarkcasedevgo.F("return_url"),
+		ScopeTier: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1ConnectionNewParamsScopeTierClioUs),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -42,7 +39,7 @@ func TestAgentV1RunNewWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestAgentV1RunListWithOptionalParams(t *testing.T) {
+func TestConnectorV1ConnectionGet(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -54,11 +51,31 @@ func TestAgentV1RunListWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Agent.V1.Run.List(context.TODO(), githubcomcasemarkcasedevgo.AgentV1RunListParams{
-		AgentID: githubcomcasemarkcasedevgo.F("agentId"),
-		Cursor:  githubcomcasemarkcasedevgo.F("cursor"),
-		Limit:   githubcomcasemarkcasedevgo.F(int64(1)),
-		Status:  githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.AgentV1RunListParamsStatusQueued),
+	err := client.Connectors.V1.Connections.Get(context.TODO(), "id")
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestConnectorV1ConnectionListWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Connectors.V1.Connections.List(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1ConnectionListParams{
+		Provider: githubcomcasemarkcasedevgo.F("provider"),
+		Status:   githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1ConnectionListParamsStatusPending),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -69,7 +86,7 @@ func TestAgentV1RunListWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestAgentV1RunCancel(t *testing.T) {
+func TestConnectorV1ConnectionDeleteWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -81,99 +98,44 @@ func TestAgentV1RunCancel(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Agent.V1.Run.Cancel(context.TODO(), "id")
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestAgentV1RunExec(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Agent.V1.Run.Exec(context.TODO(), "id")
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestAgentV1RunGetDetails(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Agent.V1.Run.GetDetails(context.TODO(), "id")
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestAgentV1RunGetStatus(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Agent.V1.Run.GetStatus(context.TODO(), "id")
-	if err != nil {
-		var apierr *githubcomcasemarkcasedevgo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestAgentV1RunWatch(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcomcasemarkcasedevgo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAPIKey("My API Key"),
-	)
-	_, err := client.Agent.V1.Run.Watch(
+	err := client.Connectors.V1.Connections.Delete(
 		context.TODO(),
 		"id",
-		githubcomcasemarkcasedevgo.AgentV1RunWatchParams{
-			CallbackURL: githubcomcasemarkcasedevgo.F("https://example.com"),
+		githubcomcasemarkcasedevgo.ConnectorV1ConnectionDeleteParams{
+			Purge: githubcomcasemarkcasedevgo.F(true),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestConnectorV1ConnectionBrowseWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Connectors.V1.Connections.Browse(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.ConnectorV1ConnectionBrowseParams{
+			Container: githubcomcasemarkcasedevgo.F("container"),
+			Cursor:    githubcomcasemarkcasedevgo.F("cursor"),
+			PageSize:  githubcomcasemarkcasedevgo.F(int64(1000)),
+			Parent:    githubcomcasemarkcasedevgo.F("parent"),
+			Query:     githubcomcasemarkcasedevgo.F("query"),
+			Site:      githubcomcasemarkcasedevgo.F("site"),
 		},
 	)
 	if err != nil {

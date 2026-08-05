@@ -30,14 +30,12 @@ type VaultService struct {
 	Options []option.RequestOption
 	Events  *VaultEventService
 	// Secure document storage with semantic search and GraphRAG
-	Graphrag *VaultGraphragService
-	// Secure document storage with semantic search and GraphRAG
 	Groups *VaultGroupService
 	// Secure document storage with semantic search and GraphRAG
 	Multipart *VaultMultipartService
-	// Secure document storage with semantic search and GraphRAG
+	// Vault object management, content access, and document operations
 	Objects *VaultObjectService
-	// Secure document storage with semantic search and GraphRAG
+	// Vault-scoped persistent memory and semantic retrieval
 	Memory *VaultMemoryService
 }
 
@@ -48,7 +46,6 @@ func NewVaultService(opts ...option.RequestOption) (r *VaultService) {
 	r = &VaultService{}
 	r.Options = opts
 	r.Events = NewVaultEventService(opts...)
-	r.Graphrag = NewVaultGraphragService(opts...)
 	r.Groups = NewVaultGroupService(opts...)
 	r.Multipart = NewVaultMultipartService(opts...)
 	r.Objects = NewVaultObjectService(opts...)
@@ -120,7 +117,9 @@ func (r *VaultService) Delete(ctx context.Context, id string, body VaultDeletePa
 
 // Confirm whether a direct-to-S3 vault upload succeeded or failed. This endpoint
 // emits vault.upload.completed or vault.upload.failed events and is idempotent for
-// repeated confirmations.
+// repeated confirmations. Conditional fields: when success=true, sizeBytes is
+// required; when success=false, errorCode and errorMessage are required. These
+// rules are enforced server-side with specific 400 responses.
 func (r *VaultService) ConfirmUpload(ctx context.Context, id string, objectID string, body VaultConfirmUploadParams, opts ...option.RequestOption) (res *VaultConfirmUploadResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
@@ -143,8 +142,7 @@ func (r *VaultService) ConfirmUpload(ctx context.Context, id string, objectID st
 // recursively up to 5 levels, and each extracted file is created as an independent
 // vault object and ingested via the normal pipeline. For unsupported types
 // (images, etc.), the file is marked as completed immediately without text
-// extraction. GraphRAG indexing must be triggered separately via POST
-// /vault/:id/graphrag/:objectId.
+// extraction.
 func (r *VaultService) Ingest(ctx context.Context, id string, objectID string, opts ...option.RequestOption) (res *VaultIngestResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
@@ -178,14 +176,17 @@ func (r *VaultService) Search(ctx context.Context, id string, body VaultSearchPa
 // Generate a presigned URL for uploading files directly to a vault's S3 storage.
 // After uploading to S3, confirm the upload result via POST
 // /vault/:vaultId/upload/:objectId/confirm before triggering ingestion.
-func (r *VaultService) Upload(ctx context.Context, id string, body VaultUploadParams, opts ...option.RequestOption) (res *VaultUploadResponse, err error) {
+func (r *VaultService) Upload(ctx context.Context, id string, params VaultUploadParams, opts ...option.RequestOption) (res *VaultUploadResponse, err error) {
+	if params.IdempotencyKey.Present {
+		opts = append(opts, option.WithHeader("Idempotency-Key", fmt.Sprintf("%v", params.IdempotencyKey)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/upload", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return res, err
 }
 
@@ -624,8 +625,7 @@ func (r VaultConfirmUploadResponseStatus) IsKnown() bool {
 }
 
 type VaultIngestResponse struct {
-	// Always false - GraphRAG must be triggered separately via POST
-	// /vault/:id/graphrag/:objectId
+	// Always false; retained for response compatibility
 	EnableGraphRag bool `json:"enableGraphRAG" api:"required"`
 	// Human-readable status message
 	Message string `json:"message" api:"required"`
@@ -809,13 +809,15 @@ func (r vaultSearchResponseSourceJSON) RawJSON() string {
 }
 
 type VaultUploadResponse struct {
+	// True when this idempotency key already identifies a confirmed upload
+	AlreadyUploaded bool `json:"alreadyUploaded"`
 	// Whether the file will be automatically indexed
 	AutoIndex bool `json:"auto_index"`
 	// Whether the vault supports indexing. False for storage-only vaults.
 	EnableIndexing bool `json:"enableIndexing"`
 	// URL expiration time in seconds
 	ExpiresIn    float64                         `json:"expiresIn"`
-	Instructions VaultUploadResponseInstructions `json:"instructions"`
+	Instructions VaultUploadResponseInstructions `json:"instructions" api:"nullable"`
 	// Whether the file is marked as AI-generated work product
 	IsAIGenerated bool `json:"is_ai_generated"`
 	// Next API endpoint to call for processing
@@ -827,25 +829,26 @@ type VaultUploadResponse struct {
 	// S3 object key for the file
 	S3Key string `json:"s3Key"`
 	// Presigned URL for uploading the file
-	UploadURL string                  `json:"uploadUrl"`
+	UploadURL string                  `json:"uploadUrl" api:"nullable"`
 	JSON      vaultUploadResponseJSON `json:"-"`
 }
 
 // vaultUploadResponseJSON contains the JSON metadata for the struct
 // [VaultUploadResponse]
 type vaultUploadResponseJSON struct {
-	AutoIndex      apijson.Field
-	EnableIndexing apijson.Field
-	ExpiresIn      apijson.Field
-	Instructions   apijson.Field
-	IsAIGenerated  apijson.Field
-	NextStep       apijson.Field
-	ObjectID       apijson.Field
-	Path           apijson.Field
-	S3Key          apijson.Field
-	UploadURL      apijson.Field
-	raw            string
-	ExtraFields    map[string]apijson.Field
+	AlreadyUploaded apijson.Field
+	AutoIndex       apijson.Field
+	EnableIndexing  apijson.Field
+	ExpiresIn       apijson.Field
+	Instructions    apijson.Field
+	IsAIGenerated   apijson.Field
+	NextStep        apijson.Field
+	ObjectID        apijson.Field
+	Path            apijson.Field
+	S3Key           apijson.Field
+	UploadURL       apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
 }
 
 func (r *VaultUploadResponse) UnmarshalJSON(data []byte) (err error) {
@@ -971,125 +974,26 @@ func (r VaultDeleteParams) URLQuery() (v url.Values) {
 }
 
 type VaultConfirmUploadParams struct {
-	Body VaultConfirmUploadParamsBodyUnion `json:"body" api:"required"`
-}
-
-func (r VaultConfirmUploadParams) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r.Body)
-}
-
-type VaultConfirmUploadParamsBody struct {
 	// Whether the upload succeeded
-	Success param.Field[VaultConfirmUploadParamsBodySuccess] `json:"success" api:"required"`
+	Success param.Field[bool] `json:"success" api:"required"`
 	// When true and the object was uploaded with auto_index, trigger ingestion
 	// immediately after a successful confirmation (no separate ingest call needed).
 	// The ingest outcome is reported in the `ingest` response field; an ingest failure
 	// does not fail the confirmation.
 	AutoIngest param.Field[bool] `json:"autoIngest"`
-	// Client-side error code
+	// Client-side error code. Required when success=false.
 	ErrorCode param.Field[string] `json:"errorCode"`
-	// Client-side error message
+	// Client-side error message. Required when success=false.
 	ErrorMessage param.Field[string] `json:"errorMessage"`
-	// S3 ETag for the uploaded object (optional if client cannot access ETag header)
+	// S3 ETag for the uploaded object (optional if client cannot access ETag header).
+	// Only meaningful when success=true.
 	Etag param.Field[string] `json:"etag"`
-	// Uploaded file size in bytes
+	// Uploaded file size in bytes. Required when success=true.
 	SizeBytes param.Field[int64] `json:"sizeBytes"`
 }
 
-func (r VaultConfirmUploadParamsBody) MarshalJSON() (data []byte, err error) {
+func (r VaultConfirmUploadParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
-}
-
-func (r VaultConfirmUploadParamsBody) implementsVaultConfirmUploadParamsBodyUnion() {}
-
-// Satisfied by [VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess],
-// [VaultConfirmUploadParamsBodyVaultConfirmUploadFailure],
-// [VaultConfirmUploadParamsBody].
-type VaultConfirmUploadParamsBodyUnion interface {
-	implementsVaultConfirmUploadParamsBodyUnion()
-}
-
-type VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess struct {
-	// Uploaded file size in bytes
-	SizeBytes param.Field[int64] `json:"sizeBytes" api:"required"`
-	// Whether the upload succeeded
-	Success param.Field[VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess] `json:"success" api:"required"`
-	// When true and the object was uploaded with auto_index, trigger ingestion
-	// immediately after a successful confirmation (no separate ingest call needed).
-	// The ingest outcome is reported in the `ingest` response field; an ingest failure
-	// does not fail the confirmation.
-	AutoIngest param.Field[bool] `json:"autoIngest"`
-	// S3 ETag for the uploaded object (optional if client cannot access ETag header)
-	Etag param.Field[string] `json:"etag"`
-}
-
-func (r VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r VaultConfirmUploadParamsBodyVaultConfirmUploadSuccess) implementsVaultConfirmUploadParamsBodyUnion() {
-}
-
-// Whether the upload succeeded
-type VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess bool
-
-const (
-	VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccessTrue VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess = true
-)
-
-func (r VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccess) IsKnown() bool {
-	switch r {
-	case VaultConfirmUploadParamsBodyVaultConfirmUploadSuccessSuccessTrue:
-		return true
-	}
-	return false
-}
-
-type VaultConfirmUploadParamsBodyVaultConfirmUploadFailure struct {
-	// Client-side error code
-	ErrorCode param.Field[string] `json:"errorCode" api:"required"`
-	// Client-side error message
-	ErrorMessage param.Field[string] `json:"errorMessage" api:"required"`
-	// Whether the upload succeeded
-	Success param.Field[VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess] `json:"success" api:"required"`
-}
-
-func (r VaultConfirmUploadParamsBodyVaultConfirmUploadFailure) MarshalJSON() (data []byte, err error) {
-	return apijson.MarshalRoot(r)
-}
-
-func (r VaultConfirmUploadParamsBodyVaultConfirmUploadFailure) implementsVaultConfirmUploadParamsBodyUnion() {
-}
-
-// Whether the upload succeeded
-type VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess bool
-
-const (
-	VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccessFalse VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess = false
-)
-
-func (r VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccess) IsKnown() bool {
-	switch r {
-	case VaultConfirmUploadParamsBodyVaultConfirmUploadFailureSuccessFalse:
-		return true
-	}
-	return false
-}
-
-// Whether the upload succeeded
-type VaultConfirmUploadParamsBodySuccess bool
-
-const (
-	VaultConfirmUploadParamsBodySuccessTrue  VaultConfirmUploadParamsBodySuccess = true
-	VaultConfirmUploadParamsBodySuccessFalse VaultConfirmUploadParamsBodySuccess = false
-)
-
-func (r VaultConfirmUploadParamsBodySuccess) IsKnown() bool {
-	switch r {
-	case VaultConfirmUploadParamsBodySuccessTrue, VaultConfirmUploadParamsBodySuccessFalse:
-		return true
-	}
-	return false
 }
 
 type VaultSearchParams struct {
@@ -1174,7 +1078,8 @@ type VaultUploadParams struct {
 	Path param.Field[string] `json:"path"`
 	// File size in bytes (optional, max 5GB for single PUT uploads). When provided,
 	// enforces exact file size at S3 level.
-	SizeBytes param.Field[int64] `json:"sizeBytes"`
+	SizeBytes      param.Field[int64]  `json:"sizeBytes"`
+	IdempotencyKey param.Field[string] `header:"Idempotency-Key"`
 }
 
 func (r VaultUploadParams) MarshalJSON() (data []byte, err error) {

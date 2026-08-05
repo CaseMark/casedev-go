@@ -15,7 +15,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Secure document storage with semantic search and GraphRAG
+// Vault-scoped event subscriptions and delivery testing
 //
 // VaultEventSubscriptionService contains methods and other services that help with
 // interacting with the casedev API.

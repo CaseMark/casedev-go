@@ -99,8 +99,7 @@ func (r *MatterV1WorkItemService) List(ctx context.Context, id string, query Mat
 	return err
 }
 
-// Approve, revise, block, or reassign a work item. Used by humans or agents to
-// move work items through their lifecycle.
+// Approve or block a work item.
 func (r *MatterV1WorkItemService) Decide(ctx context.Context, id string, workItemID string, body MatterV1WorkItemDecideParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -114,23 +113,6 @@ func (r *MatterV1WorkItemService) Decide(ctx context.Context, id string, workIte
 	}
 	path := fmt.Sprintf("matters/v1/%s/work-items/%s/decision", id, workItemID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return err
-}
-
-// List execution attempts for a work item, including agent and run linkage.
-func (r *MatterV1WorkItemService) ListExecutions(ctx context.Context, id string, workItemID string, opts ...option.RequestOption) (err error) {
-	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
-	if id == "" {
-		err = errors.New("missing required id parameter")
-		return err
-	}
-	if workItemID == "" {
-		err = errors.New("missing required workItemId parameter")
-		return err
-	}
-	path := fmt.Sprintf("matters/v1/%s/work-items/%s/executions", id, workItemID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
 	return err
 }
 
@@ -283,10 +265,9 @@ func (r MatterV1WorkItemListParams) URLQuery() (v url.Values) {
 }
 
 type MatterV1WorkItemDecideParams struct {
-	Decision    param.Field[MatterV1WorkItemDecideParamsDecision] `json:"decision" api:"required"`
-	AgentTypeID param.Field[string]                               `json:"agent_type_id"`
-	Metadata    param.Field[map[string]interface{}]               `json:"metadata"`
-	Reason      param.Field[string]                               `json:"reason"`
+	Decision param.Field[MatterV1WorkItemDecideParamsDecision] `json:"decision" api:"required"`
+	Metadata param.Field[map[string]interface{}]               `json:"metadata"`
+	Reason   param.Field[string]                               `json:"reason"`
 }
 
 func (r MatterV1WorkItemDecideParams) MarshalJSON() (data []byte, err error) {
@@ -296,15 +277,13 @@ func (r MatterV1WorkItemDecideParams) MarshalJSON() (data []byte, err error) {
 type MatterV1WorkItemDecideParamsDecision string
 
 const (
-	MatterV1WorkItemDecideParamsDecisionApprove  MatterV1WorkItemDecideParamsDecision = "approve"
-	MatterV1WorkItemDecideParamsDecisionRevise   MatterV1WorkItemDecideParamsDecision = "revise"
-	MatterV1WorkItemDecideParamsDecisionBlock    MatterV1WorkItemDecideParamsDecision = "block"
-	MatterV1WorkItemDecideParamsDecisionReassign MatterV1WorkItemDecideParamsDecision = "reassign"
+	MatterV1WorkItemDecideParamsDecisionApprove MatterV1WorkItemDecideParamsDecision = "approve"
+	MatterV1WorkItemDecideParamsDecisionBlock   MatterV1WorkItemDecideParamsDecision = "block"
 )
 
 func (r MatterV1WorkItemDecideParamsDecision) IsKnown() bool {
 	switch r {
-	case MatterV1WorkItemDecideParamsDecisionApprove, MatterV1WorkItemDecideParamsDecisionRevise, MatterV1WorkItemDecideParamsDecisionBlock, MatterV1WorkItemDecideParamsDecisionReassign:
+	case MatterV1WorkItemDecideParamsDecisionApprove, MatterV1WorkItemDecideParamsDecisionBlock:
 		return true
 	}
 	return false

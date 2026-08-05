@@ -4,14 +4,9 @@ package shared
 
 type UnionString string
 
-func (UnionString) ImplementsMatterV1LogListParamsScopeUnion()          {}
-func (UnionString) ImplementsMatterV1LogExportParamsScopeUnion()        {}
-func (UnionString) ImplementsLlmV1NewEmbeddingParamsInputUnion()        {}
-func (UnionString) ImplementsSuperdocV1AnnotateParamsFieldsValueUnion() {}
-func (UnionString) ImplementsTranslateV1DetectParamsQUnion()            {}
-func (UnionString) ImplementsTranslateV1TranslateParamsQUnion()         {}
-func (UnionString) ImplementsVaultSearchParamsFiltersObjectIDUnion()    {}
-
-type UnionFloat float64
-
-func (UnionFloat) ImplementsSuperdocV1AnnotateParamsFieldsValueUnion() {}
+func (UnionString) ImplementsMatterV1LogListParamsScopeUnion()       {}
+func (UnionString) ImplementsMatterV1LogExportParamsScopeUnion()     {}
+func (UnionString) ImplementsLlmV1NewEmbeddingParamsInputUnion()     {}
+func (UnionString) ImplementsTranslateV1DetectParamsQUnion()         {}
+func (UnionString) ImplementsTranslateV1TranslateParamsQUnion()      {}
+func (UnionString) ImplementsVaultSearchParamsFiltersObjectIDUnion() {}

@@ -14,7 +14,8 @@ import (
 // the [NewTranslateService] method instead.
 type TranslateService struct {
 	Options []option.RequestOption
-	V1      *TranslateV1Service
+	// Language detection and translation for multilingual legal workflows
+	V1 *TranslateV1Service
 }
 
 // NewTranslateService generates a new service that applies the given options to

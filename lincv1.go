@@ -14,8 +14,7 @@ import (
 // the [NewLincV1Service] method instead.
 type LincV1Service struct {
 	Options []option.RequestOption
-	// Create, manage, and execute AI agents with tool access, sandbox environments,
-	// and async run workflows
+	// Durable, stateful legal agent sessions with sandboxed tools and files
 	Sessions *LincV1SessionService
 }
 

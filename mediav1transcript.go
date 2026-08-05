@@ -13,8 +13,10 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewMediaV1TranscriptService] method instead.
 type MediaV1TranscriptService struct {
-	Options  []option.RequestOption
-	Search   *MediaV1TranscriptSearchService
+	Options []option.RequestOption
+	// Transcript retrieval and captioned media clip generation
+	Search *MediaV1TranscriptSearchService
+	// Transcript retrieval and captioned media clip generation
 	Retrieve *MediaV1TranscriptRetrieveService
 }
 

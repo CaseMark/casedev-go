@@ -17,8 +17,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Create, manage, and execute AI agents with tool access, sandbox environments,
-// and async run workflows
+// Durable, stateful legal agent sessions with sandboxed tools and files
 //
 // LincV1SessionService contains methods and other services that help with
 // interacting with the casedev API.
@@ -63,8 +62,11 @@ func (r *LincV1SessionService) Delete(ctx context.Context, id string, opts ...op
 	return err
 }
 
-// Cancel native Linc session turn
-func (r *LincV1SessionService) Cancel(ctx context.Context, id string, opts ...option.RequestOption) (err error) {
+// Sends an abort RPC to the session runtime, ending the current turn while keeping
+// the session alive. Body handling is intentionally lenient — cancel is a stop
+// control, so unknown fields are ignored and an invalid or missing body is treated
+// as empty rather than rejected.
+func (r *LincV1SessionService) Cancel(ctx context.Context, id string, body LincV1SessionCancelParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -72,7 +74,7 @@ func (r *LincV1SessionService) Cancel(ctx context.Context, id string, opts ...op
 		return err
 	}
 	path := fmt.Sprintf("linc/v1/sessions/%s/cancel", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return err
 }
 
@@ -160,6 +162,9 @@ type LincV1SessionNewParams struct {
 	Model        param.Field[string] `json:"model"`
 	// Optional caller-provided scoped Case.dev API key for the runtime.
 	ScopedAPIKey param.Field[string] `json:"scopedApiKey"`
+	// Processing tier for eligible OpenAI GPT models. Priority provides lower latency
+	// at premium cost.
+	ServiceTier param.Field[LincV1SessionNewParamsServiceTier] `json:"serviceTier"`
 	// Skills API slugs to install into the runtime sandbox before the native session
 	// starts.
 	SkillSlugs param.Field[[]string] `json:"skillSlugs"`
@@ -168,6 +173,37 @@ type LincV1SessionNewParams struct {
 }
 
 func (r LincV1SessionNewParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Processing tier for eligible OpenAI GPT models. Priority provides lower latency
+// at premium cost.
+type LincV1SessionNewParamsServiceTier string
+
+const (
+	LincV1SessionNewParamsServiceTierDefault  LincV1SessionNewParamsServiceTier = "default"
+	LincV1SessionNewParamsServiceTierPriority LincV1SessionNewParamsServiceTier = "priority"
+)
+
+func (r LincV1SessionNewParamsServiceTier) IsKnown() bool {
+	switch r {
+	case LincV1SessionNewParamsServiceTierDefault, LincV1SessionNewParamsServiceTierPriority:
+		return true
+	}
+	return false
+}
+
+type LincV1SessionCancelParams struct {
+	// Also clear queued steering/follow-up messages so the abort leaves the agent
+	// fully idle. Cleared texts are returned in the `response.data.clearedQueue` field
+	// of the response body. Without it, messages still queued when the abort settles
+	// are auto-continued as a new run. Runtimes older than the Linc release that
+	// supports this flag ignore it: the abort still happens but the queue is left
+	// untouched.
+	ClearQueue param.Field[bool] `json:"clearQueue"`
+}
+
+func (r LincV1SessionCancelParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

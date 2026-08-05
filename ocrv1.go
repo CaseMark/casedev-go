@@ -39,8 +39,8 @@ func NewOcrV1Service(opts ...option.RequestOption) (r *OcrV1Service) {
 	return
 }
 
-// Retrieve the status and results of an OCR job. Returns job progress, extracted
-// text, and metadata when processing is complete.
+// Retrieve the status and results of an OCR job. Returns job progress and
+// metadata; full extracted text is included only when include_text=true.
 func (r *OcrV1Service) Get(ctx context.Context, id string, query OcrV1GetParams, opts ...option.RequestOption) (res *OcrV1GetResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
@@ -89,7 +89,7 @@ type OcrV1GetResponse struct {
 	Metadata interface{} `json:"metadata"`
 	// Number of pages processed
 	PageCount int64 `json:"page_count"`
-	// Extracted text content (when completed)
+	// Extracted text content when completed and include_text=true
 	Text string               `json:"text"`
 	JSON ocrV1GetResponseJSON `json:"-"`
 }
@@ -193,7 +193,7 @@ func (r OcrV1ProcessResponseStatus) IsKnown() bool {
 }
 
 type OcrV1GetParams struct {
-	// Include full OCR text in completed responses (default: true)
+	// Include full OCR text in completed responses (default: false)
 	IncludeText param.Field[OcrV1GetParamsIncludeText] `query:"include_text"`
 }
 
@@ -205,7 +205,7 @@ func (r OcrV1GetParams) URLQuery() (v url.Values) {
 	})
 }
 
-// Include full OCR text in completed responses (default: true)
+// Include full OCR text in completed responses (default: false)
 type OcrV1GetParamsIncludeText string
 
 const (

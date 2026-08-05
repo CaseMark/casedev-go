@@ -18,7 +18,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Secure document storage with semantic search and GraphRAG
+// Vault object management, content access, and document operations
 //
 // VaultObjectService contains methods and other services that help with
 // interacting with the casedev API.
@@ -228,29 +228,10 @@ func (r *VaultObjectService) GetPages(ctx context.Context, id string, objectID s
 	return res, err
 }
 
-// Get the status of a CaseMark summary workflow job.
-func (r *VaultObjectService) GetSummarizeJob(ctx context.Context, id string, objectID string, jobID string, opts ...option.RequestOption) (res *VaultObjectGetSummarizeJobResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
-	if id == "" {
-		err = errors.New("missing required id parameter")
-		return nil, err
-	}
-	if objectID == "" {
-		err = errors.New("missing required objectId parameter")
-		return nil, err
-	}
-	if jobID == "" {
-		err = errors.New("missing required jobId parameter")
-		return nil, err
-	}
-	path := fmt.Sprintf("vault/%s/objects/%s/summarize/%s", id, objectID, jobID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return res, err
-}
-
-// Retrieves the full extracted text content from a processed vault object. Returns
-// the concatenated text from all chunks, useful for document review, analysis, or
-// export. The object must have completed processing before text can be retrieved.
+// Retrieves the full extracted text content from a processed vault object,
+// page-numbered (--- Page N --- markers) when the source document is paginated.
+// Useful for document review, analysis, or export. The object must have completed
+// processing before text can be retrieved.
 func (r *VaultObjectService) GetText(ctx context.Context, id string, objectID string, opts ...option.RequestOption) (res *VaultObjectGetTextResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
@@ -266,21 +247,20 @@ func (r *VaultObjectService) GetText(ctx context.Context, id string, objectID st
 	return res, err
 }
 
-// Triggers a CaseMark AI workflow to summarize or analyze a document stored in the
-// vault. The workflow processes the document asynchronously and stores the result
-// as a new object in the same vault, linked to the original document.
-func (r *VaultObjectService) Summarize(ctx context.Context, id string, objectID string, body VaultObjectSummarizeParams, opts ...option.RequestOption) (res *VaultObjectSummarizeResponse, err error) {
+// Starts an asynchronous merge that creates a new PDF vault object. Source objects
+// are unchanged. Missing searchable PDF renditions are generated on demand before
+// combining. Completion is reported through vault.object.merge webhooks.
+func (r *VaultObjectService) Merge(ctx context.Context, id string, params VaultObjectMergeParams, opts ...option.RequestOption) (res *VaultObjectMergeResponse, err error) {
+	if params.IdempotencyKey.Present {
+		opts = append(opts, option.WithHeader("Idempotency-Key", fmt.Sprintf("%v", params.IdempotencyKey)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return nil, err
 	}
-	if objectID == "" {
-		err = errors.New("missing required objectId parameter")
-		return nil, err
-	}
-	path := fmt.Sprintf("vault/%s/objects/%s/summarize", id, objectID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	path := fmt.Sprintf("vault/%s/objects/merge", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return res, err
 }
 
@@ -559,6 +539,7 @@ func (r vaultObjectDeleteResponseDeletedObjectJSON) RawJSON() string {
 
 type VaultObjectAppendResponse struct {
 	ID              string                        `json:"id"`
+	Bates           interface{}                   `json:"bates"`
 	Checksum        string                        `json:"checksum"`
 	ContentType     string                        `json:"contentType"`
 	CreatedAt       time.Time                     `json:"createdAt" format:"date-time"`
@@ -567,6 +548,7 @@ type VaultObjectAppendResponse struct {
 	Filename        string                        `json:"filename"`
 	IngestionStatus string                        `json:"ingestionStatus"`
 	Metadata        interface{}                   `json:"metadata"`
+	ObjectID        string                        `json:"objectId"`
 	PageCount       int64                         `json:"pageCount"`
 	SizeBytes       int64                         `json:"sizeBytes"`
 	VaultID         string                        `json:"vaultId"`
@@ -577,6 +559,7 @@ type VaultObjectAppendResponse struct {
 // [VaultObjectAppendResponse]
 type vaultObjectAppendResponseJSON struct {
 	ID              apijson.Field
+	Bates           apijson.Field
 	Checksum        apijson.Field
 	ContentType     apijson.Field
 	CreatedAt       apijson.Field
@@ -585,6 +568,7 @@ type vaultObjectAppendResponseJSON struct {
 	Filename        apijson.Field
 	IngestionStatus apijson.Field
 	Metadata        apijson.Field
+	ObjectID        apijson.Field
 	PageCount       apijson.Field
 	SizeBytes       apijson.Field
 	VaultID         apijson.Field
@@ -947,70 +931,6 @@ func (r vaultObjectGetPagesResponsePageJSON) RawJSON() string {
 	return r.raw
 }
 
-type VaultObjectGetSummarizeJobResponse struct {
-	// When the job completed
-	CompletedAt time.Time `json:"completedAt" api:"nullable" format:"date-time"`
-	// When the job was created
-	CreatedAt time.Time `json:"createdAt" format:"date-time"`
-	// Error message (if failed)
-	Error string `json:"error" api:"nullable"`
-	// Case.dev job ID
-	JobID string `json:"jobId"`
-	// Filename of the result document (if completed)
-	ResultFilename string `json:"resultFilename" api:"nullable"`
-	// ID of the result document (if completed)
-	ResultObjectID string `json:"resultObjectId" api:"nullable"`
-	// ID of the source document
-	SourceObjectID string `json:"sourceObjectId"`
-	// Current job status
-	Status VaultObjectGetSummarizeJobResponseStatus `json:"status"`
-	// Type of workflow being executed
-	WorkflowType string                                 `json:"workflowType"`
-	JSON         vaultObjectGetSummarizeJobResponseJSON `json:"-"`
-}
-
-// vaultObjectGetSummarizeJobResponseJSON contains the JSON metadata for the struct
-// [VaultObjectGetSummarizeJobResponse]
-type vaultObjectGetSummarizeJobResponseJSON struct {
-	CompletedAt    apijson.Field
-	CreatedAt      apijson.Field
-	Error          apijson.Field
-	JobID          apijson.Field
-	ResultFilename apijson.Field
-	ResultObjectID apijson.Field
-	SourceObjectID apijson.Field
-	Status         apijson.Field
-	WorkflowType   apijson.Field
-	raw            string
-	ExtraFields    map[string]apijson.Field
-}
-
-func (r *VaultObjectGetSummarizeJobResponse) UnmarshalJSON(data []byte) (err error) {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-func (r vaultObjectGetSummarizeJobResponseJSON) RawJSON() string {
-	return r.raw
-}
-
-// Current job status
-type VaultObjectGetSummarizeJobResponseStatus string
-
-const (
-	VaultObjectGetSummarizeJobResponseStatusPending    VaultObjectGetSummarizeJobResponseStatus = "pending"
-	VaultObjectGetSummarizeJobResponseStatusProcessing VaultObjectGetSummarizeJobResponseStatus = "processing"
-	VaultObjectGetSummarizeJobResponseStatusCompleted  VaultObjectGetSummarizeJobResponseStatus = "completed"
-	VaultObjectGetSummarizeJobResponseStatusFailed     VaultObjectGetSummarizeJobResponseStatus = "failed"
-)
-
-func (r VaultObjectGetSummarizeJobResponseStatus) IsKnown() bool {
-	switch r {
-	case VaultObjectGetSummarizeJobResponseStatusPending, VaultObjectGetSummarizeJobResponseStatusProcessing, VaultObjectGetSummarizeJobResponseStatusCompleted, VaultObjectGetSummarizeJobResponseStatusFailed:
-		return true
-	}
-	return false
-}
-
 type VaultObjectGetTextResponse struct {
 	Metadata VaultObjectGetTextResponseMetadata `json:"metadata" api:"required"`
 	// Full concatenated text content from all chunks
@@ -1072,53 +992,42 @@ func (r vaultObjectGetTextResponseMetadataJSON) RawJSON() string {
 	return r.raw
 }
 
-type VaultObjectSummarizeResponse struct {
-	// CaseMark workflow ID
-	CasemarkWorkflowID string `json:"casemarkWorkflowId"`
-	// Case.dev job ID for tracking
-	JobID string `json:"jobId"`
-	// Current job status
-	Status VaultObjectSummarizeResponseStatus `json:"status"`
-	// URL to check job status
-	StatusURL string `json:"statusUrl"`
-	// Type of workflow being executed
-	WorkflowType string                           `json:"workflowType"`
-	JSON         vaultObjectSummarizeResponseJSON `json:"-"`
+type VaultObjectMergeResponse struct {
+	ClientReference string                         `json:"clientReference"`
+	ObjectID        string                         `json:"objectId"`
+	Status          VaultObjectMergeResponseStatus `json:"status"`
+	WorkflowID      string                         `json:"workflowId"`
+	JSON            vaultObjectMergeResponseJSON   `json:"-"`
 }
 
-// vaultObjectSummarizeResponseJSON contains the JSON metadata for the struct
-// [VaultObjectSummarizeResponse]
-type vaultObjectSummarizeResponseJSON struct {
-	CasemarkWorkflowID apijson.Field
-	JobID              apijson.Field
-	Status             apijson.Field
-	StatusURL          apijson.Field
-	WorkflowType       apijson.Field
-	raw                string
-	ExtraFields        map[string]apijson.Field
+// vaultObjectMergeResponseJSON contains the JSON metadata for the struct
+// [VaultObjectMergeResponse]
+type vaultObjectMergeResponseJSON struct {
+	ClientReference apijson.Field
+	ObjectID        apijson.Field
+	Status          apijson.Field
+	WorkflowID      apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
 }
 
-func (r *VaultObjectSummarizeResponse) UnmarshalJSON(data []byte) (err error) {
+func (r *VaultObjectMergeResponse) UnmarshalJSON(data []byte) (err error) {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-func (r vaultObjectSummarizeResponseJSON) RawJSON() string {
+func (r vaultObjectMergeResponseJSON) RawJSON() string {
 	return r.raw
 }
 
-// Current job status
-type VaultObjectSummarizeResponseStatus string
+type VaultObjectMergeResponseStatus string
 
 const (
-	VaultObjectSummarizeResponseStatusPending    VaultObjectSummarizeResponseStatus = "pending"
-	VaultObjectSummarizeResponseStatusProcessing VaultObjectSummarizeResponseStatus = "processing"
-	VaultObjectSummarizeResponseStatusCompleted  VaultObjectSummarizeResponseStatus = "completed"
-	VaultObjectSummarizeResponseStatusFailed     VaultObjectSummarizeResponseStatus = "failed"
+	VaultObjectMergeResponseStatusProcessing VaultObjectMergeResponseStatus = "processing"
 )
 
-func (r VaultObjectSummarizeResponseStatus) IsKnown() bool {
+func (r VaultObjectMergeResponseStatus) IsKnown() bool {
 	switch r {
-	case VaultObjectSummarizeResponseStatusPending, VaultObjectSummarizeResponseStatusProcessing, VaultObjectSummarizeResponseStatusCompleted, VaultObjectSummarizeResponseStatusFailed:
+	case VaultObjectMergeResponseStatusProcessing:
 		return true
 	}
 	return false
@@ -1192,6 +1101,9 @@ type VaultObjectAppendParams struct {
 	// Label text for the back link. Used only when backLinks is true and rendered
 	// centered at the bottom of each appended page.
 	BackLinksText param.Field[string] `json:"backLinksText"`
+	// Optional Bates stamping for appended source PDFs. Numbering is deterministic
+	// across appendObjectIds order and does not stamp the target report pages.
+	Bates param.Field[VaultObjectAppendParamsBates] `json:"bates"`
 	// When true, rewrites links in the target object to internal PDF jumps when the
 	// URL contains exactly one appended object ID as a standalone query parameter
 	// value or decoded path segment.
@@ -1199,6 +1111,20 @@ type VaultObjectAppendParams struct {
 }
 
 func (r VaultObjectAppendParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Optional Bates stamping for appended source PDFs. Numbering is deterministic
+// across appendObjectIds order and does not stamp the target report pages.
+type VaultObjectAppendParamsBates struct {
+	Enabled param.Field[bool]   `json:"enabled"`
+	PadTo   param.Field[int64]  `json:"padTo"`
+	Prefix  param.Field[string] `json:"prefix"`
+	Start   param.Field[int64]  `json:"start"`
+	Suffix  param.Field[string] `json:"suffix"`
+}
+
+func (r VaultObjectAppendParamsBates) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
@@ -1291,29 +1217,43 @@ func (r VaultObjectGetPagesParams) URLQuery() (v url.Values) {
 	})
 }
 
-type VaultObjectSummarizeParams struct {
-	// Output format for the summary document
-	OutputFormat param.Field[VaultObjectSummarizeParamsOutputFormat] `json:"outputFormat"`
-	// Type of CaseMark workflow to run
-	WorkflowType param.Field[string] `json:"workflowType"`
+type VaultObjectMergeParams struct {
+	// Output PDF filename
+	Filename param.Field[string] `json:"filename" api:"required"`
+	// Source object IDs in output order
+	SourceObjectIDs param.Field[[]string]                              `json:"sourceObjectIds" api:"required"`
+	SourceRendition param.Field[VaultObjectMergeParamsSourceRendition] `json:"sourceRendition" api:"required"`
+	IdempotencyKey  param.Field[string]                                `header:"Idempotency-Key" api:"required"`
+	Bates           param.Field[VaultObjectMergeParamsBates]           `json:"bates"`
+	ClientReference param.Field[string]                                `json:"clientReference"`
 }
 
-func (r VaultObjectSummarizeParams) MarshalJSON() (data []byte, err error) {
+func (r VaultObjectMergeParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// Output format for the summary document
-type VaultObjectSummarizeParamsOutputFormat string
+type VaultObjectMergeParamsSourceRendition string
 
 const (
-	VaultObjectSummarizeParamsOutputFormatPdf  VaultObjectSummarizeParamsOutputFormat = "PDF"
-	VaultObjectSummarizeParamsOutputFormatWord VaultObjectSummarizeParamsOutputFormat = "WORD"
+	VaultObjectMergeParamsSourceRenditionOriginal      VaultObjectMergeParamsSourceRendition = "original"
+	VaultObjectMergeParamsSourceRenditionSearchablePdf VaultObjectMergeParamsSourceRendition = "searchable_pdf"
 )
 
-func (r VaultObjectSummarizeParamsOutputFormat) IsKnown() bool {
+func (r VaultObjectMergeParamsSourceRendition) IsKnown() bool {
 	switch r {
-	case VaultObjectSummarizeParamsOutputFormatPdf, VaultObjectSummarizeParamsOutputFormatWord:
+	case VaultObjectMergeParamsSourceRenditionOriginal, VaultObjectMergeParamsSourceRenditionSearchablePdf:
 		return true
 	}
 	return false
+}
+
+type VaultObjectMergeParamsBates struct {
+	PadTo  param.Field[int64]  `json:"padTo"`
+	Prefix param.Field[string] `json:"prefix"`
+	Start  param.Field[int64]  `json:"start"`
+	Suffix param.Field[string] `json:"suffix"`
+}
+
+func (r VaultObjectMergeParamsBates) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
