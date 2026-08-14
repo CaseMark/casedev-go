@@ -34,7 +34,13 @@ func TestConnectorV1SyncLinkWithOptionalParams(t *testing.T) {
 			Path:        githubcomcasemarkcasedevgo.F("path"),
 			SiteID:      githubcomcasemarkcasedevgo.F("site_id"),
 		}),
-		VaultID:  githubcomcasemarkcasedevgo.F("vault_id"),
+		VaultID: githubcomcasemarkcasedevgo.F("vault_id"),
+		ExportDestination: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1SyncLinkParamsExportDestination{
+			FolderID:    githubcomcasemarkcasedevgo.F("folder_id"),
+			ContainerID: githubcomcasemarkcasedevgo.F("container_id"),
+			Path:        githubcomcasemarkcasedevgo.F("path"),
+			SiteID:      githubcomcasemarkcasedevgo.F("site_id"),
+		}),
 		MatterID: githubcomcasemarkcasedevgo.F("matter_id"),
 		Policy: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1SyncLinkParamsPolicy{
 			Collisions: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1SyncLinkParamsPolicyCollisionsVersion),
@@ -75,7 +81,13 @@ func TestConnectorV1TransferWithOptionalParams(t *testing.T) {
 			Path:        githubcomcasemarkcasedevgo.F("path"),
 			SiteID:      githubcomcasemarkcasedevgo.F("site_id"),
 		}),
-		VaultID:  githubcomcasemarkcasedevgo.F("vault_id"),
+		VaultID: githubcomcasemarkcasedevgo.F("vault_id"),
+		ExportDestination: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1TransferParamsExportDestination{
+			FolderID:    githubcomcasemarkcasedevgo.F("folder_id"),
+			ContainerID: githubcomcasemarkcasedevgo.F("container_id"),
+			Path:        githubcomcasemarkcasedevgo.F("path"),
+			SiteID:      githubcomcasemarkcasedevgo.F("site_id"),
+		}),
 		MatterID: githubcomcasemarkcasedevgo.F("matter_id"),
 		Policy: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1TransferParamsPolicy{
 			Collisions: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1TransferParamsPolicyCollisionsVersion),

@@ -41,11 +41,17 @@ func NewLincV1SessionService(opts ...option.RequestOption) (r *LincV1SessionServ
 // Creates a Daytona-backed native Linc session with scoped Case.dev credentials.
 // This endpoint starts the sandbox actor only; messages and event replay use
 // separate endpoints.
-func (r *LincV1SessionService) New(ctx context.Context, body LincV1SessionNewParams, opts ...option.RequestOption) (err error) {
+func (r *LincV1SessionService) New(ctx context.Context, params LincV1SessionNewParams, opts ...option.RequestOption) (err error) {
+	if params.AIReportingTags.Present {
+		opts = append(opts, option.WithHeader("ai-reporting-tags", fmt.Sprintf("%v", params.AIReportingTags)))
+	}
+	if params.AIReportingUser.Present {
+		opts = append(opts, option.WithHeader("ai-reporting-user", fmt.Sprintf("%v", params.AIReportingUser)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "linc/v1/sessions"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
 	return err
 }
 
@@ -167,9 +173,11 @@ type LincV1SessionNewParams struct {
 	ServiceTier param.Field[LincV1SessionNewParamsServiceTier] `json:"serviceTier"`
 	// Skills API slugs to install into the runtime sandbox before the native session
 	// starts.
-	SkillSlugs param.Field[[]string] `json:"skillSlugs"`
-	Title      param.Field[string]   `json:"title"`
-	VaultIDs   param.Field[[]string] `json:"vaultIds"`
+	SkillSlugs      param.Field[[]string] `json:"skillSlugs"`
+	Title           param.Field[string]   `json:"title"`
+	VaultIDs        param.Field[[]string] `json:"vaultIds"`
+	AIReportingTags param.Field[string]   `header:"ai-reporting-tags"`
+	AIReportingUser param.Field[string]   `header:"ai-reporting-user"`
 }
 
 func (r LincV1SessionNewParams) MarshalJSON() (data []byte, err error) {
