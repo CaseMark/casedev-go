@@ -38,6 +38,8 @@ func TestLlmV1ChatNewCompletionWithOptionalParams(t *testing.T) {
 		Stream:                githubcomcasemarkcasedevgo.F(false),
 		Temperature:           githubcomcasemarkcasedevgo.F(0.700000),
 		TopP:                  githubcomcasemarkcasedevgo.F(0.000000),
+		AIReportingTags:       githubcomcasemarkcasedevgo.F("ai-reporting-tags"),
+		AIReportingUser:       githubcomcasemarkcasedevgo.F("ai-reporting-user"),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error

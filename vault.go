@@ -720,6 +720,9 @@ type VaultSearchResponseChunk struct {
 	// Source media timestamp for the last word in the chunk. Present only for
 	// media-backed transcripts with real word timing.
 	EndMs int64 `json:"end_ms"`
+	// Filename of the chunk's source document; null when the vector's object ID no
+	// longer matches a vault object (stale index entry)
+	Filename string `json:"filename" api:"nullable"`
 	// ID of the source document
 	ObjectID string `json:"object_id"`
 	// PDF page number where the chunk ends (1-indexed). Null for non-PDF documents or
@@ -754,6 +757,7 @@ type vaultSearchResponseChunkJSON struct {
 	ChunkIndex     apijson.Field
 	Distance       apijson.Field
 	EndMs          apijson.Field
+	Filename       apijson.Field
 	ObjectID       apijson.Field
 	PageEnd        apijson.Field
 	PageStart      apijson.Field

@@ -44,10 +44,11 @@ func NewConnectorV1Service(opts ...option.RequestOption) (r *ConnectorV1Service)
 }
 
 // Standing promise: backfill now, then stay current (the sync sweeper re-runs
-// synced links on a schedule). Same body as /transfer minus run_mode. Upserts the
-// link identified by (connection_id, direction, remote, vault_id); an existing
-// once-link is upgraded in place with its ledger and cursor preserved. Downgrade
-// or pause via PATCH /links/{id}.
+// synced links on a schedule). Direction both creates paired import/export links
+// and defaults export to a CaseMark Output subfolder. Same body as /transfer minus
+// run_mode. Upserts links by (connection_id, direction, remote, vault_id);
+// existing once-links are upgraded in place with their ledger and cursor
+// preserved. Downgrade or pause via PATCH /links/{id}.
 func (r *ConnectorV1Service) SyncLink(ctx context.Context, body ConnectorV1SyncLinkParams, opts ...option.RequestOption) (res *ConnectorV1SyncLinkResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "connectors/v1/sync-link"
@@ -55,10 +56,11 @@ func (r *ConnectorV1Service) SyncLink(ctx context.Context, body ConnectorV1SyncL
 	return res, err
 }
 
-// One-shot import (provider folder → vault) or export (vault → provider folder).
-// Upserts the link identified by (connection_id, direction, remote, vault_id):
-// first call backfills, later calls move only new/changed files via the ledger.
-// Poll GET /links/{id} → active_run for progress.
+// One-shot import (provider folder → vault), export (vault → provider folder), or
+// both. Direction both creates paired import/export links and defaults export to a
+// CaseMark Output subfolder. Upserts links by (connection_id, direction, remote,
+// vault_id): first call backfills, later calls move only new/changed files via the
+// ledger. Poll GET /links/{id} → active_run for progress.
 func (r *ConnectorV1Service) Transfer(ctx context.Context, body ConnectorV1TransferParams, opts ...option.RequestOption) (res *ConnectorV1TransferResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "connectors/v1/transfer"
@@ -113,8 +115,11 @@ type ConnectorV1SyncLinkParams struct {
 	Direction    param.Field[ConnectorV1SyncLinkParamsDirection] `json:"direction" api:"required"`
 	Remote       param.Field[ConnectorV1SyncLinkParamsRemote]    `json:"remote" api:"required"`
 	VaultID      param.Field[string]                             `json:"vault_id" api:"required"`
-	MatterID     param.Field[string]                             `json:"matter_id"`
-	Policy       param.Field[ConnectorV1SyncLinkParamsPolicy]    `json:"policy"`
+	// Optional destination for direction both. Defaults to CaseMark Output under
+	// remote.
+	ExportDestination param.Field[ConnectorV1SyncLinkParamsExportDestination] `json:"export_destination"`
+	MatterID          param.Field[string]                                     `json:"matter_id"`
+	Policy            param.Field[ConnectorV1SyncLinkParamsPolicy]            `json:"policy"`
 }
 
 func (r ConnectorV1SyncLinkParams) MarshalJSON() (data []byte, err error) {
@@ -126,11 +131,12 @@ type ConnectorV1SyncLinkParamsDirection string
 const (
 	ConnectorV1SyncLinkParamsDirectionImport ConnectorV1SyncLinkParamsDirection = "import"
 	ConnectorV1SyncLinkParamsDirectionExport ConnectorV1SyncLinkParamsDirection = "export"
+	ConnectorV1SyncLinkParamsDirectionBoth   ConnectorV1SyncLinkParamsDirection = "both"
 )
 
 func (r ConnectorV1SyncLinkParamsDirection) IsKnown() bool {
 	switch r {
-	case ConnectorV1SyncLinkParamsDirectionImport, ConnectorV1SyncLinkParamsDirectionExport:
+	case ConnectorV1SyncLinkParamsDirectionImport, ConnectorV1SyncLinkParamsDirectionExport, ConnectorV1SyncLinkParamsDirectionBoth:
 		return true
 	}
 	return false
@@ -144,6 +150,19 @@ type ConnectorV1SyncLinkParamsRemote struct {
 }
 
 func (r ConnectorV1SyncLinkParamsRemote) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Optional destination for direction both. Defaults to CaseMark Output under
+// remote.
+type ConnectorV1SyncLinkParamsExportDestination struct {
+	FolderID    param.Field[string] `json:"folder_id" api:"required"`
+	ContainerID param.Field[string] `json:"container_id"`
+	Path        param.Field[string] `json:"path"`
+	SiteID      param.Field[string] `json:"site_id"`
+}
+
+func (r ConnectorV1SyncLinkParamsExportDestination) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
@@ -202,9 +221,12 @@ type ConnectorV1TransferParams struct {
 	Direction    param.Field[ConnectorV1TransferParamsDirection] `json:"direction" api:"required"`
 	Remote       param.Field[ConnectorV1TransferParamsRemote]    `json:"remote" api:"required"`
 	VaultID      param.Field[string]                             `json:"vault_id" api:"required"`
-	MatterID     param.Field[string]                             `json:"matter_id"`
-	Policy       param.Field[ConnectorV1TransferParamsPolicy]    `json:"policy"`
-	RunMode      param.Field[ConnectorV1TransferParamsRunMode]   `json:"run_mode"`
+	// Optional destination for direction both. Defaults to CaseMark Output under
+	// remote.
+	ExportDestination param.Field[ConnectorV1TransferParamsExportDestination] `json:"export_destination"`
+	MatterID          param.Field[string]                                     `json:"matter_id"`
+	Policy            param.Field[ConnectorV1TransferParamsPolicy]            `json:"policy"`
+	RunMode           param.Field[ConnectorV1TransferParamsRunMode]           `json:"run_mode"`
 }
 
 func (r ConnectorV1TransferParams) MarshalJSON() (data []byte, err error) {
@@ -216,11 +238,12 @@ type ConnectorV1TransferParamsDirection string
 const (
 	ConnectorV1TransferParamsDirectionImport ConnectorV1TransferParamsDirection = "import"
 	ConnectorV1TransferParamsDirectionExport ConnectorV1TransferParamsDirection = "export"
+	ConnectorV1TransferParamsDirectionBoth   ConnectorV1TransferParamsDirection = "both"
 )
 
 func (r ConnectorV1TransferParamsDirection) IsKnown() bool {
 	switch r {
-	case ConnectorV1TransferParamsDirectionImport, ConnectorV1TransferParamsDirectionExport:
+	case ConnectorV1TransferParamsDirectionImport, ConnectorV1TransferParamsDirectionExport, ConnectorV1TransferParamsDirectionBoth:
 		return true
 	}
 	return false
@@ -234,6 +257,19 @@ type ConnectorV1TransferParamsRemote struct {
 }
 
 func (r ConnectorV1TransferParamsRemote) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Optional destination for direction both. Defaults to CaseMark Output under
+// remote.
+type ConnectorV1TransferParamsExportDestination struct {
+	FolderID    param.Field[string] `json:"folder_id" api:"required"`
+	ContainerID param.Field[string] `json:"container_id"`
+	Path        param.Field[string] `json:"path"`
+	SiteID      param.Field[string] `json:"site_id"`
+}
+
+func (r ConnectorV1TransferParamsExportDestination) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

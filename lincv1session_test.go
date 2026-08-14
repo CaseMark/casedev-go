@@ -36,6 +36,8 @@ func TestLincV1SessionNewWithOptionalParams(t *testing.T) {
 		SkillSlugs:               githubcomcasemarkcasedevgo.F([]string{"string"}),
 		Title:                    githubcomcasemarkcasedevgo.F("title"),
 		VaultIDs:                 githubcomcasemarkcasedevgo.F([]string{"string"}),
+		AIReportingTags:          githubcomcasemarkcasedevgo.F("ai-reporting-tags"),
+		AIReportingUser:          githubcomcasemarkcasedevgo.F("ai-reporting-user"),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
