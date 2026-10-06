@@ -4,6 +4,7 @@ package githubcomcasemarkcasedevgo
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"slices"
 
@@ -13,7 +14,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Import and export between provider folders (Google Drive) and vaults
+// Import and export between provider folders and vaults
 //
 // ConnectorV1Service contains methods and other services that help with
 // interacting with the casedev API.
@@ -22,12 +23,13 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewConnectorV1Service] method instead.
 type ConnectorV1Service struct {
-	Options []option.RequestOption
-	// Import and export between provider folders (Google Drive) and vaults
+	Options      []option.RequestOption
+	Applications *ConnectorV1ApplicationService
+	// Import and export between provider folders and vaults
 	Installations *ConnectorV1InstallationService
-	// Import and export between provider folders (Google Drive) and vaults
+	// Import and export between provider folders and vaults
 	Connections *ConnectorV1ConnectionService
-	// Import and export between provider folders (Google Drive) and vaults
+	// Import and export between provider folders and vaults
 	Links *ConnectorV1LinkService
 }
 
@@ -37,6 +39,7 @@ type ConnectorV1Service struct {
 func NewConnectorV1Service(opts ...option.RequestOption) (r *ConnectorV1Service) {
 	r = &ConnectorV1Service{}
 	r.Options = opts
+	r.Applications = NewConnectorV1ApplicationService(opts...)
 	r.Installations = NewConnectorV1InstallationService(opts...)
 	r.Connections = NewConnectorV1ConnectionService(opts...)
 	r.Links = NewConnectorV1LinkService(opts...)
@@ -49,10 +52,13 @@ func NewConnectorV1Service(opts ...option.RequestOption) (r *ConnectorV1Service)
 // run_mode. Upserts links by (connection_id, direction, remote, vault_id);
 // existing once-links are upgraded in place with their ledger and cursor
 // preserved. Downgrade or pause via PATCH /links/{id}.
-func (r *ConnectorV1Service) SyncLink(ctx context.Context, body ConnectorV1SyncLinkParams, opts ...option.RequestOption) (res *ConnectorV1SyncLinkResponse, err error) {
+func (r *ConnectorV1Service) SyncLink(ctx context.Context, params ConnectorV1SyncLinkParams, opts ...option.RequestOption) (res *ConnectorV1SyncLinkResponse, err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	path := "connectors/v1/sync-link"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return res, err
 }
 
@@ -61,22 +67,197 @@ func (r *ConnectorV1Service) SyncLink(ctx context.Context, body ConnectorV1SyncL
 // CaseMark Output subfolder. Upserts links by (connection_id, direction, remote,
 // vault_id): first call backfills, later calls move only new/changed files via the
 // ledger. Poll GET /links/{id} → active_run for progress.
-func (r *ConnectorV1Service) Transfer(ctx context.Context, body ConnectorV1TransferParams, opts ...option.RequestOption) (res *ConnectorV1TransferResponse, err error) {
+func (r *ConnectorV1Service) Transfer(ctx context.Context, params ConnectorV1TransferParams, opts ...option.RequestOption) (res *ConnectorV1TransferResponse, err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	path := "connectors/v1/transfer"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return res, err
 }
 
+type SyncLinkLinkRun struct {
+	LinkID  string                `json:"link_id" api:"required"`
+	Started bool                  `json:"started" api:"required"`
+	Backlog int64                 `json:"backlog"`
+	Reason  SyncLinkLinkRunReason `json:"reason"`
+	JSON    syncLinkLinkRunJSON   `json:"-"`
+}
+
+// syncLinkLinkRunJSON contains the JSON metadata for the struct [SyncLinkLinkRun]
+type syncLinkLinkRunJSON struct {
+	LinkID      apijson.Field
+	Started     apijson.Field
+	Backlog     apijson.Field
+	Reason      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SyncLinkLinkRun) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r syncLinkLinkRunJSON) RawJSON() string {
+	return r.raw
+}
+
+type SyncLinkLinkRunReason string
+
+const (
+	SyncLinkLinkRunReasonStaleRunRecovery SyncLinkLinkRunReason = "stale_run_recovery"
+	SyncLinkLinkRunReasonAlreadyRunning   SyncLinkLinkRunReason = "already_running"
+	SyncLinkLinkRunReasonIngestionBacklog SyncLinkLinkRunReason = "ingestion_backlog"
+)
+
+func (r SyncLinkLinkRunReason) IsKnown() bool {
+	switch r {
+	case SyncLinkLinkRunReasonStaleRunRecovery, SyncLinkLinkRunReasonAlreadyRunning, SyncLinkLinkRunReasonIngestionBacklog:
+		return true
+	}
+	return false
+}
+
+// Whether a provider scan started or was deferred.
+type SyncLinkRun struct {
+	Started bool              `json:"started" api:"required"`
+	Backlog int64             `json:"backlog"`
+	Reason  SyncLinkRunReason `json:"reason"`
+	JSON    syncLinkRunJSON   `json:"-"`
+}
+
+// syncLinkRunJSON contains the JSON metadata for the struct [SyncLinkRun]
+type syncLinkRunJSON struct {
+	Started     apijson.Field
+	Backlog     apijson.Field
+	Reason      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SyncLinkRun) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r syncLinkRunJSON) RawJSON() string {
+	return r.raw
+}
+
+type SyncLinkRunReason string
+
+const (
+	SyncLinkRunReasonStaleRunRecovery SyncLinkRunReason = "stale_run_recovery"
+	SyncLinkRunReasonAlreadyRunning   SyncLinkRunReason = "already_running"
+	SyncLinkRunReasonIngestionBacklog SyncLinkRunReason = "ingestion_backlog"
+)
+
+func (r SyncLinkRunReason) IsKnown() bool {
+	switch r {
+	case SyncLinkRunReasonStaleRunRecovery, SyncLinkRunReasonAlreadyRunning, SyncLinkRunReasonIngestionBacklog:
+		return true
+	}
+	return false
+}
+
+type TransferLinkRun struct {
+	LinkID  string                `json:"link_id" api:"required"`
+	Started bool                  `json:"started" api:"required"`
+	Backlog int64                 `json:"backlog"`
+	Reason  TransferLinkRunReason `json:"reason"`
+	JSON    transferLinkRunJSON   `json:"-"`
+}
+
+// transferLinkRunJSON contains the JSON metadata for the struct [TransferLinkRun]
+type transferLinkRunJSON struct {
+	LinkID      apijson.Field
+	Started     apijson.Field
+	Backlog     apijson.Field
+	Reason      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *TransferLinkRun) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r transferLinkRunJSON) RawJSON() string {
+	return r.raw
+}
+
+type TransferLinkRunReason string
+
+const (
+	TransferLinkRunReasonStaleRunRecovery TransferLinkRunReason = "stale_run_recovery"
+	TransferLinkRunReasonAlreadyRunning   TransferLinkRunReason = "already_running"
+	TransferLinkRunReasonIngestionBacklog TransferLinkRunReason = "ingestion_backlog"
+)
+
+func (r TransferLinkRunReason) IsKnown() bool {
+	switch r {
+	case TransferLinkRunReasonStaleRunRecovery, TransferLinkRunReasonAlreadyRunning, TransferLinkRunReasonIngestionBacklog:
+		return true
+	}
+	return false
+}
+
+// Whether a provider scan started or was deferred.
+type TransferRun struct {
+	Started bool              `json:"started" api:"required"`
+	Backlog int64             `json:"backlog"`
+	Reason  TransferRunReason `json:"reason"`
+	JSON    transferRunJSON   `json:"-"`
+}
+
+// transferRunJSON contains the JSON metadata for the struct [TransferRun]
+type transferRunJSON struct {
+	Started     apijson.Field
+	Backlog     apijson.Field
+	Reason      apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *TransferRun) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r transferRunJSON) RawJSON() string {
+	return r.raw
+}
+
+type TransferRunReason string
+
+const (
+	TransferRunReasonStaleRunRecovery TransferRunReason = "stale_run_recovery"
+	TransferRunReasonAlreadyRunning   TransferRunReason = "already_running"
+	TransferRunReasonIngestionBacklog TransferRunReason = "ingestion_backlog"
+)
+
+func (r TransferRunReason) IsKnown() bool {
+	switch r {
+	case TransferRunReasonStaleRunRecovery, TransferRunReasonAlreadyRunning, TransferRunReasonIngestionBacklog:
+		return true
+	}
+	return false
+}
+
 type ConnectorV1SyncLinkResponse struct {
-	Links []interface{}                   `json:"links"`
-	JSON  connectorV1SyncLinkResponseJSON `json:"-"`
+	Links []interface{} `json:"links"`
+	// Whether a provider scan started or was deferred.
+	Run SyncLinkRun `json:"run"`
+	// Start result for each link when direction is both.
+	Runs []SyncLinkLinkRun               `json:"runs"`
+	JSON connectorV1SyncLinkResponseJSON `json:"-"`
 }
 
 // connectorV1SyncLinkResponseJSON contains the JSON metadata for the struct
 // [ConnectorV1SyncLinkResponse]
 type connectorV1SyncLinkResponseJSON struct {
 	Links       apijson.Field
+	Run         apijson.Field
+	Runs        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -90,14 +271,20 @@ func (r connectorV1SyncLinkResponseJSON) RawJSON() string {
 }
 
 type ConnectorV1TransferResponse struct {
-	Links []interface{}                   `json:"links"`
-	JSON  connectorV1TransferResponseJSON `json:"-"`
+	Links []interface{} `json:"links"`
+	// Whether a provider scan started or was deferred.
+	Run TransferRun `json:"run"`
+	// Start result for each link when direction is both.
+	Runs []TransferLinkRun               `json:"runs"`
+	JSON connectorV1TransferResponseJSON `json:"-"`
 }
 
 // connectorV1TransferResponseJSON contains the JSON metadata for the struct
 // [ConnectorV1TransferResponse]
 type connectorV1TransferResponseJSON struct {
 	Links       apijson.Field
+	Run         apijson.Field
+	Runs        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -117,9 +304,10 @@ type ConnectorV1SyncLinkParams struct {
 	VaultID      param.Field[string]                             `json:"vault_id" api:"required"`
 	// Optional destination for direction both. Defaults to CaseMark Output under
 	// remote.
-	ExportDestination param.Field[ConnectorV1SyncLinkParamsExportDestination] `json:"export_destination"`
-	MatterID          param.Field[string]                                     `json:"matter_id"`
-	Policy            param.Field[ConnectorV1SyncLinkParamsPolicy]            `json:"policy"`
+	ExportDestination     param.Field[ConnectorV1SyncLinkParamsExportDestination] `json:"export_destination"`
+	MatterID              param.Field[string]                                     `json:"matter_id"`
+	Policy                param.Field[ConnectorV1SyncLinkParamsPolicy]            `json:"policy"`
+	XCaseConnectorSubject param.Field[string]                                     `header:"x-case-connector-subject"`
 }
 
 func (r ConnectorV1SyncLinkParams) MarshalJSON() (data []byte, err error) {
@@ -143,10 +331,11 @@ func (r ConnectorV1SyncLinkParamsDirection) IsKnown() bool {
 }
 
 type ConnectorV1SyncLinkParamsRemote struct {
-	FolderID    param.Field[string] `json:"folder_id" api:"required"`
-	ContainerID param.Field[string] `json:"container_id"`
-	Path        param.Field[string] `json:"path"`
-	SiteID      param.Field[string] `json:"site_id"`
+	FolderID     param.Field[string] `json:"folder_id" api:"required"`
+	ContainerID  param.Field[string] `json:"container_id"`
+	Path         param.Field[string] `json:"path"`
+	ResourceType param.Field[string] `json:"resource_type"`
+	SiteID       param.Field[string] `json:"site_id"`
 }
 
 func (r ConnectorV1SyncLinkParamsRemote) MarshalJSON() (data []byte, err error) {
@@ -208,8 +397,12 @@ func (r ConnectorV1SyncLinkParamsPolicyDeletes) IsKnown() bool {
 }
 
 type ConnectorV1SyncLinkParamsPolicyFilters struct {
-	ExcludeMime  param.Field[[]string] `json:"exclude_mime"`
-	MaxSizeBytes param.Field[int64]    `json:"max_size_bytes"`
+	// Skip these stable document ids before download, including future versions.
+	ExcludeFileIDs param.Field[[]string] `json:"exclude_file_ids"`
+	// Skip these folders and all descendants during document imports.
+	ExcludeFolderIDs param.Field[[]string] `json:"exclude_folder_ids"`
+	ExcludeMime      param.Field[[]string] `json:"exclude_mime"`
+	MaxSizeBytes     param.Field[int64]    `json:"max_size_bytes"`
 }
 
 func (r ConnectorV1SyncLinkParamsPolicyFilters) MarshalJSON() (data []byte, err error) {
@@ -223,10 +416,11 @@ type ConnectorV1TransferParams struct {
 	VaultID      param.Field[string]                             `json:"vault_id" api:"required"`
 	// Optional destination for direction both. Defaults to CaseMark Output under
 	// remote.
-	ExportDestination param.Field[ConnectorV1TransferParamsExportDestination] `json:"export_destination"`
-	MatterID          param.Field[string]                                     `json:"matter_id"`
-	Policy            param.Field[ConnectorV1TransferParamsPolicy]            `json:"policy"`
-	RunMode           param.Field[ConnectorV1TransferParamsRunMode]           `json:"run_mode"`
+	ExportDestination     param.Field[ConnectorV1TransferParamsExportDestination] `json:"export_destination"`
+	MatterID              param.Field[string]                                     `json:"matter_id"`
+	Policy                param.Field[ConnectorV1TransferParamsPolicy]            `json:"policy"`
+	RunMode               param.Field[ConnectorV1TransferParamsRunMode]           `json:"run_mode"`
+	XCaseConnectorSubject param.Field[string]                                     `header:"x-case-connector-subject"`
 }
 
 func (r ConnectorV1TransferParams) MarshalJSON() (data []byte, err error) {
@@ -250,10 +444,11 @@ func (r ConnectorV1TransferParamsDirection) IsKnown() bool {
 }
 
 type ConnectorV1TransferParamsRemote struct {
-	FolderID    param.Field[string] `json:"folder_id" api:"required"`
-	ContainerID param.Field[string] `json:"container_id"`
-	Path        param.Field[string] `json:"path"`
-	SiteID      param.Field[string] `json:"site_id"`
+	FolderID     param.Field[string] `json:"folder_id" api:"required"`
+	ContainerID  param.Field[string] `json:"container_id"`
+	Path         param.Field[string] `json:"path"`
+	ResourceType param.Field[string] `json:"resource_type"`
+	SiteID       param.Field[string] `json:"site_id"`
 }
 
 func (r ConnectorV1TransferParamsRemote) MarshalJSON() (data []byte, err error) {
@@ -315,8 +510,12 @@ func (r ConnectorV1TransferParamsPolicyDeletes) IsKnown() bool {
 }
 
 type ConnectorV1TransferParamsPolicyFilters struct {
-	ExcludeMime  param.Field[[]string] `json:"exclude_mime"`
-	MaxSizeBytes param.Field[int64]    `json:"max_size_bytes"`
+	// Skip these stable document ids before download, including future versions.
+	ExcludeFileIDs param.Field[[]string] `json:"exclude_file_ids"`
+	// Skip these folders and all descendants during document imports.
+	ExcludeFolderIDs param.Field[[]string] `json:"exclude_folder_ids"`
+	ExcludeMime      param.Field[[]string] `json:"exclude_mime"`
+	MaxSizeBytes     param.Field[int64]    `json:"max_size_bytes"`
 }
 
 func (r ConnectorV1TransferParamsPolicyFilters) MarshalJSON() (data []byte, err error) {

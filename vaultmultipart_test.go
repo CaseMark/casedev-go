@@ -42,7 +42,7 @@ func TestVaultMultipartAbort(t *testing.T) {
 	}
 }
 
-func TestVaultMultipartComplete(t *testing.T) {
+func TestVaultMultipartCompleteWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -54,7 +54,7 @@ func TestVaultMultipartComplete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Vault.Multipart.Complete(
+	_, err := client.Vault.Multipart.Complete(
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.VaultMultipartCompleteParams{
@@ -63,8 +63,9 @@ func TestVaultMultipartComplete(t *testing.T) {
 				Etag:       githubcomcasemarkcasedevgo.F("etag"),
 				PartNumber: githubcomcasemarkcasedevgo.F(int64(1)),
 			}}),
-			SizeBytes: githubcomcasemarkcasedevgo.F(int64(1)),
-			UploadID:  githubcomcasemarkcasedevgo.F("uploadId"),
+			SizeBytes:  githubcomcasemarkcasedevgo.F(int64(1)),
+			UploadID:   githubcomcasemarkcasedevgo.F("uploadId"),
+			AutoIngest: githubcomcasemarkcasedevgo.F(true),
 		},
 	)
 	if err != nil {
@@ -125,10 +126,13 @@ func TestVaultMultipartInitWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.VaultMultipartInitParams{
-			ContentType:   githubcomcasemarkcasedevgo.F("contentType"),
-			Filename:      githubcomcasemarkcasedevgo.F("filename"),
-			SizeBytes:     githubcomcasemarkcasedevgo.F(int64(1)),
-			AutoIndex:     githubcomcasemarkcasedevgo.F(true),
+			ContentType: githubcomcasemarkcasedevgo.F("contentType"),
+			Filename:    githubcomcasemarkcasedevgo.F("filename"),
+			SizeBytes:   githubcomcasemarkcasedevgo.F(int64(1)),
+			AutoIndex:   githubcomcasemarkcasedevgo.F(true),
+			FileOrigin: githubcomcasemarkcasedevgo.F(map[string]interface{}{
+				"foo": "bar",
+			}),
 			IsAIGenerated: githubcomcasemarkcasedevgo.F(true),
 			Metadata:      githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
 			PartSizeBytes: githubcomcasemarkcasedevgo.F(int64(5242880)),

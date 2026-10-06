@@ -17,7 +17,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Import and export between provider folders (Google Drive) and vaults
+// Import and export between provider folders and vaults
 //
 // ConnectorV1ConnectionService contains methods and other services that help with
 // interacting with the casedev API.
@@ -41,15 +41,21 @@ func NewConnectorV1ConnectionService(opts ...option.RequestOption) (r *Connector
 // Create a pending provider connection and return a one-time connect_url for the
 // hosted OAuth flow. The user completes provider consent at connect_url and is
 // redirected to return_url with ?connection_id=.
-func (r *ConnectorV1ConnectionService) New(ctx context.Context, body ConnectorV1ConnectionNewParams, opts ...option.RequestOption) (res *ConnectorV1ConnectionNewResponse, err error) {
+func (r *ConnectorV1ConnectionService) New(ctx context.Context, params ConnectorV1ConnectionNewParams, opts ...option.RequestOption) (res *ConnectorV1ConnectionNewResponse, err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	path := "connectors/v1/connections"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return res, err
 }
 
 // Retrieve one provider connection, including account identity and health.
-func (r *ConnectorV1ConnectionService) Get(ctx context.Context, id string, opts ...option.RequestOption) (err error) {
+func (r *ConnectorV1ConnectionService) Get(ctx context.Context, id string, query ConnectorV1ConnectionGetParams, opts ...option.RequestOption) (err error) {
+	if query.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", query.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -61,17 +67,27 @@ func (r *ConnectorV1ConnectionService) Get(ctx context.Context, id string, opts 
 	return err
 }
 
-// List provider connections for the organization, with health status.
-func (r *ConnectorV1ConnectionService) List(ctx context.Context, query ConnectorV1ConnectionListParams, opts ...option.RequestOption) (res *ConnectorV1ConnectionListResponse, err error) {
+// List provider connections for the organization, with health status. Returns at
+// most `limit` connections (default 200, maximum 200). When `pagination.has_more`
+// is true, replay `pagination.next_cursor` as `?cursor=` to fetch the following
+// page. Cursors are opaque and are only valid for the exact filter set and
+// installation/subject scope they were issued under.
+func (r *ConnectorV1ConnectionService) List(ctx context.Context, params ConnectorV1ConnectionListParams, opts ...option.RequestOption) (res *ConnectorV1ConnectionListResponse, err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	path := "connectors/v1/connections"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, params, &res, opts...)
 	return res, err
 }
 
 // Unlink a provider account: revoke tokens at the provider and delete them.
 // purge=true additionally deletes the vault documents its import links brought in.
-func (r *ConnectorV1ConnectionService) Delete(ctx context.Context, id string, body ConnectorV1ConnectionDeleteParams, opts ...option.RequestOption) (err error) {
+func (r *ConnectorV1ConnectionService) Delete(ctx context.Context, id string, params ConnectorV1ConnectionDeleteParams, opts ...option.RequestOption) (err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -79,7 +95,7 @@ func (r *ConnectorV1ConnectionService) Delete(ctx context.Context, id string, bo
 		return err
 	}
 	path := fmt.Sprintf("connectors/v1/connections/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, params, nil, opts...)
 	return err
 }
 
@@ -87,15 +103,32 @@ func (r *ConnectorV1ConnectionService) Delete(ctx context.Context, id string, bo
 // returns top-level resources. Pass the stable browse_ref fields returned by one
 // response to navigate into the next level. Returns 403
 // provider_scope_insufficient when the connection scope cannot browse server-side.
-func (r *ConnectorV1ConnectionService) Browse(ctx context.Context, id string, query ConnectorV1ConnectionBrowseParams, opts ...option.RequestOption) (res *ConnectorV1ConnectionBrowseResponse, err error) {
+// Clio browsing shares request capacity with background runs; throttled responses
+// include Retry-After when a retry deadline is known.
+func (r *ConnectorV1ConnectionService) Browse(ctx context.Context, id string, params ConnectorV1ConnectionBrowseParams, opts ...option.RequestOption) (res *ConnectorV1ConnectionBrowseResponse, err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
 		return nil, err
 	}
 	path := fmt.Sprintf("connectors/v1/connections/%s/browse", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, params, &res, opts...)
 	return res, err
+}
+
+// Enable or disable new runs and scheduled syncs for one provider across the
+// authenticated organization or installation. This organization-wide operation
+// requires explicit confirmation. Existing credentials, links, and imported files
+// are preserved; active runs are not interrupted.
+func (r *ConnectorV1ConnectionService) UpdateAll(ctx context.Context, body ConnectorV1ConnectionUpdateAllParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	path := "connectors/v1/connections"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, nil, opts...)
+	return err
 }
 
 type ConnectorV1ConnectionNewResponse struct {
@@ -126,8 +159,14 @@ func (r connectorV1ConnectionNewResponseJSON) RawJSON() string {
 type ConnectorV1ConnectionListResponse struct {
 	Capabilities ConnectorV1ConnectionListResponseCapabilities `json:"capabilities"`
 	Connections  []interface{}                                 `json:"connections"`
-	Cursor       string                                        `json:"cursor" api:"nullable"`
-	JSON         connectorV1ConnectionListResponseJSON         `json:"-"`
+	// Mirror of `pagination.next_cursor`. Prefer `pagination`.
+	//
+	// Deprecated: deprecated
+	Cursor     string                                      `json:"cursor" api:"nullable"`
+	Pagination ConnectorV1ConnectionListResponsePagination `json:"pagination"`
+	// Available import providers and their adapter-declared capabilities.
+	Providers []ConnectorV1ConnectionListResponseProvider `json:"providers"`
+	JSON      connectorV1ConnectionListResponseJSON       `json:"-"`
 }
 
 // connectorV1ConnectionListResponseJSON contains the JSON metadata for the struct
@@ -136,6 +175,8 @@ type connectorV1ConnectionListResponseJSON struct {
 	Capabilities apijson.Field
 	Connections  apijson.Field
 	Cursor       apijson.Field
+	Pagination   apijson.Field
+	Providers    apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
 }
@@ -169,6 +210,58 @@ func (r connectorV1ConnectionListResponseCapabilitiesJSON) RawJSON() string {
 	return r.raw
 }
 
+type ConnectorV1ConnectionListResponsePagination struct {
+	HasMore    bool                                            `json:"has_more"`
+	Limit      int64                                           `json:"limit"`
+	NextCursor string                                          `json:"next_cursor" api:"nullable"`
+	JSON       connectorV1ConnectionListResponsePaginationJSON `json:"-"`
+}
+
+// connectorV1ConnectionListResponsePaginationJSON contains the JSON metadata for
+// the struct [ConnectorV1ConnectionListResponsePagination]
+type connectorV1ConnectionListResponsePaginationJSON struct {
+	HasMore     apijson.Field
+	Limit       apijson.Field
+	NextCursor  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConnectorV1ConnectionListResponsePagination) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r connectorV1ConnectionListResponsePaginationJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConnectorV1ConnectionListResponseProvider struct {
+	ID             string                                        `json:"id"`
+	ResourceTypes  []string                                      `json:"resource_types"`
+	ScopeTier      string                                        `json:"scope_tier"`
+	SupportsExport bool                                          `json:"supports_export"`
+	JSON           connectorV1ConnectionListResponseProviderJSON `json:"-"`
+}
+
+// connectorV1ConnectionListResponseProviderJSON contains the JSON metadata for the
+// struct [ConnectorV1ConnectionListResponseProvider]
+type connectorV1ConnectionListResponseProviderJSON struct {
+	ID             apijson.Field
+	ResourceTypes  apijson.Field
+	ScopeTier      apijson.Field
+	SupportsExport apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *ConnectorV1ConnectionListResponseProvider) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r connectorV1ConnectionListResponseProviderJSON) RawJSON() string {
+	return r.raw
+}
+
 type ConnectorV1ConnectionBrowseResponse struct {
 	Cursor string                                    `json:"cursor" api:"nullable"`
 	Items  []ConnectorV1ConnectionBrowseResponseItem `json:"items"`
@@ -193,17 +286,20 @@ func (r connectorV1ConnectionBrowseResponseJSON) RawJSON() string {
 }
 
 type ConnectorV1ConnectionBrowseResponseItem struct {
-	ID          string                                       `json:"id"`
-	BrowseRef   interface{}                                  `json:"browse_ref" api:"nullable"`
-	ContainerID string                                       `json:"container_id" api:"nullable"`
-	Kind        ConnectorV1ConnectionBrowseResponseItemsKind `json:"kind"`
-	MimeType    string                                       `json:"mime_type" api:"nullable"`
-	ModifiedAt  string                                       `json:"modified_at" api:"nullable"`
-	Name        string                                       `json:"name"`
-	ParentIDs   []string                                     `json:"parent_ids"`
-	Path        string                                       `json:"path" api:"nullable"`
-	SizeBytes   int64                                        `json:"size_bytes" api:"nullable"`
-	JSON        connectorV1ConnectionBrowseResponseItemJSON  `json:"-"`
+	ID          string      `json:"id"`
+	BrowseRef   interface{} `json:"browse_ref" api:"nullable"`
+	ContainerID string      `json:"container_id" api:"nullable"`
+	Description string      `json:"description" api:"nullable"`
+	// Importable container root, when different from its browse reference.
+	ImportRef  interface{}                                  `json:"import_ref" api:"nullable"`
+	Kind       ConnectorV1ConnectionBrowseResponseItemsKind `json:"kind"`
+	MimeType   string                                       `json:"mime_type" api:"nullable"`
+	ModifiedAt string                                       `json:"modified_at" api:"nullable"`
+	Name       string                                       `json:"name"`
+	ParentIDs  []string                                     `json:"parent_ids"`
+	Path       string                                       `json:"path" api:"nullable"`
+	SizeBytes  int64                                        `json:"size_bytes" api:"nullable"`
+	JSON       connectorV1ConnectionBrowseResponseItemJSON  `json:"-"`
 }
 
 // connectorV1ConnectionBrowseResponseItemJSON contains the JSON metadata for the
@@ -212,6 +308,8 @@ type connectorV1ConnectionBrowseResponseItemJSON struct {
 	ID          apijson.Field
 	BrowseRef   apijson.Field
 	ContainerID apijson.Field
+	Description apijson.Field
+	ImportRef   apijson.Field
 	Kind        apijson.Field
 	MimeType    apijson.Field
 	ModifiedAt  apijson.Field
@@ -256,7 +354,12 @@ type ConnectorV1ConnectionNewParams struct {
 	// HTTPS URL the user is sent back to after consent.
 	ReturnURL param.Field[string] `json:"return_url" api:"required"`
 	// Provider-specific OAuth permission tier. Omit to use the provider's default.
-	ScopeTier param.Field[ConnectorV1ConnectionNewParamsScopeTier] `json:"scope_tier"`
+	// Microsoft defaults to organizational OneDrive/SharePoint; use
+	// microsoft.personal.read for a personal Microsoft account's own OneDrive.
+	// Microsoft write tiers are a separately gated private pilot; exports and paired
+	// sync are not yet available.
+	ScopeTier             param.Field[ConnectorV1ConnectionNewParamsScopeTier] `json:"scope_tier"`
+	XCaseConnectorSubject param.Field[string]                                  `header:"x-case-connector-subject"`
 }
 
 func (r ConnectorV1ConnectionNewParams) MarshalJSON() (data []byte, err error) {
@@ -266,39 +369,64 @@ func (r ConnectorV1ConnectionNewParams) MarshalJSON() (data []byte, err error) {
 type ConnectorV1ConnectionNewParamsProvider string
 
 const (
+	ConnectorV1ConnectionNewParamsProviderBox       ConnectorV1ConnectionNewParamsProvider = "box"
 	ConnectorV1ConnectionNewParamsProviderClio      ConnectorV1ConnectionNewParamsProvider = "clio"
+	ConnectorV1ConnectionNewParamsProviderDropbox   ConnectorV1ConnectionNewParamsProvider = "dropbox"
 	ConnectorV1ConnectionNewParamsProviderGdrive    ConnectorV1ConnectionNewParamsProvider = "gdrive"
 	ConnectorV1ConnectionNewParamsProviderMicrosoft ConnectorV1ConnectionNewParamsProvider = "microsoft"
+	ConnectorV1ConnectionNewParamsProviderSmokeball ConnectorV1ConnectionNewParamsProvider = "smokeball"
 )
 
 func (r ConnectorV1ConnectionNewParamsProvider) IsKnown() bool {
 	switch r {
-	case ConnectorV1ConnectionNewParamsProviderClio, ConnectorV1ConnectionNewParamsProviderGdrive, ConnectorV1ConnectionNewParamsProviderMicrosoft:
+	case ConnectorV1ConnectionNewParamsProviderBox, ConnectorV1ConnectionNewParamsProviderClio, ConnectorV1ConnectionNewParamsProviderDropbox, ConnectorV1ConnectionNewParamsProviderGdrive, ConnectorV1ConnectionNewParamsProviderMicrosoft, ConnectorV1ConnectionNewParamsProviderSmokeball:
 		return true
 	}
 	return false
 }
 
 // Provider-specific OAuth permission tier. Omit to use the provider's default.
+// Microsoft defaults to organizational OneDrive/SharePoint; use
+// microsoft.personal.read for a personal Microsoft account's own OneDrive.
+// Microsoft write tiers are a separately gated private pilot; exports and paired
+// sync are not yet available.
 type ConnectorV1ConnectionNewParamsScopeTier string
 
 const (
-	ConnectorV1ConnectionNewParamsScopeTierClioUs        ConnectorV1ConnectionNewParamsScopeTier = "clio.us"
-	ConnectorV1ConnectionNewParamsScopeTierDrive         ConnectorV1ConnectionNewParamsScopeTier = "drive"
-	ConnectorV1ConnectionNewParamsScopeTierMicrosoftRead ConnectorV1ConnectionNewParamsScopeTier = "microsoft.read"
+	ConnectorV1ConnectionNewParamsScopeTierBoxReadwrite           ConnectorV1ConnectionNewParamsScopeTier = "box.readwrite"
+	ConnectorV1ConnectionNewParamsScopeTierBoxReadwriteWebhooks   ConnectorV1ConnectionNewParamsScopeTier = "box.readwrite.webhooks"
+	ConnectorV1ConnectionNewParamsScopeTierClioUs                 ConnectorV1ConnectionNewParamsScopeTier = "clio.us"
+	ConnectorV1ConnectionNewParamsScopeTierDropboxReadwrite       ConnectorV1ConnectionNewParamsScopeTier = "dropbox.readwrite"
+	ConnectorV1ConnectionNewParamsScopeTierDrive                  ConnectorV1ConnectionNewParamsScopeTier = "drive"
+	ConnectorV1ConnectionNewParamsScopeTierMicrosoftRead          ConnectorV1ConnectionNewParamsScopeTier = "microsoft.read"
+	ConnectorV1ConnectionNewParamsScopeTierMicrosoftPersonalRead  ConnectorV1ConnectionNewParamsScopeTier = "microsoft.personal.read"
+	ConnectorV1ConnectionNewParamsScopeTierMicrosoftWrite         ConnectorV1ConnectionNewParamsScopeTier = "microsoft.write"
+	ConnectorV1ConnectionNewParamsScopeTierMicrosoftPersonalWrite ConnectorV1ConnectionNewParamsScopeTier = "microsoft.personal.write"
+	ConnectorV1ConnectionNewParamsScopeTierSmokeballUs            ConnectorV1ConnectionNewParamsScopeTier = "smokeball.us"
+	ConnectorV1ConnectionNewParamsScopeTierSmokeballUsStaging     ConnectorV1ConnectionNewParamsScopeTier = "smokeball.us.staging"
 )
 
 func (r ConnectorV1ConnectionNewParamsScopeTier) IsKnown() bool {
 	switch r {
-	case ConnectorV1ConnectionNewParamsScopeTierClioUs, ConnectorV1ConnectionNewParamsScopeTierDrive, ConnectorV1ConnectionNewParamsScopeTierMicrosoftRead:
+	case ConnectorV1ConnectionNewParamsScopeTierBoxReadwrite, ConnectorV1ConnectionNewParamsScopeTierBoxReadwriteWebhooks, ConnectorV1ConnectionNewParamsScopeTierClioUs, ConnectorV1ConnectionNewParamsScopeTierDropboxReadwrite, ConnectorV1ConnectionNewParamsScopeTierDrive, ConnectorV1ConnectionNewParamsScopeTierMicrosoftRead, ConnectorV1ConnectionNewParamsScopeTierMicrosoftPersonalRead, ConnectorV1ConnectionNewParamsScopeTierMicrosoftWrite, ConnectorV1ConnectionNewParamsScopeTierMicrosoftPersonalWrite, ConnectorV1ConnectionNewParamsScopeTierSmokeballUs, ConnectorV1ConnectionNewParamsScopeTierSmokeballUsStaging:
 		return true
 	}
 	return false
 }
 
+type ConnectorV1ConnectionGetParams struct {
+	XCaseConnectorSubject param.Field[string] `header:"x-case-connector-subject"`
+}
+
 type ConnectorV1ConnectionListParams struct {
-	Provider param.Field[string]                                `query:"provider"`
-	Status   param.Field[ConnectorV1ConnectionListParamsStatus] `query:"status"`
+	// Opaque continuation cursor from `pagination.next_cursor` of the previous page.
+	// Must be replayed with the same filters and scope that produced it.
+	Cursor param.Field[string] `query:"cursor"`
+	// Connections per page (1-200). Defaults to 200.
+	Limit                 param.Field[int64]                                 `query:"limit"`
+	Provider              param.Field[string]                                `query:"provider"`
+	Status                param.Field[ConnectorV1ConnectionListParamsStatus] `query:"status"`
+	XCaseConnectorSubject param.Field[string]                                `header:"x-case-connector-subject"`
 }
 
 // URLQuery serializes [ConnectorV1ConnectionListParams]'s query parameters as
@@ -329,7 +457,8 @@ func (r ConnectorV1ConnectionListParamsStatus) IsKnown() bool {
 }
 
 type ConnectorV1ConnectionDeleteParams struct {
-	Purge param.Field[bool] `query:"purge"`
+	Purge                 param.Field[bool]   `query:"purge"`
+	XCaseConnectorSubject param.Field[string] `header:"x-case-connector-subject"`
 }
 
 // URLQuery serializes [ConnectorV1ConnectionDeleteParams]'s query parameters as
@@ -351,7 +480,8 @@ type ConnectorV1ConnectionBrowseParams struct {
 	// Optional provider-supported search text
 	Query param.Field[string] `query:"query"`
 	// Site id to list
-	Site param.Field[string] `query:"site"`
+	Site                  param.Field[string] `query:"site"`
+	XCaseConnectorSubject param.Field[string] `header:"x-case-connector-subject"`
 }
 
 // URLQuery serializes [ConnectorV1ConnectionBrowseParams]'s query parameters as
@@ -361,4 +491,30 @@ func (r ConnectorV1ConnectionBrowseParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type ConnectorV1ConnectionUpdateAllParams struct {
+	// Confirms that this change applies to every user connection in scope.
+	ConfirmOrganizationWide param.Field[ConnectorV1ConnectionUpdateAllParamsConfirmOrganizationWide] `json:"confirm_organization_wide" api:"required"`
+	Enabled                 param.Field[bool]                                                        `json:"enabled" api:"required"`
+	Provider                param.Field[string]                                                      `json:"provider" api:"required"`
+}
+
+func (r ConnectorV1ConnectionUpdateAllParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Confirms that this change applies to every user connection in scope.
+type ConnectorV1ConnectionUpdateAllParamsConfirmOrganizationWide bool
+
+const (
+	ConnectorV1ConnectionUpdateAllParamsConfirmOrganizationWideTrue ConnectorV1ConnectionUpdateAllParamsConfirmOrganizationWide = true
+)
+
+func (r ConnectorV1ConnectionUpdateAllParamsConfirmOrganizationWide) IsKnown() bool {
+	switch r {
+	case ConnectorV1ConnectionUpdateAllParamsConfirmOrganizationWideTrue:
+		return true
+	}
+	return false
 }

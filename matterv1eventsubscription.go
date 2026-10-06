@@ -37,7 +37,10 @@ func NewMatterV1EventSubscriptionService(opts ...option.RequestOption) (r *Matte
 }
 
 // Creates a webhook subscription for matter and work-item events.
-func (r *MatterV1EventSubscriptionService) New(ctx context.Context, id string, body MatterV1EventSubscriptionNewParams, opts ...option.RequestOption) (err error) {
+func (r *MatterV1EventSubscriptionService) New(ctx context.Context, id string, params MatterV1EventSubscriptionNewParams, opts ...option.RequestOption) (err error) {
+	if params.IdempotencyKey.Present {
+		opts = append(opts, option.WithHeader("Idempotency-Key", fmt.Sprintf("%v", params.IdempotencyKey)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -45,7 +48,7 @@ func (r *MatterV1EventSubscriptionService) New(ctx context.Context, id string, b
 		return err
 	}
 	path := fmt.Sprintf("matters/v1/%s/events/subscriptions", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
 	return err
 }
 
@@ -80,9 +83,10 @@ func (r *MatterV1EventSubscriptionService) Delete(ctx context.Context, id string
 }
 
 type MatterV1EventSubscriptionNewParams struct {
-	CallbackURL   param.Field[string]   `json:"callbackUrl" api:"required" format:"uri"`
-	EventTypes    param.Field[[]string] `json:"eventTypes"`
-	SigningSecret param.Field[string]   `json:"signingSecret"`
+	CallbackURL    param.Field[string]   `json:"callbackUrl" api:"required" format:"uri"`
+	EventTypes     param.Field[[]string] `json:"eventTypes"`
+	SigningSecret  param.Field[string]   `json:"signingSecret"`
+	IdempotencyKey param.Field[string]   `header:"Idempotency-Key"`
 }
 
 func (r MatterV1EventSubscriptionNewParams) MarshalJSON() (data []byte, err error) {

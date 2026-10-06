@@ -36,7 +36,7 @@ type Client struct {
 	Search    *SearchService
 	Translate *TranslateService
 	Usage     *UsageService
-	// Secure document storage with semantic search and GraphRAG
+	// Secure document storage with semantic search
 	Vault    *VaultService
 	Voice    *VoiceService
 	Webhooks *WebhookService

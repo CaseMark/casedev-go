@@ -54,7 +54,6 @@ func TestMatterV1NewWithOptionalParams(t *testing.T) {
 		Subtype:               githubcomcasemarkcasedevgo.F("subtype"),
 		Vault: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.MatterV1NewParamsVault{
 			Description:    githubcomcasemarkcasedevgo.F("description"),
-			EnableGraph:    githubcomcasemarkcasedevgo.F(true),
 			EnableIndexing: githubcomcasemarkcasedevgo.F(true),
 			Metadata: githubcomcasemarkcasedevgo.F(map[string]interface{}{
 				"foo": "bar",
@@ -158,12 +157,36 @@ func TestMatterV1ListWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Matters.V1.List(context.TODO(), githubcomcasemarkcasedevgo.MatterV1ListParams{
+	_, err := client.Matters.V1.List(context.TODO(), githubcomcasemarkcasedevgo.MatterV1ListParams{
+		Cursor:       githubcomcasemarkcasedevgo.F("cursor"),
+		Limit:        githubcomcasemarkcasedevgo.F(int64(1)),
 		MatterType:   githubcomcasemarkcasedevgo.F("matter_type"),
 		PracticeArea: githubcomcasemarkcasedevgo.F("practice_area"),
 		Query:        githubcomcasemarkcasedevgo.F("query"),
 		Status:       githubcomcasemarkcasedevgo.F("status"),
 	})
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestMatterV1Delete(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Matters.V1.Delete(context.TODO(), "id")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

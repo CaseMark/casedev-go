@@ -29,10 +29,11 @@ func TestVaultEventSubscriptionNewWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.VaultEventSubscriptionNewParams{
-			CallbackURL:   githubcomcasemarkcasedevgo.F("https://example.com"),
-			EventTypes:    githubcomcasemarkcasedevgo.F([]string{"string"}),
-			ObjectIDs:     githubcomcasemarkcasedevgo.F([]string{"string"}),
-			SigningSecret: githubcomcasemarkcasedevgo.F("signingSecret"),
+			CallbackURL:    githubcomcasemarkcasedevgo.F("https://example.com"),
+			EventTypes:     githubcomcasemarkcasedevgo.F([]string{"string"}),
+			ObjectIDs:      githubcomcasemarkcasedevgo.F([]string{"string"}),
+			SigningSecret:  githubcomcasemarkcasedevgo.F("signingSecret"),
+			IdempotencyKey: githubcomcasemarkcasedevgo.F("Idempotency-Key"),
 		},
 	)
 	if err != nil {

@@ -15,7 +15,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Secure document storage with semantic search and GraphRAG
+// Secure document storage with semantic search
 //
 // VaultMultipartService contains methods and other services that help with
 // interacting with the casedev API.
@@ -52,16 +52,15 @@ func (r *VaultMultipartService) Abort(ctx context.Context, id string, body Vault
 // Complete a multipart upload by providing the list of part numbers and ETags
 // (live). Single PUT uploads are capped at 5GB; multipart default max is 16GB
 // (configurable).
-func (r *VaultMultipartService) Complete(ctx context.Context, id string, body VaultMultipartCompleteParams, opts ...option.RequestOption) (err error) {
+func (r *VaultMultipartService) Complete(ctx context.Context, id string, body VaultMultipartCompleteParams, opts ...option.RequestOption) (res *VaultMultipartCompleteResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return err
+		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/multipart/complete", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return err
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
 }
 
 // Generate presigned URLs for individual multipart upload parts (live).
@@ -89,6 +88,58 @@ func (r *VaultMultipartService) Init(ctx context.Context, id string, body VaultM
 	path := fmt.Sprintf("vault/%s/multipart/init", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return res, err
+}
+
+type VaultMultipartCompleteResponse struct {
+	// Present when autoIngest was requested
+	Ingest  VaultMultipartCompleteResponseIngest `json:"ingest"`
+	Success bool                                 `json:"success"`
+	JSON    vaultMultipartCompleteResponseJSON   `json:"-"`
+}
+
+// vaultMultipartCompleteResponseJSON contains the JSON metadata for the struct
+// [VaultMultipartCompleteResponse]
+type vaultMultipartCompleteResponseJSON struct {
+	Ingest      apijson.Field
+	Success     apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultMultipartCompleteResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultMultipartCompleteResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// Present when autoIngest was requested
+type VaultMultipartCompleteResponseIngest struct {
+	Error      string                                   `json:"error"`
+	StatusCode int64                                    `json:"statusCode"`
+	Triggered  bool                                     `json:"triggered"`
+	WorkflowID string                                   `json:"workflowId" api:"nullable"`
+	JSON       vaultMultipartCompleteResponseIngestJSON `json:"-"`
+}
+
+// vaultMultipartCompleteResponseIngestJSON contains the JSON metadata for the
+// struct [VaultMultipartCompleteResponseIngest]
+type vaultMultipartCompleteResponseIngestJSON struct {
+	Error       apijson.Field
+	StatusCode  apijson.Field
+	Triggered   apijson.Field
+	WorkflowID  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultMultipartCompleteResponseIngest) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultMultipartCompleteResponseIngestJSON) RawJSON() string {
+	return r.raw
 }
 
 type VaultMultipartGetPartURLsResponse struct {
@@ -136,6 +187,8 @@ func (r vaultMultipartGetPartURLsResponseURLJSON) RawJSON() string {
 }
 
 type VaultMultipartInitResponse struct {
+	// Client-defined provenance metadata associated with the file
+	FileOrigin    map[string]interface{}         `json:"file_origin" api:"nullable"`
 	NextStep      string                         `json:"next_step"`
 	ObjectID      string                         `json:"objectId"`
 	PartCount     int64                          `json:"partCount"`
@@ -148,6 +201,7 @@ type VaultMultipartInitResponse struct {
 // vaultMultipartInitResponseJSON contains the JSON metadata for the struct
 // [VaultMultipartInitResponse]
 type vaultMultipartInitResponseJSON struct {
+	FileOrigin    apijson.Field
 	NextStep      apijson.Field
 	ObjectID      apijson.Field
 	PartCount     apijson.Field
@@ -184,6 +238,9 @@ type VaultMultipartCompleteParams struct {
 	// VAULT_MULTIPART_MAX_FILE_SIZE_BYTES.
 	SizeBytes param.Field[int64]  `json:"sizeBytes" api:"required"`
 	UploadID  param.Field[string] `json:"uploadId" api:"required"`
+	// Start ingestion after completion when auto_index is enabled. The ingest response
+	// reports whether a workflow was started.
+	AutoIngest param.Field[bool] `json:"autoIngest"`
 }
 
 func (r VaultMultipartCompleteParams) MarshalJSON() (data []byte, err error) {
@@ -233,6 +290,9 @@ type VaultMultipartInitParams struct {
 	SizeBytes param.Field[int64] `json:"sizeBytes" api:"required"`
 	// Whether to automatically process and index the file for search
 	AutoIndex param.Field[bool] `json:"auto_index"`
+	// Optional client-defined provenance metadata. Returned with the object and
+	// queryable through the object-list API.
+	FileOrigin param.Field[map[string]interface{}] `json:"file_origin"`
 	// Marks the file as AI-generated work product (e.g. uploaded by an agent) rather
 	// than a user-provided source document. Persisted on the object and returned by
 	// object listings so clients can distinguish provenance.
@@ -241,7 +301,7 @@ type VaultMultipartInitParams struct {
 	Metadata param.Field[interface{}] `json:"metadata"`
 	// Multipart part size in bytes (min 5MB, max 5GB). Defaults to 64MB.
 	PartSizeBytes param.Field[int64] `json:"partSizeBytes"`
-	// Optional folder path for hierarchy preservation
+	// Optional folder path, excluding the filename, for hierarchy preservation
 	Path param.Field[string] `json:"path"`
 }
 

@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestConnectorV1InstallationListWithOptionalParams(t *testing.T) {
+func TestMatterV1ContentPurgeNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,12 +25,17 @@ func TestConnectorV1InstallationListWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Connectors.V1.Installations.List(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1InstallationListParams{
-		Application:      githubcomcasemarkcasedevgo.F("application"),
-		Cursor:           githubcomcasemarkcasedevgo.F("cursor"),
-		ExternalTenantID: githubcomcasemarkcasedevgo.F("external_tenant_id"),
-		Limit:            githubcomcasemarkcasedevgo.F(int64(1)),
-	})
+	_, err := client.Matters.V1.ContentPurges.New(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.MatterV1ContentPurgeNewParams{
+			RequestID:        githubcomcasemarkcasedevgo.F("request_id"),
+			ObjectIDs:        githubcomcasemarkcasedevgo.F([]string{"string"}),
+			SessionIDs:       githubcomcasemarkcasedevgo.F([]string{"string"}),
+			TranscriptionIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
+			WorkItemIDs:      githubcomcasemarkcasedevgo.F([]string{"string"}),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -40,7 +45,7 @@ func TestConnectorV1InstallationListWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestConnectorV1InstallationEnsure(t *testing.T) {
+func TestMatterV1ContentPurgeGet(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -52,10 +57,7 @@ func TestConnectorV1InstallationEnsure(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Connectors.V1.Installations.Ensure(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1InstallationEnsureParams{
-		Application:      githubcomcasemarkcasedevgo.F("application"),
-		ExternalTenantID: githubcomcasemarkcasedevgo.F("external_tenant_id"),
-	})
+	_, err := client.Matters.V1.ContentPurges.Get(context.TODO(), "purgeId")
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

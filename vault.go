@@ -18,7 +18,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Secure document storage with semantic search and GraphRAG
+// Secure document storage with semantic search
 //
 // VaultService contains methods and other services that help with interacting with
 // the casedev API.
@@ -29,9 +29,9 @@ import (
 type VaultService struct {
 	Options []option.RequestOption
 	Events  *VaultEventService
-	// Secure document storage with semantic search and GraphRAG
+	// Secure document storage with semantic search
 	Groups *VaultGroupService
-	// Secure document storage with semantic search and GraphRAG
+	// Secure document storage with semantic search
 	Multipart *VaultMultipartService
 	// Vault object management, content access, and document operations
 	Objects *VaultObjectService
@@ -54,9 +54,8 @@ func NewVaultService(opts ...option.RequestOption) (r *VaultService) {
 }
 
 // Creates a new secure vault with dedicated S3 storage and vector search
-// capabilities. Each vault provides isolated document storage with semantic
-// search, OCR processing, and optional GraphRAG knowledge graph features for legal
-// document analysis and discovery.
+// capabilities. Each vault provides isolated document storage with semantic search
+// and OCR processing for legal document analysis and discovery.
 func (r *VaultService) New(ctx context.Context, body VaultNewParams, opts ...option.RequestOption) (res *VaultNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "vault"
@@ -78,9 +77,7 @@ func (r *VaultService) Get(ctx context.Context, id string, opts ...option.Reques
 	return res, err
 }
 
-// Update vault settings including name, description, and enableGraph. Changing
-// enableGraph only affects future document uploads - existing documents retain
-// their current graph/non-graph state.
+// Update vault settings including name, description, and group membership.
 func (r *VaultService) Update(ctx context.Context, id string, body VaultUpdateParams, opts ...option.RequestOption) (res *VaultUpdateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
@@ -94,10 +91,15 @@ func (r *VaultService) Update(ctx context.Context, id string, body VaultUpdatePa
 
 // List all vaults for the authenticated organization. Returns vault metadata
 // including name, description, storage configuration, and usage statistics.
-func (r *VaultService) List(ctx context.Context, opts ...option.RequestOption) (res *VaultListResponse, err error) {
+// Pagination is opt-in: pass `limit` (1-200) to receive a bounded page, then
+// replay `pagination.next_cursor` as `?cursor=` while `pagination.has_more` is
+// true. A request with neither `limit` nor `cursor` still returns every vault, and
+// `pagination.limit` is null. That default will become a bounded page in a future
+// release — paginate now to avoid the change.
+func (r *VaultService) List(ctx context.Context, query VaultListParams, opts ...option.RequestOption) (res *VaultListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "vault"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return res, err
 }
 
@@ -138,12 +140,12 @@ func (r *VaultService) ConfirmUpload(ctx context.Context, id string, objectID st
 // Triggers ingestion workflow for a vault object to extract text, generate chunks,
 // and create embeddings. For supported file types (PDF, DOCX, PPTX, XLSX, TXT,
 // RTF, XML, HTML, Markdown, CSV/TSV, JSON/YAML/TOML, common source code files,
-// ZIP, audio, video), processing happens asynchronously. ZIP archives are unpacked
-// recursively up to 5 levels, and each extracted file is created as an independent
-// vault object and ingested via the normal pipeline. For unsupported types
-// (images, etc.), the file is marked as completed immediately without text
-// extraction.
-func (r *VaultService) Ingest(ctx context.Context, id string, objectID string, opts ...option.RequestOption) (res *VaultIngestResponse, err error) {
+// ZIP, audio, video), processing happens asynchronously. ZIP archives always
+// return a processing response, are unpacked recursively up to 5 levels, and each
+// extracted file is created as an independent vault object and ingested via the
+// normal pipeline. For unsupported types (images, etc.), the file is marked as
+// completed immediately without text extraction.
+func (r *VaultService) Ingest(ctx context.Context, id string, objectID string, body VaultIngestParams, opts ...option.RequestOption) (res *VaultIngestResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -154,14 +156,13 @@ func (r *VaultService) Ingest(ctx context.Context, id string, objectID string, o
 		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/ingest/%s", id, objectID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return res, err
 }
 
-// Search across vault documents using multiple methods including hybrid vector +
-// graph search, GraphRAG global search, entity-based search, and fast similarity
-// search. Returns relevant documents and contextual answers based on the search
-// method.
+// Search across vault documents using hybrid vector + BM25 search (default), fast
+// vector similarity search, or a simple vector fallback. Returns matching chunks
+// and their source documents.
 func (r *VaultService) Search(ctx context.Context, id string, body VaultSearchParams, opts ...option.RequestOption) (res *VaultSearchResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
@@ -283,8 +284,6 @@ type VaultGetResponse struct {
 	ChunkStrategy VaultGetResponseChunkStrategy `json:"chunkStrategy"`
 	// Vault description
 	Description string `json:"description"`
-	// Whether GraphRAG is enabled
-	EnableGraph bool `json:"enableGraph"`
 	// Search index name
 	IndexName string `json:"indexName"`
 	// KMS key for encryption
@@ -314,7 +313,6 @@ type vaultGetResponseJSON struct {
 	Region        apijson.Field
 	ChunkStrategy apijson.Field
 	Description   apijson.Field
-	EnableGraph   apijson.Field
 	IndexName     apijson.Field
 	KmsKeyID      apijson.Field
 	Metadata      apijson.Field
@@ -376,8 +374,6 @@ type VaultUpdateResponse struct {
 	CreatedAt time.Time `json:"createdAt" format:"date-time"`
 	// Vault description
 	Description string `json:"description" api:"nullable"`
-	// Whether GraphRAG is enabled for future uploads
-	EnableGraph bool `json:"enableGraph"`
 	// S3 bucket for document storage
 	FilesBucket string `json:"filesBucket"`
 	// Search index name
@@ -410,7 +406,6 @@ type vaultUpdateResponseJSON struct {
 	ChunkStrategy apijson.Field
 	CreatedAt     apijson.Field
 	Description   apijson.Field
-	EnableGraph   apijson.Field
 	FilesBucket   apijson.Field
 	IndexName     apijson.Field
 	KmsKeyID      apijson.Field
@@ -435,8 +430,12 @@ func (r vaultUpdateResponseJSON) RawJSON() string {
 }
 
 type VaultListResponse struct {
-	// Total number of vaults
-	Total  int64                    `json:"total"`
+	Pagination VaultListResponsePagination `json:"pagination"`
+	// Number of vaults in this response
+	Total int64 `json:"total"`
+	// Present only with `include_totals=true`. Covers every vault matching the
+	// filters, across all pages.
+	Totals VaultListResponseTotals  `json:"totals"`
 	Vaults []VaultListResponseVault `json:"vaults"`
 	JSON   vaultListResponseJSON    `json:"-"`
 }
@@ -444,7 +443,9 @@ type VaultListResponse struct {
 // vaultListResponseJSON contains the JSON metadata for the struct
 // [VaultListResponse]
 type vaultListResponseJSON struct {
+	Pagination  apijson.Field
 	Total       apijson.Field
+	Totals      apijson.Field
 	Vaults      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -458,6 +459,58 @@ func (r vaultListResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+type VaultListResponsePagination struct {
+	HasMore    bool                            `json:"has_more"`
+	Limit      int64                           `json:"limit" api:"nullable"`
+	NextCursor string                          `json:"next_cursor" api:"nullable"`
+	JSON       vaultListResponsePaginationJSON `json:"-"`
+}
+
+// vaultListResponsePaginationJSON contains the JSON metadata for the struct
+// [VaultListResponsePagination]
+type vaultListResponsePaginationJSON struct {
+	HasMore     apijson.Field
+	Limit       apijson.Field
+	NextCursor  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultListResponsePagination) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultListResponsePaginationJSON) RawJSON() string {
+	return r.raw
+}
+
+// Present only with `include_totals=true`. Covers every vault matching the
+// filters, across all pages.
+type VaultListResponseTotals struct {
+	TotalBytes   int64                       `json:"totalBytes"`
+	TotalObjects int64                       `json:"totalObjects"`
+	Vaults       int64                       `json:"vaults"`
+	JSON         vaultListResponseTotalsJSON `json:"-"`
+}
+
+// vaultListResponseTotalsJSON contains the JSON metadata for the struct
+// [VaultListResponseTotals]
+type vaultListResponseTotalsJSON struct {
+	TotalBytes   apijson.Field
+	TotalObjects apijson.Field
+	Vaults       apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *VaultListResponseTotals) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultListResponseTotalsJSON) RawJSON() string {
+	return r.raw
+}
+
 type VaultListResponseVault struct {
 	// Vault identifier
 	ID string `json:"id"`
@@ -465,8 +518,6 @@ type VaultListResponseVault struct {
 	CreatedAt time.Time `json:"createdAt" format:"date-time"`
 	// Vault description
 	Description string `json:"description"`
-	// Whether GraphRAG is enabled
-	EnableGraph bool `json:"enableGraph"`
 	// Vault name
 	Name string `json:"name"`
 	// Total storage size in bytes
@@ -482,7 +533,6 @@ type vaultListResponseVaultJSON struct {
 	ID           apijson.Field
 	CreatedAt    apijson.Field
 	Description  apijson.Field
-	EnableGraph  apijson.Field
 	Name         apijson.Field
 	TotalBytes   apijson.Field
 	TotalObjects apijson.Field
@@ -586,6 +636,7 @@ func (r vaultConfirmUploadResponseJSON) RawJSON() string {
 // Present when autoIngest was requested on a successful confirmation
 type VaultConfirmUploadResponseIngest struct {
 	Error      string                               `json:"error"`
+	StatusCode int64                                `json:"statusCode"`
 	Triggered  bool                                 `json:"triggered"`
 	WorkflowID string                               `json:"workflowId" api:"nullable"`
 	JSON       vaultConfirmUploadResponseIngestJSON `json:"-"`
@@ -595,6 +646,7 @@ type VaultConfirmUploadResponseIngest struct {
 // [VaultConfirmUploadResponseIngest]
 type vaultConfirmUploadResponseIngestJSON struct {
 	Error       apijson.Field
+	StatusCode  apijson.Field
 	Triggered   apijson.Field
 	WorkflowID  apijson.Field
 	raw         string
@@ -625,8 +677,6 @@ func (r VaultConfirmUploadResponseStatus) IsKnown() bool {
 }
 
 type VaultIngestResponse struct {
-	// Always false; retained for response compatibility
-	EnableGraphRag bool `json:"enableGraphRAG" api:"required"`
 	// Human-readable status message
 	Message string `json:"message" api:"required"`
 	// ID of the vault object being processed
@@ -642,13 +692,12 @@ type VaultIngestResponse struct {
 // vaultIngestResponseJSON contains the JSON metadata for the struct
 // [VaultIngestResponse]
 type vaultIngestResponseJSON struct {
-	EnableGraphRag apijson.Field
-	Message        apijson.Field
-	ObjectID       apijson.Field
-	Status         apijson.Field
-	WorkflowID     apijson.Field
-	raw            string
-	ExtraFields    map[string]apijson.Field
+	Message     apijson.Field
+	ObjectID    apijson.Field
+	Status      apijson.Field
+	WorkflowID  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
 }
 
 func (r *VaultIngestResponse) UnmarshalJSON(data []byte) (err error) {
@@ -682,10 +731,8 @@ type VaultSearchResponse struct {
 	// Search method used
 	Method string `json:"method"`
 	// Original search query
-	Query string `json:"query"`
-	// AI-generated answer based on search results (for global/entity methods)
-	Response string                      `json:"response"`
-	Sources  []VaultSearchResponseSource `json:"sources"`
+	Query   string                      `json:"query"`
+	Sources []VaultSearchResponseSource `json:"sources"`
 	// ID of the searched vault
 	VaultID string                  `json:"vault_id"`
 	JSON    vaultSearchResponseJSON `json:"-"`
@@ -697,7 +744,6 @@ type vaultSearchResponseJSON struct {
 	Chunks      apijson.Field
 	Method      apijson.Field
 	Query       apijson.Field
-	Response    apijson.Field
 	Sources     apijson.Field
 	VaultID     apijson.Field
 	raw         string
@@ -820,7 +866,9 @@ type VaultUploadResponse struct {
 	// Whether the vault supports indexing. False for storage-only vaults.
 	EnableIndexing bool `json:"enableIndexing"`
 	// URL expiration time in seconds
-	ExpiresIn    float64                         `json:"expiresIn"`
+	ExpiresIn float64 `json:"expiresIn"`
+	// Client-defined provenance metadata associated with the file
+	FileOrigin   map[string]interface{}          `json:"file_origin" api:"nullable"`
 	Instructions VaultUploadResponseInstructions `json:"instructions" api:"nullable"`
 	// Whether the file is marked as AI-generated work product
 	IsAIGenerated bool `json:"is_ai_generated"`
@@ -844,6 +892,7 @@ type vaultUploadResponseJSON struct {
 	AutoIndex       apijson.Field
 	EnableIndexing  apijson.Field
 	ExpiresIn       apijson.Field
+	FileOrigin      apijson.Field
 	Instructions    apijson.Field
 	IsAIGenerated   apijson.Field
 	NextStep        apijson.Field
@@ -901,9 +950,6 @@ type VaultNewParams struct {
 	// `casemark/embed-v1` (retained for SDK backward compatibility); new integrations
 	// should use `casemark/embed-v1` directly.
 	EmbeddingModel param.Field[VaultNewParamsEmbeddingModel] `json:"embeddingModel"`
-	// Enable knowledge graph for entity relationship mapping. Only applies when
-	// enableIndexing is true.
-	EnableGraph param.Field[bool] `json:"enableGraph"`
 	// Enable vector indexing and search capabilities. Set to false for storage-only
 	// vaults.
 	EnableIndexing param.Field[bool] `json:"enableIndexing"`
@@ -950,8 +996,6 @@ func (r VaultNewParamsEmbeddingModel) IsKnown() bool {
 type VaultUpdateParams struct {
 	// New description for the vault. Set to null to remove.
 	Description param.Field[string] `json:"description"`
-	// Whether to enable GraphRAG for future document uploads
-	EnableGraph param.Field[bool] `json:"enableGraph"`
 	// Move the vault to a different group, or set to null to remove from its current
 	// group.
 	GroupID param.Field[string] `json:"groupId"`
@@ -961,6 +1005,29 @@ type VaultUpdateParams struct {
 
 func (r VaultUpdateParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type VaultListParams struct {
+	// Opaque continuation cursor from `pagination.next_cursor` of the previous page.
+	// Must be replayed with the same API key scope and `query` that produced it.
+	Cursor param.Field[string] `query:"cursor"`
+	// When `true`, adds `totals` covering every vault matching the filters, not just
+	// this page. Scans all objects in those vaults, so request it once per filter
+	// change rather than on every page.
+	IncludeTotals param.Field[bool] `query:"include_totals"`
+	// Vaults per page (1-200). Omit to receive every vault. Supplying a cursor without
+	// a limit uses 50.
+	Limit param.Field[int64] `query:"limit"`
+	// Case-insensitive substring match on the vault name.
+	Query param.Field[string] `query:"query"`
+}
+
+// URLQuery serializes [VaultListParams]'s query parameters as `url.Values`.
+func (r VaultListParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type VaultDeleteParams struct {
@@ -992,11 +1059,25 @@ type VaultConfirmUploadParams struct {
 	// S3 ETag for the uploaded object (optional if client cannot access ETag header).
 	// Only meaningful when success=true.
 	Etag param.Field[string] `json:"etag"`
-	// Uploaded file size in bytes. Required when success=true.
+	// Uploaded file size in bytes, including zero. Required when success=true and
+	// verified against S3. Empty files can be stored and transferred, but cannot be
+	// ingested.
 	SizeBytes param.Field[int64] `json:"sizeBytes"`
 }
 
 func (r VaultConfirmUploadParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type VaultIngestParams struct {
+	// Optional callback URL for asynchronous workflow completion.
+	CallbackURL param.Field[string] `json:"callback_url" format:"uri"`
+	// Optional PDF pages that must begin a new chunk segment. Overlap never crosses
+	// these boundaries.
+	PageBoundaries param.Field[[]int64] `json:"page_boundaries"`
+}
+
+func (r VaultIngestParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
@@ -1005,8 +1086,9 @@ type VaultSearchParams struct {
 	Query param.Field[string] `json:"query" api:"required"`
 	// Filters to narrow search results to specific documents
 	Filters param.Field[VaultSearchParamsFilters] `json:"filters"`
-	// Search method: 'global' for comprehensive questions, 'entity' for specific
-	// entities, 'fast' for quick similarity search, 'hybrid' for combined approach
+	// Search method: 'hybrid' for combined vector + keyword ranking (default), 'fast'
+	// for quick vector similarity search, 'vector' for a simple document listing
+	// fallback
 	Method param.Field[VaultSearchParamsMethod] `json:"method"`
 	// Maximum number of results to return. Hybrid search supports 1 to 50; other
 	// methods may support up to 100.
@@ -1021,8 +1103,11 @@ func (r VaultSearchParams) MarshalJSON() (data []byte, err error) {
 type VaultSearchParamsFilters struct {
 	// Filter to specific document(s) by object ID. Accepts a single ID or array of
 	// IDs.
-	ObjectID    param.Field[VaultSearchParamsFiltersObjectIDUnion] `json:"object_id"`
-	ExtraFields map[string]interface{}                             `json:"-,extras"`
+	ObjectID param.Field[VaultSearchParamsFiltersObjectIDUnion] `json:"object_id"`
+	// Restrict vector-backed retrieval to chunks wholly contained in this inclusive
+	// PDF page range. Supported by vector, hybrid, and fast methods.
+	PageRange   param.Field[VaultSearchParamsFiltersPageRange] `json:"page_range"`
+	ExtraFields map[string]interface{}                         `json:"-,extras"`
 }
 
 func (r VaultSearchParamsFilters) MarshalJSON() (data []byte, err error) {
@@ -1041,23 +1126,31 @@ type VaultSearchParamsFiltersObjectIDArray []string
 
 func (r VaultSearchParamsFiltersObjectIDArray) ImplementsVaultSearchParamsFiltersObjectIDUnion() {}
 
-// Search method: 'global' for comprehensive questions, 'entity' for specific
-// entities, 'fast' for quick similarity search, 'hybrid' for combined approach
+// Restrict vector-backed retrieval to chunks wholly contained in this inclusive
+// PDF page range. Supported by vector, hybrid, and fast methods.
+type VaultSearchParamsFiltersPageRange struct {
+	Start param.Field[int64] `json:"start" api:"required"`
+	End   param.Field[int64] `json:"end"`
+}
+
+func (r VaultSearchParamsFiltersPageRange) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// Search method: 'hybrid' for combined vector + keyword ranking (default), 'fast'
+// for quick vector similarity search, 'vector' for a simple document listing
+// fallback
 type VaultSearchParamsMethod string
 
 const (
-	VaultSearchParamsMethodVector VaultSearchParamsMethod = "vector"
-	VaultSearchParamsMethodGraph  VaultSearchParamsMethod = "graph"
 	VaultSearchParamsMethodHybrid VaultSearchParamsMethod = "hybrid"
-	VaultSearchParamsMethodGlobal VaultSearchParamsMethod = "global"
-	VaultSearchParamsMethodLocal  VaultSearchParamsMethod = "local"
 	VaultSearchParamsMethodFast   VaultSearchParamsMethod = "fast"
-	VaultSearchParamsMethodEntity VaultSearchParamsMethod = "entity"
+	VaultSearchParamsMethodVector VaultSearchParamsMethod = "vector"
 )
 
 func (r VaultSearchParamsMethod) IsKnown() bool {
 	switch r {
-	case VaultSearchParamsMethodVector, VaultSearchParamsMethodGraph, VaultSearchParamsMethodHybrid, VaultSearchParamsMethodGlobal, VaultSearchParamsMethodLocal, VaultSearchParamsMethodFast, VaultSearchParamsMethodEntity:
+	case VaultSearchParamsMethodHybrid, VaultSearchParamsMethodFast, VaultSearchParamsMethodVector:
 		return true
 	}
 	return false
@@ -1070,18 +1163,22 @@ type VaultUploadParams struct {
 	Filename param.Field[string] `json:"filename" api:"required"`
 	// Whether to automatically process and index the file for search
 	AutoIndex param.Field[bool] `json:"auto_index"`
+	// Optional client-defined provenance metadata. Returned with the object and
+	// queryable through the object-list API.
+	FileOrigin param.Field[map[string]interface{}] `json:"file_origin"`
 	// Marks the file as AI-generated work product (e.g. uploaded by an agent) rather
 	// than a user-provided source document. Persisted on the object and returned by
 	// object listings so clients can distinguish provenance.
 	IsAIGenerated param.Field[bool] `json:"is_ai_generated"`
 	// Additional metadata to associate with the file
 	Metadata param.Field[interface{}] `json:"metadata"`
-	// Optional folder path for hierarchy preservation. Allows integrations to maintain
-	// source folder structure from systems like NetDocs, Clio, or Smokeball. Example:
-	// '/Discovery/Depositions/2024'
+	// Optional folder path, excluding the filename, for hierarchy preservation. Allows
+	// integrations to maintain source folder structure from systems like NetDocs,
+	// Clio, or Smokeball. Example: '/Discovery/Depositions/2024'
 	Path param.Field[string] `json:"path"`
-	// File size in bytes (optional, max 5GB for single PUT uploads). When provided,
-	// enforces exact file size at S3 level.
+	// File size in bytes (optional, including zero, max 5GB for single PUT uploads).
+	// When provided, enforces exact file size at S3 level. Empty files can be stored
+	// and transferred, but cannot be ingested.
 	SizeBytes      param.Field[int64]  `json:"sizeBytes"`
 	IdempotencyKey param.Field[string] `header:"Idempotency-Key"`
 }

@@ -223,6 +223,8 @@ type VoiceTranscriptionNewParams struct {
 	BoostParam param.Field[VoiceTranscriptionNewParamsBoostParam] `json:"boost_param"`
 	// Enable content moderation and safety labeling
 	ContentSafety param.Field[bool] `json:"content_safety"`
+	// Preserve filler words such as um and uh in English transcription
+	Disfluencies param.Field[bool] `json:"disfluencies"`
 	// Output format for the transcript when using vault mode
 	Format param.Field[VoiceTranscriptionNewParamsFormat] `json:"format"`
 	// Format text with proper capitalization
