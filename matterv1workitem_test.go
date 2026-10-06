@@ -132,11 +132,13 @@ func TestMatterV1WorkItemListWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Matters.V1.WorkItems.List(
+	_, err := client.Matters.V1.WorkItems.List(
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.MatterV1WorkItemListParams{
 			AssigneeID: githubcomcasemarkcasedevgo.F("assignee_id"),
+			Cursor:     githubcomcasemarkcasedevgo.F("cursor"),
+			Limit:      githubcomcasemarkcasedevgo.F(int64(1)),
 			Status:     githubcomcasemarkcasedevgo.F("status"),
 		},
 	)

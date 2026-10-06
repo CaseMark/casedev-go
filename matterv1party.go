@@ -73,13 +73,65 @@ func (r *MatterV1PartyService) Update(ctx context.Context, partyID string, opts 
 	return err
 }
 
-// List reusable legal parties for the authenticated organization.
-func (r *MatterV1PartyService) List(ctx context.Context, query MatterV1PartyListParams, opts ...option.RequestOption) (err error) {
+// List reusable legal parties for the authenticated organization, newest update
+// first. Pagination is opt-in: pass `limit` (1-200) to receive a bounded page,
+// then replay `pagination.next_cursor` as `?cursor=` while `pagination.has_more`
+// is true. A request with neither `limit` nor `cursor` still returns every party,
+// and `pagination.limit` is null. That default will become a bounded page in a
+// future release — paginate now to avoid the change.
+func (r *MatterV1PartyService) List(ctx context.Context, query MatterV1PartyListParams, opts ...option.RequestOption) (res *MatterV1PartyListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "matters/v1/parties"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return err
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
+}
+
+type MatterV1PartyListResponse struct {
+	Data       []interface{}                       `json:"data"`
+	Pagination MatterV1PartyListResponsePagination `json:"pagination"`
+	JSON       matterV1PartyListResponseJSON       `json:"-"`
+}
+
+// matterV1PartyListResponseJSON contains the JSON metadata for the struct
+// [MatterV1PartyListResponse]
+type matterV1PartyListResponseJSON struct {
+	Data        apijson.Field
+	Pagination  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MatterV1PartyListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r matterV1PartyListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type MatterV1PartyListResponsePagination struct {
+	HasMore    bool                                    `json:"has_more"`
+	Limit      int64                                   `json:"limit" api:"nullable"`
+	NextCursor string                                  `json:"next_cursor" api:"nullable"`
+	JSON       matterV1PartyListResponsePaginationJSON `json:"-"`
+}
+
+// matterV1PartyListResponsePaginationJSON contains the JSON metadata for the
+// struct [MatterV1PartyListResponsePagination]
+type matterV1PartyListResponsePaginationJSON struct {
+	HasMore     apijson.Field
+	Limit       apijson.Field
+	NextCursor  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MatterV1PartyListResponsePagination) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r matterV1PartyListResponsePaginationJSON) RawJSON() string {
+	return r.raw
 }
 
 type MatterV1PartyNewParams struct {
@@ -113,7 +165,13 @@ func (r MatterV1PartyNewParamsType) IsKnown() bool {
 }
 
 type MatterV1PartyListParams struct {
-	Email param.Field[string]                      `query:"email"`
+	// Opaque continuation cursor from `pagination.next_cursor` of the previous page.
+	// Must be replayed with the same filters that produced it.
+	Cursor param.Field[string] `query:"cursor"`
+	Email  param.Field[string] `query:"email"`
+	// Parties per page (1-200). Omit to receive every party. Supplying a cursor
+	// without a limit uses 50.
+	Limit param.Field[int64]                       `query:"limit"`
 	Query param.Field[string]                      `query:"query"`
 	Type  param.Field[MatterV1PartyListParamsType] `query:"type"`
 }

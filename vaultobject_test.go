@@ -90,7 +90,12 @@ func TestVaultObjectListWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.VaultObjectListParams{
+			Cursor:             githubcomcasemarkcasedevgo.F("cursor"),
+			FileOrigin:         githubcomcasemarkcasedevgo.F(`{"provider":"clio"}`),
+			IncludeTotals:      githubcomcasemarkcasedevgo.F(true),
 			IncludeUnconfirmed: githubcomcasemarkcasedevgo.F(true),
+			Limit:              githubcomcasemarkcasedevgo.F(int64(1)),
+			Query:              githubcomcasemarkcasedevgo.F("query"),
 		},
 	)
 	if err != nil {
@@ -158,7 +163,10 @@ func TestVaultObjectAppendWithOptionalParams(t *testing.T) {
 				Start:   githubcomcasemarkcasedevgo.F(int64(1)),
 				Suffix:  githubcomcasemarkcasedevgo.F("suffix"),
 			}),
-			RewriteLinks: githubcomcasemarkcasedevgo.F(true),
+			ClientReference: githubcomcasemarkcasedevgo.F("clientReference"),
+			Mode:            githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectAppendParamsModeSync),
+			RewriteLinks:    githubcomcasemarkcasedevgo.F(true),
+			IdempotencyKey:  githubcomcasemarkcasedevgo.F("x"),
 		},
 	)
 	if err != nil {
@@ -384,6 +392,38 @@ func TestVaultObjectMergeWithOptionalParams(t *testing.T) {
 				Suffix: githubcomcasemarkcasedevgo.F("suffix"),
 			}),
 			ClientReference: githubcomcasemarkcasedevgo.F("clientReference"),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestVaultObjectMoveWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Vault.Objects.Move(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.VaultObjectMoveParams{
+			DestinationVaultID: githubcomcasemarkcasedevgo.F("destinationVaultId"),
+			Mode:               githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectMoveParamsModeMove),
+			ObjectIDs:          githubcomcasemarkcasedevgo.F([]string{"string"}),
+			IdempotencyKey:     githubcomcasemarkcasedevgo.F("Idempotency-Key"),
+			Path:               githubcomcasemarkcasedevgo.F("path"),
 		},
 	)
 	if err != nil {

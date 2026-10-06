@@ -38,7 +38,10 @@ func NewVaultEventSubscriptionService(opts ...option.RequestOption) (r *VaultEve
 
 // Creates a webhook subscription for vault lifecycle events. Optional object
 // filters can limit notifications to specific vault objects.
-func (r *VaultEventSubscriptionService) New(ctx context.Context, id string, body VaultEventSubscriptionNewParams, opts ...option.RequestOption) (err error) {
+func (r *VaultEventSubscriptionService) New(ctx context.Context, id string, params VaultEventSubscriptionNewParams, opts ...option.RequestOption) (err error) {
+	if params.IdempotencyKey.Present {
+		opts = append(opts, option.WithHeader("Idempotency-Key", fmt.Sprintf("%v", params.IdempotencyKey)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -46,7 +49,7 @@ func (r *VaultEventSubscriptionService) New(ctx context.Context, id string, body
 		return err
 	}
 	path := fmt.Sprintf("vault/%s/events/subscriptions", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
 	return err
 }
 
@@ -125,7 +128,8 @@ type VaultEventSubscriptionNewParams struct {
 	// objects in the vault.
 	ObjectIDs param.Field[[]string] `json:"objectIds"`
 	// Optional secret used to sign outbound webhook deliveries
-	SigningSecret param.Field[string] `json:"signingSecret"`
+	SigningSecret  param.Field[string] `json:"signingSecret"`
+	IdempotencyKey param.Field[string] `header:"Idempotency-Key"`
 }
 
 func (r VaultEventSubscriptionNewParams) MarshalJSON() (data []byte, err error) {

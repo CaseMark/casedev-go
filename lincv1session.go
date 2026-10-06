@@ -56,7 +56,7 @@ func (r *LincV1SessionService) New(ctx context.Context, params LincV1SessionNewP
 }
 
 // End native Linc session
-func (r *LincV1SessionService) Delete(ctx context.Context, id string, opts ...option.RequestOption) (err error) {
+func (r *LincV1SessionService) Delete(ctx context.Context, id string, body LincV1SessionDeleteParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -64,7 +64,7 @@ func (r *LincV1SessionService) Delete(ctx context.Context, id string, opts ...op
 		return err
 	}
 	path := fmt.Sprintf("linc/v1/sessions/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, nil, opts...)
 	return err
 }
 
@@ -95,6 +95,21 @@ func (r *LincV1SessionService) IngestEvents(ctx context.Context, id string, body
 	}
 	path := fmt.Sprintf("linc/v1/sessions/%s/events/ingest", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	return err
+}
+
+// Stops the conversation worker, applies a newly authorized object scope, revokes
+// its prior managed credential, and resumes the same native conversation in its
+// existing workspace.
+func (r *LincV1SessionService) ReplaceScope(ctx context.Context, id string, body LincV1SessionReplaceScopeParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return err
+	}
+	path := fmt.Sprintf("linc/v1/sessions/%s/scope", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, body, nil, opts...)
 	return err
 }
 
@@ -156,6 +171,13 @@ func (r *LincV1SessionService) SendRpc(ctx context.Context, id string, body Linc
 }
 
 type LincV1SessionNewParams struct {
+	// Optional server-enforced capability profile. read_only grants only
+	// retrieval/inference service reads; session event ingestion remains bound to the
+	// exact managed runtime credential.
+	CapabilityPolicy param.Field[LincV1SessionNewParamsCapabilityPolicy] `json:"capabilityPolicy"`
+	// Stable conversation identity within workspaceKey. Required in workspace mode and
+	// idempotent for repeated creates.
+	ConversationKey param.Field[string] `json:"conversationKey"`
 	// Specific document template slugs to inject into the using-document-templates
 	// skill.
 	DocumentTemplateSlugs param.Field[[]string] `json:"documentTemplateSlugs"`
@@ -173,15 +195,39 @@ type LincV1SessionNewParams struct {
 	ServiceTier param.Field[LincV1SessionNewParamsServiceTier] `json:"serviceTier"`
 	// Skills API slugs to install into the runtime sandbox before the native session
 	// starts.
-	SkillSlugs      param.Field[[]string] `json:"skillSlugs"`
-	Title           param.Field[string]   `json:"title"`
-	VaultIDs        param.Field[[]string] `json:"vaultIds"`
-	AIReportingTags param.Field[string]   `header:"ai-reporting-tags"`
-	AIReportingUser param.Field[string]   `header:"ai-reporting-user"`
+	SkillSlugs param.Field[[]string] `json:"skillSlugs"`
+	Title      param.Field[string]   `json:"title"`
+	// Legacy explicit whole-vault scope. Mutually exclusive with vaultScopes.
+	VaultIDs param.Field[[]string] `json:"vaultIds"`
+	// Exact object allowlist per vault. Empty objectIds denies object access for that
+	// vault. Mutually exclusive with vaultIds.
+	VaultScopes param.Field[[]LincV1SessionNewParamsVaultScope] `json:"vaultScopes"`
+	// Opt-in persistent workspace identity. Requires conversationKey. Omit both fields
+	// to preserve isolated legacy session behavior.
+	WorkspaceKey    param.Field[string] `json:"workspaceKey"`
+	AIReportingTags param.Field[string] `header:"ai-reporting-tags"`
+	AIReportingUser param.Field[string] `header:"ai-reporting-user"`
 }
 
 func (r LincV1SessionNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Optional server-enforced capability profile. read_only grants only
+// retrieval/inference service reads; session event ingestion remains bound to the
+// exact managed runtime credential.
+type LincV1SessionNewParamsCapabilityPolicy string
+
+const (
+	LincV1SessionNewParamsCapabilityPolicyReadOnly LincV1SessionNewParamsCapabilityPolicy = "read_only"
+)
+
+func (r LincV1SessionNewParamsCapabilityPolicy) IsKnown() bool {
+	switch r {
+	case LincV1SessionNewParamsCapabilityPolicyReadOnly:
+		return true
+	}
+	return false
 }
 
 // Processing tier for eligible OpenAI GPT models. Priority provides lower latency
@@ -196,6 +242,53 @@ const (
 func (r LincV1SessionNewParamsServiceTier) IsKnown() bool {
 	switch r {
 	case LincV1SessionNewParamsServiceTierDefault, LincV1SessionNewParamsServiceTierPriority:
+		return true
+	}
+	return false
+}
+
+type LincV1SessionNewParamsVaultScope struct {
+	ObjectIDs param.Field[[]string] `json:"objectIds" api:"required"`
+	VaultID   param.Field[string]   `json:"vaultId" api:"required"`
+}
+
+func (r LincV1SessionNewParamsVaultScope) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type LincV1SessionDeleteParams struct {
+	// Why the session is being ended; recorded in the linc.session.ended event
+	// payload. Unknown values fall back to user*deleted. The replaced*\* values
+	// distinguish automatic session replacement (e.g. by C3) from a user-initiated
+	// deletion.
+	Reason param.Field[LincV1SessionDeleteParamsReason] `query:"reason"`
+}
+
+// URLQuery serializes [LincV1SessionDeleteParams]'s query parameters as
+// `url.Values`.
+func (r LincV1SessionDeleteParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Why the session is being ended; recorded in the linc.session.ended event
+// payload. Unknown values fall back to user*deleted. The replaced*\* values
+// distinguish automatic session replacement (e.g. by C3) from a user-initiated
+// deletion.
+type LincV1SessionDeleteParamsReason string
+
+const (
+	LincV1SessionDeleteParamsReasonUserDeleted                LincV1SessionDeleteParamsReason = "user_deleted"
+	LincV1SessionDeleteParamsReasonReplacedScopeChanged       LincV1SessionDeleteParamsReason = "replaced_scope_changed"
+	LincV1SessionDeleteParamsReasonReplacedMissingSession     LincV1SessionDeleteParamsReason = "replaced_missing_session"
+	LincV1SessionDeleteParamsReasonReplacedRuntimeUnavailable LincV1SessionDeleteParamsReason = "replaced_runtime_unavailable"
+)
+
+func (r LincV1SessionDeleteParamsReason) IsKnown() bool {
+	switch r {
+	case LincV1SessionDeleteParamsReasonUserDeleted, LincV1SessionDeleteParamsReasonReplacedScopeChanged, LincV1SessionDeleteParamsReasonReplacedMissingSession, LincV1SessionDeleteParamsReasonReplacedRuntimeUnavailable:
 		return true
 	}
 	return false
@@ -234,6 +327,26 @@ type LincV1SessionIngestEventsParamsFrame struct {
 }
 
 func (r LincV1SessionIngestEventsParamsFrame) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type LincV1SessionReplaceScopeParams struct {
+	// Legacy whole-vault scope. Mutually exclusive with vaultScopes.
+	VaultIDs param.Field[[]string] `json:"vaultIds"`
+	// Authoritative object allowlist for the next and later turns.
+	VaultScopes param.Field[[]LincV1SessionReplaceScopeParamsVaultScope] `json:"vaultScopes"`
+}
+
+func (r LincV1SessionReplaceScopeParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type LincV1SessionReplaceScopeParamsVaultScope struct {
+	ObjectIDs param.Field[[]string] `json:"objectIds" api:"required"`
+	VaultID   param.Field[string]   `json:"vaultId" api:"required"`
+}
+
+func (r LincV1SessionReplaceScopeParamsVaultScope) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 

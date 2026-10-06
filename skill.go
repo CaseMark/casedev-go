@@ -79,6 +79,15 @@ func (r *SkillService) Delete(ctx context.Context, slug string, opts ...option.R
 	return res, err
 }
 
+// Browse public and organization skills using one authenticated catalog. Returns
+// metadata only; skill content is loaded separately.
+func (r *SkillService) Catalog(ctx context.Context, query SkillCatalogParams, opts ...option.RequestOption) (res *SkillCatalogResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "skills/catalog"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
+}
+
 // Export a skill as an installable filesystem tree for sandbox runtimes.
 // Authenticated org-scoped custom skills are resolved before curated skills.
 func (r *SkillService) Export(ctx context.Context, slug string, query SkillExportParams, opts ...option.RequestOption) (res *SkillExportResponse, err error) {
@@ -119,7 +128,9 @@ type ReadResponseFileBundle struct {
 	Role        ReadResponseFileBundleRole `json:"role" api:"required"`
 	RootSlug    string                     `json:"root_slug" api:"required"`
 	ContentType string                     `json:"content_type" api:"nullable"`
-	JSON        readResponseFileBundleJSON `json:"-"`
+	// Encoding of the returned content field.
+	Encoding ReadResponseFileBundleEncoding `json:"encoding"`
+	JSON     readResponseFileBundleJSON     `json:"-"`
 }
 
 // readResponseFileBundleJSON contains the JSON metadata for the struct
@@ -129,6 +140,7 @@ type readResponseFileBundleJSON struct {
 	Role        apijson.Field
 	RootSlug    apijson.Field
 	ContentType apijson.Field
+	Encoding    apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -152,6 +164,22 @@ const (
 func (r ReadResponseFileBundleRole) IsKnown() bool {
 	switch r {
 	case ReadResponseFileBundleRoleFile:
+		return true
+	}
+	return false
+}
+
+// Encoding of the returned content field.
+type ReadResponseFileBundleEncoding string
+
+const (
+	ReadResponseFileBundleEncodingUtf8   ReadResponseFileBundleEncoding = "utf8"
+	ReadResponseFileBundleEncodingBase64 ReadResponseFileBundleEncoding = "base64"
+)
+
+func (r ReadResponseFileBundleEncoding) IsKnown() bool {
+	switch r {
+	case ReadResponseFileBundleEncodingUtf8, ReadResponseFileBundleEncodingBase64:
 		return true
 	}
 	return false
@@ -183,11 +211,13 @@ func (r readResponseRootBundleJSON) RawJSON() string {
 func (r ReadResponseRootBundle) implementsSkillReadResponseBundle() {}
 
 type ReadResponseRootBundleFile struct {
-	Path        string                         `json:"path" api:"required"`
-	Slug        string                         `json:"slug" api:"required"`
-	ContentType string                         `json:"content_type" api:"nullable"`
-	Name        string                         `json:"name" api:"nullable"`
-	JSON        readResponseRootBundleFileJSON `json:"-"`
+	Path        string `json:"path" api:"required"`
+	Slug        string `json:"slug" api:"required"`
+	ContentType string `json:"content_type" api:"nullable"`
+	// Encoding used by content when this companion slug is read.
+	Encoding ReadResponseRootBundleFilesEncoding `json:"encoding"`
+	Name     string                              `json:"name" api:"nullable"`
+	JSON     readResponseRootBundleFileJSON      `json:"-"`
 }
 
 // readResponseRootBundleFileJSON contains the JSON metadata for the struct
@@ -196,6 +226,7 @@ type readResponseRootBundleFileJSON struct {
 	Path        apijson.Field
 	Slug        apijson.Field
 	ContentType apijson.Field
+	Encoding    apijson.Field
 	Name        apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
@@ -207,6 +238,22 @@ func (r *ReadResponseRootBundleFile) UnmarshalJSON(data []byte) (err error) {
 
 func (r readResponseRootBundleFileJSON) RawJSON() string {
 	return r.raw
+}
+
+// Encoding used by content when this companion slug is read.
+type ReadResponseRootBundleFilesEncoding string
+
+const (
+	ReadResponseRootBundleFilesEncodingUtf8   ReadResponseRootBundleFilesEncoding = "utf8"
+	ReadResponseRootBundleFilesEncodingBase64 ReadResponseRootBundleFilesEncoding = "base64"
+)
+
+func (r ReadResponseRootBundleFilesEncoding) IsKnown() bool {
+	switch r {
+	case ReadResponseRootBundleFilesEncodingUtf8, ReadResponseRootBundleFilesEncodingBase64:
+		return true
+	}
+	return false
 }
 
 type ReadResponseRootBundleRole string
@@ -320,6 +367,85 @@ func (r skillDeleteResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+type SkillCatalogResponse struct {
+	Count      int64                       `json:"count"`
+	HasMore    bool                        `json:"hasMore"`
+	Limit      int64                       `json:"limit"`
+	NextOffset int64                       `json:"nextOffset" api:"nullable"`
+	Offset     int64                       `json:"offset"`
+	Query      string                      `json:"query"`
+	Skills     []SkillCatalogResponseSkill `json:"skills"`
+	Total      int64                       `json:"total"`
+	JSON       skillCatalogResponseJSON    `json:"-"`
+}
+
+// skillCatalogResponseJSON contains the JSON metadata for the struct
+// [SkillCatalogResponse]
+type skillCatalogResponseJSON struct {
+	Count       apijson.Field
+	HasMore     apijson.Field
+	Limit       apijson.Field
+	NextOffset  apijson.Field
+	Offset      apijson.Field
+	Query       apijson.Field
+	Skills      apijson.Field
+	Total       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SkillCatalogResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillCatalogResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type SkillCatalogResponseSkill struct {
+	Description string                           `json:"description"`
+	Name        string                           `json:"name"`
+	Slug        string                           `json:"slug"`
+	Source      SkillCatalogResponseSkillsSource `json:"source"`
+	Tags        []string                         `json:"tags"`
+	JSON        skillCatalogResponseSkillJSON    `json:"-"`
+}
+
+// skillCatalogResponseSkillJSON contains the JSON metadata for the struct
+// [SkillCatalogResponseSkill]
+type skillCatalogResponseSkillJSON struct {
+	Description apijson.Field
+	Name        apijson.Field
+	Slug        apijson.Field
+	Source      apijson.Field
+	Tags        apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *SkillCatalogResponseSkill) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r skillCatalogResponseSkillJSON) RawJSON() string {
+	return r.raw
+}
+
+type SkillCatalogResponseSkillsSource string
+
+const (
+	SkillCatalogResponseSkillsSourceCustom  SkillCatalogResponseSkillsSource = "custom"
+	SkillCatalogResponseSkillsSourceCurated SkillCatalogResponseSkillsSource = "curated"
+)
+
+func (r SkillCatalogResponseSkillsSource) IsKnown() bool {
+	switch r {
+	case SkillCatalogResponseSkillsSourceCustom, SkillCatalogResponseSkillsSourceCurated:
+		return true
+	}
+	return false
+}
+
 type SkillExportResponse struct {
 	Files  []SkillExportResponseFile `json:"files"`
 	Root   string                    `json:"root"`
@@ -350,12 +476,14 @@ func (r skillExportResponseJSON) RawJSON() string {
 }
 
 type SkillExportResponseFile struct {
-	Content     string                      `json:"content"`
-	ContentType string                      `json:"content_type"`
-	Path        string                      `json:"path"`
-	Sha256      string                      `json:"sha256"`
-	SizeBytes   int64                       `json:"size_bytes"`
-	JSON        skillExportResponseFileJSON `json:"-"`
+	Content     string `json:"content"`
+	ContentType string `json:"content_type"`
+	// Encoding of content. Binary files use canonical base64.
+	Encoding  SkillExportResponseFilesEncoding `json:"encoding"`
+	Path      string                           `json:"path"`
+	Sha256    string                           `json:"sha256"`
+	SizeBytes int64                            `json:"size_bytes"`
+	JSON      skillExportResponseFileJSON      `json:"-"`
 }
 
 // skillExportResponseFileJSON contains the JSON metadata for the struct
@@ -363,6 +491,7 @@ type SkillExportResponseFile struct {
 type skillExportResponseFileJSON struct {
 	Content     apijson.Field
 	ContentType apijson.Field
+	Encoding    apijson.Field
 	Path        apijson.Field
 	Sha256      apijson.Field
 	SizeBytes   apijson.Field
@@ -376,6 +505,22 @@ func (r *SkillExportResponseFile) UnmarshalJSON(data []byte) (err error) {
 
 func (r skillExportResponseFileJSON) RawJSON() string {
 	return r.raw
+}
+
+// Encoding of content. Binary files use canonical base64.
+type SkillExportResponseFilesEncoding string
+
+const (
+	SkillExportResponseFilesEncodingUtf8   SkillExportResponseFilesEncoding = "utf8"
+	SkillExportResponseFilesEncodingBase64 SkillExportResponseFilesEncoding = "base64"
+)
+
+func (r SkillExportResponseFilesEncoding) IsKnown() bool {
+	switch r {
+	case SkillExportResponseFilesEncodingUtf8, SkillExportResponseFilesEncodingBase64:
+		return true
+	}
+	return false
 }
 
 type SkillExportResponseSource string
@@ -449,6 +594,8 @@ func (r skillReadResponseJSON) RawJSON() string {
 type SkillReadResponseBundle struct {
 	Role        SkillReadResponseBundleRole `json:"role" api:"required"`
 	ContentType string                      `json:"content_type" api:"nullable"`
+	// Encoding of the returned content field.
+	Encoding SkillReadResponseBundleEncoding `json:"encoding"`
 	// This field can have the runtime type of [[]ReadResponseRootBundleFile].
 	Files    interface{}                 `json:"files"`
 	Path     string                      `json:"path"`
@@ -462,6 +609,7 @@ type SkillReadResponseBundle struct {
 type skillReadResponseBundleJSON struct {
 	Role        apijson.Field
 	ContentType apijson.Field
+	Encoding    apijson.Field
 	Files       apijson.Field
 	Path        apijson.Field
 	RootSlug    apijson.Field
@@ -523,6 +671,22 @@ const (
 func (r SkillReadResponseBundleRole) IsKnown() bool {
 	switch r {
 	case SkillReadResponseBundleRoleRoot, SkillReadResponseBundleRoleFile:
+		return true
+	}
+	return false
+}
+
+// Encoding of the returned content field.
+type SkillReadResponseBundleEncoding string
+
+const (
+	SkillReadResponseBundleEncodingUtf8   SkillReadResponseBundleEncoding = "utf8"
+	SkillReadResponseBundleEncodingBase64 SkillReadResponseBundleEncoding = "base64"
+)
+
+func (r SkillReadResponseBundleEncoding) IsKnown() bool {
+	switch r {
+	case SkillReadResponseBundleEncodingUtf8, SkillReadResponseBundleEncodingBase64:
 		return true
 	}
 	return false
@@ -627,7 +791,8 @@ type SkillNewParams struct {
 	// Skill name
 	Name param.Field[string] `json:"name" api:"required"`
 	// Optional bundled companion files installed alongside the skill as <slug>/<path>
-	// in sandbox skill directories.
+	// in sandbox skill directories. The complete file set may contain at most 12 MiB
+	// of decoded content.
 	Files param.Field[[]SkillNewParamsFile] `json:"files"`
 	// Arbitrary metadata (author, license, etc.)
 	Metadata param.Field[interface{}] `json:"metadata"`
@@ -644,25 +809,47 @@ func (r SkillNewParams) MarshalJSON() (data []byte, err error) {
 }
 
 type SkillNewParamsFile struct {
+	// UTF-8 text when encoding is utf8 (max 65,536 characters), or canonical base64
+	// when encoding is base64 (max 262,144 decoded bytes).
 	Content param.Field[string] `json:"content" api:"required"`
 	// Relative path inside the skill directory. SKILL.md is reserved for the root
 	// skill content.
-	Path        param.Field[string]      `json:"path" api:"required"`
-	ContentType param.Field[string]      `json:"contentType"`
-	Metadata    param.Field[interface{}] `json:"metadata"`
-	Name        param.Field[string]      `json:"name"`
-	Summary     param.Field[string]      `json:"summary"`
-	Tags        param.Field[[]string]    `json:"tags"`
+	Path        param.Field[string] `json:"path" api:"required"`
+	ContentType param.Field[string] `json:"contentType"`
+	// How content is encoded. Omit for UTF-8 text files.
+	Encoding param.Field[SkillNewParamsFilesEncoding] `json:"encoding"`
+	Metadata param.Field[interface{}]                 `json:"metadata"`
+	Name     param.Field[string]                      `json:"name"`
+	Summary  param.Field[string]                      `json:"summary"`
+	Tags     param.Field[[]string]                    `json:"tags"`
 }
 
 func (r SkillNewParamsFile) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
+// How content is encoded. Omit for UTF-8 text files.
+type SkillNewParamsFilesEncoding string
+
+const (
+	SkillNewParamsFilesEncodingUtf8   SkillNewParamsFilesEncoding = "utf8"
+	SkillNewParamsFilesEncodingBase64 SkillNewParamsFilesEncoding = "base64"
+)
+
+func (r SkillNewParamsFilesEncoding) IsKnown() bool {
+	switch r {
+	case SkillNewParamsFilesEncodingUtf8, SkillNewParamsFilesEncodingBase64:
+		return true
+	}
+	return false
+}
+
 type SkillUpdateParams struct {
 	Content param.Field[string] `json:"content"`
-	// Optional replacement companion file tree. Omit to leave existing bundled files
-	// unchanged; send [] to remove bundled files.
+	// Reject with 409 if the skill changed since this version was read.
+	ExpectedVersion param.Field[int64] `json:"expectedVersion"`
+	// Optional replacement companion file tree, limited to 12 MiB of decoded content.
+	// Omit to leave existing bundled files unchanged; send [] to remove bundled files.
 	Files    param.Field[[]SkillUpdateParamsFile] `json:"files"`
 	Metadata param.Field[interface{}]             `json:"metadata"`
 	Name     param.Field[string]                  `json:"name"`
@@ -677,17 +864,76 @@ func (r SkillUpdateParams) MarshalJSON() (data []byte, err error) {
 }
 
 type SkillUpdateParamsFile struct {
-	Content     param.Field[string]      `json:"content" api:"required"`
-	Path        param.Field[string]      `json:"path" api:"required"`
-	ContentType param.Field[string]      `json:"contentType"`
-	Metadata    param.Field[interface{}] `json:"metadata"`
-	Name        param.Field[string]      `json:"name"`
-	Summary     param.Field[string]      `json:"summary"`
-	Tags        param.Field[[]string]    `json:"tags"`
+	// UTF-8 text when encoding is utf8 (max 65,536 characters), or canonical base64
+	// when encoding is base64 (max 262,144 decoded bytes).
+	Content     param.Field[string] `json:"content" api:"required"`
+	Path        param.Field[string] `json:"path" api:"required"`
+	ContentType param.Field[string] `json:"contentType"`
+	// How content is encoded. Omit for UTF-8 text files.
+	Encoding param.Field[SkillUpdateParamsFilesEncoding] `json:"encoding"`
+	Metadata param.Field[interface{}]                    `json:"metadata"`
+	Name     param.Field[string]                         `json:"name"`
+	Summary  param.Field[string]                         `json:"summary"`
+	Tags     param.Field[[]string]                       `json:"tags"`
 }
 
 func (r SkillUpdateParamsFile) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// How content is encoded. Omit for UTF-8 text files.
+type SkillUpdateParamsFilesEncoding string
+
+const (
+	SkillUpdateParamsFilesEncodingUtf8   SkillUpdateParamsFilesEncoding = "utf8"
+	SkillUpdateParamsFilesEncodingBase64 SkillUpdateParamsFilesEncoding = "base64"
+)
+
+func (r SkillUpdateParamsFilesEncoding) IsKnown() bool {
+	switch r {
+	case SkillUpdateParamsFilesEncodingUtf8, SkillUpdateParamsFilesEncodingBase64:
+		return true
+	}
+	return false
+}
+
+type SkillCatalogParams struct {
+	// Maximum results to return
+	Limit param.Field[int64] `query:"limit"`
+	// Number of results to skip
+	Offset param.Field[int64] `query:"offset"`
+	// Optional text search
+	Q param.Field[string] `query:"q"`
+	// Optional source filter, applied after organization overrides and before
+	// pagination. Omit to browse both sources.
+	Source param.Field[SkillCatalogParamsSource] `query:"source"`
+	// Optional tag filter
+	Tag param.Field[string] `query:"tag"`
+}
+
+// URLQuery serializes [SkillCatalogParams]'s query parameters as `url.Values`.
+func (r SkillCatalogParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Optional source filter, applied after organization overrides and before
+// pagination. Omit to browse both sources.
+type SkillCatalogParamsSource string
+
+const (
+	SkillCatalogParamsSourceCustom  SkillCatalogParamsSource = "custom"
+	SkillCatalogParamsSourceCurated SkillCatalogParamsSource = "curated"
+)
+
+func (r SkillCatalogParamsSource) IsKnown() bool {
+	switch r {
+	case SkillCatalogParamsSourceCustom, SkillCatalogParamsSourceCurated:
+		return true
+	}
+	return false
 }
 
 type SkillExportParams struct {

@@ -26,6 +26,8 @@ func TestLincV1SessionNewWithOptionalParams(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	err := client.Linc.V1.Sessions.New(context.TODO(), githubcomcasemarkcasedevgo.LincV1SessionNewParams{
+		CapabilityPolicy:         githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LincV1SessionNewParamsCapabilityPolicyReadOnly),
+		ConversationKey:          githubcomcasemarkcasedevgo.F("conversationKey"),
 		DocumentTemplateSlugs:    githubcomcasemarkcasedevgo.F([]string{"string"}),
 		IdleTimeoutMs:            githubcomcasemarkcasedevgo.F(int64(0)),
 		IncludeDocumentTemplates: githubcomcasemarkcasedevgo.F(true),
@@ -36,8 +38,13 @@ func TestLincV1SessionNewWithOptionalParams(t *testing.T) {
 		SkillSlugs:               githubcomcasemarkcasedevgo.F([]string{"string"}),
 		Title:                    githubcomcasemarkcasedevgo.F("title"),
 		VaultIDs:                 githubcomcasemarkcasedevgo.F([]string{"string"}),
-		AIReportingTags:          githubcomcasemarkcasedevgo.F("ai-reporting-tags"),
-		AIReportingUser:          githubcomcasemarkcasedevgo.F("ai-reporting-user"),
+		VaultScopes: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.LincV1SessionNewParamsVaultScope{{
+			ObjectIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
+			VaultID:   githubcomcasemarkcasedevgo.F("vaultId"),
+		}}),
+		WorkspaceKey:    githubcomcasemarkcasedevgo.F("workspaceKey"),
+		AIReportingTags: githubcomcasemarkcasedevgo.F("ai-reporting-tags"),
+		AIReportingUser: githubcomcasemarkcasedevgo.F("ai-reporting-user"),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -48,7 +55,7 @@ func TestLincV1SessionNewWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestLincV1SessionDelete(t *testing.T) {
+func TestLincV1SessionDeleteWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -60,7 +67,13 @@ func TestLincV1SessionDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Linc.V1.Sessions.Delete(context.TODO(), "id")
+	err := client.Linc.V1.Sessions.Delete(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.LincV1SessionDeleteParams{
+			Reason: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LincV1SessionDeleteParamsReasonUserDeleted),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -120,6 +133,38 @@ func TestLincV1SessionIngestEvents(t *testing.T) {
 				}),
 				Seq:  githubcomcasemarkcasedevgo.F(int64(1)),
 				Type: githubcomcasemarkcasedevgo.F("type"),
+			}}),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestLincV1SessionReplaceScopeWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.Linc.V1.Sessions.ReplaceScope(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.LincV1SessionReplaceScopeParams{
+			VaultIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
+			VaultScopes: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.LincV1SessionReplaceScopeParamsVaultScope{{
+				ObjectIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
+				VaultID:   githubcomcasemarkcasedevgo.F("vaultId"),
 			}}),
 		},
 	)

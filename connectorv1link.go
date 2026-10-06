@@ -17,7 +17,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Import and export between provider folders (Google Drive) and vaults
+// Import and export between provider folders and vaults
 //
 // ConnectorV1LinkService contains methods and other services that help with
 // interacting with the casedev API.
@@ -40,7 +40,10 @@ func NewConnectorV1LinkService(opts ...option.RequestOption) (r *ConnectorV1Link
 
 // Retrieve one link: state, counts, and embedded active_run/last_run. Poll this
 // after POST /transfer.
-func (r *ConnectorV1LinkService) Get(ctx context.Context, id string, opts ...option.RequestOption) (err error) {
+func (r *ConnectorV1LinkService) Get(ctx context.Context, id string, query ConnectorV1LinkGetParams, opts ...option.RequestOption) (err error) {
+	if query.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", query.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -54,7 +57,10 @@ func (r *ConnectorV1LinkService) Get(ctx context.Context, id string, opts ...opt
 
 // Pause/resume a link (state "paused" | "ready"), change its mode (synced -> once
 // is the sync downgrade), or edit its policy in place.
-func (r *ConnectorV1LinkService) Update(ctx context.Context, id string, body ConnectorV1LinkUpdateParams, opts ...option.RequestOption) (err error) {
+func (r *ConnectorV1LinkService) Update(ctx context.Context, id string, params ConnectorV1LinkUpdateParams, opts ...option.RequestOption) (err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -62,23 +68,29 @@ func (r *ConnectorV1LinkService) Update(ctx context.Context, id string, body Con
 		return err
 	}
 	path := fmt.Sprintf("connectors/v1/links/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, params, nil, opts...)
 	return err
 }
 
 // List transfer links, filterable by vault, connection, direction, mode, and
 // state.
-func (r *ConnectorV1LinkService) List(ctx context.Context, query ConnectorV1LinkListParams, opts ...option.RequestOption) (err error) {
+func (r *ConnectorV1LinkService) List(ctx context.Context, params ConnectorV1LinkListParams, opts ...option.RequestOption) (err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "connectors/v1/links"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, params, nil, opts...)
 	return err
 }
 
 // Delete a link and its ledger. vault_docs=delete additionally removes the vault
 // documents an import link brought in (default: keep).
-func (r *ConnectorV1LinkService) Delete(ctx context.Context, id string, body ConnectorV1LinkDeleteParams, opts ...option.RequestOption) (err error) {
+func (r *ConnectorV1LinkService) Delete(ctx context.Context, id string, params ConnectorV1LinkDeleteParams, opts ...option.RequestOption) (err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -86,13 +98,16 @@ func (r *ConnectorV1LinkService) Delete(ctx context.Context, id string, body Con
 		return err
 	}
 	path := fmt.Sprintf("connectors/v1/links/%s", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, body, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, params, nil, opts...)
 	return err
 }
 
 // Per-file transfer ledger for a link: provider item, vault object, path, content
 // version, state, and error.
-func (r *ConnectorV1LinkService) ListObjects(ctx context.Context, id string, query ConnectorV1LinkListObjectsParams, opts ...option.RequestOption) (err error) {
+func (r *ConnectorV1LinkService) ListObjects(ctx context.Context, id string, params ConnectorV1LinkListObjectsParams, opts ...option.RequestOption) (err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
@@ -100,14 +115,22 @@ func (r *ConnectorV1LinkService) ListObjects(ctx context.Context, id string, que
 		return err
 	}
 	path := fmt.Sprintf("connectors/v1/links/%s/objects", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, params, nil, opts...)
 	return err
 }
 
+type ConnectorV1LinkGetParams struct {
+	XCaseConnectorSubject param.Field[string] `header:"x-case-connector-subject"`
+}
+
 type ConnectorV1LinkUpdateParams struct {
-	Mode   param.Field[ConnectorV1LinkUpdateParamsMode]  `json:"mode"`
-	Policy param.Field[interface{}]                      `json:"policy"`
-	State  param.Field[ConnectorV1LinkUpdateParamsState] `json:"state"`
+	Mode param.Field[ConnectorV1LinkUpdateParamsMode] `json:"mode"`
+	// Replaces the entire stored policy; omitted fields return to defaults. Repeat
+	// deletes, collisions and filters that should be retained. Folder/file exclusions
+	// require deletes: preserve (the default).
+	Policy                param.Field[interface{}]                      `json:"policy"`
+	State                 param.Field[ConnectorV1LinkUpdateParamsState] `json:"state"`
+	XCaseConnectorSubject param.Field[string]                           `header:"x-case-connector-subject"`
 }
 
 func (r ConnectorV1LinkUpdateParams) MarshalJSON() (data []byte, err error) {
@@ -145,12 +168,15 @@ func (r ConnectorV1LinkUpdateParamsState) IsKnown() bool {
 }
 
 type ConnectorV1LinkListParams struct {
-	ConnectionID param.Field[string]                             `query:"connection_id"`
-	Direction    param.Field[ConnectorV1LinkListParamsDirection] `query:"direction"`
-	Mode         param.Field[ConnectorV1LinkListParamsMode]      `query:"mode"`
-	PairID       param.Field[string]                             `query:"pair_id"`
-	State        param.Field[ConnectorV1LinkListParamsState]     `query:"state"`
-	VaultID      param.Field[string]                             `query:"vault_id"`
+	ConnectionID param.Field[string] `query:"connection_id"`
+	// Opaque cursor from the previous page.
+	Cursor                param.Field[string]                             `query:"cursor"`
+	Direction             param.Field[ConnectorV1LinkListParamsDirection] `query:"direction"`
+	Mode                  param.Field[ConnectorV1LinkListParamsMode]      `query:"mode"`
+	PairID                param.Field[string]                             `query:"pair_id"`
+	State                 param.Field[ConnectorV1LinkListParamsState]     `query:"state"`
+	VaultID               param.Field[string]                             `query:"vault_id"`
+	XCaseConnectorSubject param.Field[string]                             `header:"x-case-connector-subject"`
 }
 
 // URLQuery serializes [ConnectorV1LinkListParams]'s query parameters as
@@ -212,7 +238,8 @@ func (r ConnectorV1LinkListParamsState) IsKnown() bool {
 }
 
 type ConnectorV1LinkDeleteParams struct {
-	VaultDocs param.Field[ConnectorV1LinkDeleteParamsVaultDocs] `query:"vault_docs"`
+	VaultDocs             param.Field[ConnectorV1LinkDeleteParamsVaultDocs] `query:"vault_docs"`
+	XCaseConnectorSubject param.Field[string]                               `header:"x-case-connector-subject"`
 }
 
 // URLQuery serializes [ConnectorV1LinkDeleteParams]'s query parameters as
@@ -240,8 +267,9 @@ func (r ConnectorV1LinkDeleteParamsVaultDocs) IsKnown() bool {
 }
 
 type ConnectorV1LinkListObjectsParams struct {
-	Cursor param.Field[string]                                `query:"cursor"`
-	State  param.Field[ConnectorV1LinkListObjectsParamsState] `query:"state"`
+	Cursor                param.Field[string]                                `query:"cursor"`
+	State                 param.Field[ConnectorV1LinkListObjectsParamsState] `query:"state"`
+	XCaseConnectorSubject param.Field[string]                                `header:"x-case-connector-subject"`
 }
 
 // URLQuery serializes [ConnectorV1LinkListObjectsParams]'s query parameters as

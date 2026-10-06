@@ -29,9 +29,10 @@ func TestMatterV1EventSubscriptionNewWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.MatterV1EventSubscriptionNewParams{
-			CallbackURL:   githubcomcasemarkcasedevgo.F("https://example.com"),
-			EventTypes:    githubcomcasemarkcasedevgo.F([]string{"string"}),
-			SigningSecret: githubcomcasemarkcasedevgo.F("signingSecret"),
+			CallbackURL:    githubcomcasemarkcasedevgo.F("https://example.com"),
+			EventTypes:     githubcomcasemarkcasedevgo.F([]string{"string"}),
+			SigningSecret:  githubcomcasemarkcasedevgo.F("signingSecret"),
+			IdempotencyKey: githubcomcasemarkcasedevgo.F("Idempotency-Key"),
 		},
 	)
 	if err != nil {

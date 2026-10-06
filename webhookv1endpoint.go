@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"time"
 
 	"github.com/CaseMark/casedev-go/internal/apijson"
 	"github.com/CaseMark/casedev-go/internal/apiquery"
@@ -41,12 +42,11 @@ func NewWebhookV1EndpointService(opts ...option.RequestOption) (r *WebhookV1Endp
 // Creates a webhook endpoint that receives platform events matching the supplied
 // event-type filters. Returns the generated signing secret ONCE — the response is
 // the only time it is shown in plaintext.
-func (r *WebhookV1EndpointService) New(ctx context.Context, body WebhookV1EndpointNewParams, opts ...option.RequestOption) (err error) {
+func (r *WebhookV1EndpointService) New(ctx context.Context, body WebhookV1EndpointNewParams, opts ...option.RequestOption) (res *WebhookV1EndpointNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "webhooks/v1/endpoints"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return err
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
 }
 
 // Get webhook endpoint
@@ -133,6 +133,116 @@ func (r *WebhookV1EndpointService) Test(ctx context.Context, id string, body Web
 	path := fmt.Sprintf("webhooks/v1/endpoints/%s/test", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return err
+}
+
+type WebhookV1EndpointNewResponse struct {
+	Endpoint WebhookV1EndpointNewResponseEndpoint `json:"endpoint" api:"required"`
+	// One-time webhook signing secret.
+	SigningSecret string                           `json:"signingSecret" api:"required"`
+	JSON          webhookV1EndpointNewResponseJSON `json:"-"`
+}
+
+// webhookV1EndpointNewResponseJSON contains the JSON metadata for the struct
+// [WebhookV1EndpointNewResponse]
+type webhookV1EndpointNewResponseJSON struct {
+	Endpoint      apijson.Field
+	SigningSecret apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *WebhookV1EndpointNewResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r webhookV1EndpointNewResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type WebhookV1EndpointNewResponseEndpoint struct {
+	ID                             string                                             `json:"id" api:"required"`
+	ConsecutiveFailureCount        int64                                              `json:"consecutiveFailureCount" api:"required"`
+	CreatedAt                      time.Time                                          `json:"createdAt" api:"required" format:"date-time"`
+	Description                    string                                             `json:"description" api:"required,nullable"`
+	DisabledReason                 string                                             `json:"disabledReason" api:"required,nullable"`
+	EventTypeFilters               []string                                           `json:"eventTypeFilters" api:"required"`
+	HasPreviousSigningSecret       bool                                               `json:"hasPreviousSigningSecret" api:"required"`
+	LastFailureAt                  time.Time                                          `json:"lastFailureAt" api:"required,nullable" format:"date-time"`
+	LastSuccessAt                  time.Time                                          `json:"lastSuccessAt" api:"required,nullable" format:"date-time"`
+	PreviousSigningSecretExpiresAt time.Time                                          `json:"previousSigningSecretExpiresAt" api:"required,nullable" format:"date-time"`
+	ResourceScopes                 WebhookV1EndpointNewResponseEndpointResourceScopes `json:"resourceScopes" api:"required,nullable"`
+	Status                         WebhookV1EndpointNewResponseEndpointStatus         `json:"status" api:"required"`
+	UpdatedAt                      time.Time                                          `json:"updatedAt" api:"required" format:"date-time"`
+	URL                            string                                             `json:"url" api:"required" format:"uri"`
+	JSON                           webhookV1EndpointNewResponseEndpointJSON           `json:"-"`
+}
+
+// webhookV1EndpointNewResponseEndpointJSON contains the JSON metadata for the
+// struct [WebhookV1EndpointNewResponseEndpoint]
+type webhookV1EndpointNewResponseEndpointJSON struct {
+	ID                             apijson.Field
+	ConsecutiveFailureCount        apijson.Field
+	CreatedAt                      apijson.Field
+	Description                    apijson.Field
+	DisabledReason                 apijson.Field
+	EventTypeFilters               apijson.Field
+	HasPreviousSigningSecret       apijson.Field
+	LastFailureAt                  apijson.Field
+	LastSuccessAt                  apijson.Field
+	PreviousSigningSecretExpiresAt apijson.Field
+	ResourceScopes                 apijson.Field
+	Status                         apijson.Field
+	UpdatedAt                      apijson.Field
+	URL                            apijson.Field
+	raw                            string
+	ExtraFields                    map[string]apijson.Field
+}
+
+func (r *WebhookV1EndpointNewResponseEndpoint) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r webhookV1EndpointNewResponseEndpointJSON) RawJSON() string {
+	return r.raw
+}
+
+type WebhookV1EndpointNewResponseEndpointResourceScopes struct {
+	MatterIDs []string                                               `json:"matterIds"`
+	VaultIDs  []string                                               `json:"vaultIds"`
+	JSON      webhookV1EndpointNewResponseEndpointResourceScopesJSON `json:"-"`
+}
+
+// webhookV1EndpointNewResponseEndpointResourceScopesJSON contains the JSON
+// metadata for the struct [WebhookV1EndpointNewResponseEndpointResourceScopes]
+type webhookV1EndpointNewResponseEndpointResourceScopesJSON struct {
+	MatterIDs   apijson.Field
+	VaultIDs    apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *WebhookV1EndpointNewResponseEndpointResourceScopes) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r webhookV1EndpointNewResponseEndpointResourceScopesJSON) RawJSON() string {
+	return r.raw
+}
+
+type WebhookV1EndpointNewResponseEndpointStatus string
+
+const (
+	WebhookV1EndpointNewResponseEndpointStatusActive       WebhookV1EndpointNewResponseEndpointStatus = "active"
+	WebhookV1EndpointNewResponseEndpointStatusDisabled     WebhookV1EndpointNewResponseEndpointStatus = "disabled"
+	WebhookV1EndpointNewResponseEndpointStatusAutoDisabled WebhookV1EndpointNewResponseEndpointStatus = "auto_disabled"
+)
+
+func (r WebhookV1EndpointNewResponseEndpointStatus) IsKnown() bool {
+	switch r {
+	case WebhookV1EndpointNewResponseEndpointStatusActive, WebhookV1EndpointNewResponseEndpointStatusDisabled, WebhookV1EndpointNewResponseEndpointStatusAutoDisabled:
+		return true
+	}
+	return false
 }
 
 type WebhookV1EndpointNewParams struct {

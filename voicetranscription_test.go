@@ -30,6 +30,7 @@ func TestVoiceTranscriptionNewWithOptionalParams(t *testing.T) {
 		AutoHighlights:    githubcomcasemarkcasedevgo.F(true),
 		BoostParam:        githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VoiceTranscriptionNewParamsBoostParamLow),
 		ContentSafety:     githubcomcasemarkcasedevgo.F(true),
+		Disfluencies:      githubcomcasemarkcasedevgo.F(true),
 		Format:            githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VoiceTranscriptionNewParamsFormatJson),
 		FormatText:        githubcomcasemarkcasedevgo.F(true),
 		LanguageCode:      githubcomcasemarkcasedevgo.F("language_code"),
