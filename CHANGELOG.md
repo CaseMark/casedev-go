@@ -3,6 +3,14 @@
 ## [0.58.0](https://github.com/CaseMark/casedev-go/compare/v0.57.0...v0.58.0) (2026-10-06)
 
 
+### Compatibility and migration
+
+This pre-1.0 minor release includes breaking API signatures. Vault GraphRAG settings and graph/global/local/entity search modes are retired; use hybrid, fast, or vector search instead. Matter, party and work-item lists and multipart completion now expose typed response envelopes; consume pagination.next_cursor and pagination.has_more rather than assuming an array or empty response.
+
+Go callers must pass generated parameter structs to Vault.List, Vault.Ingest, connector connection/link Get, and Linc session Delete, including empty structs when no options are needed. Methods that now return typed responses require response/error assignments instead of error-only assignments. The Go module import path remains github.com/CaseMark/casedev-go.
+
+Migration examples and operational guidance: https://github.com/CaseMark/casedotdev-mono/blob/preview/stainless/RELEASE_RECONCILIATION.md. Connector token creation and webhook endpoint creation return one-time credentials; protect them and exclude responses from logs.
+
 ### Features
 
 * **api:** api update ([17dd05d](https://github.com/CaseMark/casedev-go/commit/17dd05de36d83e0b6f9a2f486c86edf0a5f823bb))
