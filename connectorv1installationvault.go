@@ -15,7 +15,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Import and export between provider folders (Google Drive) and vaults
+// Import and export between provider folders and vaults
 //
 // ConnectorV1InstallationVaultService contains methods and other services that
 // help with interacting with the casedev API.

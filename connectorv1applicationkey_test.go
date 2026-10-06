@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestConnectorV1InstallationListWithOptionalParams(t *testing.T) {
+func TestConnectorV1ApplicationKeyBind(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,12 +25,11 @@ func TestConnectorV1InstallationListWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Connectors.V1.Installations.List(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1InstallationListParams{
-		Application:      githubcomcasemarkcasedevgo.F("application"),
-		Cursor:           githubcomcasemarkcasedevgo.F("cursor"),
-		ExternalTenantID: githubcomcasemarkcasedevgo.F("external_tenant_id"),
-		Limit:            githubcomcasemarkcasedevgo.F(int64(1)),
-	})
+	_, err := client.Connectors.V1.Applications.Keys.Bind(
+		context.TODO(),
+		"id",
+		"keyId",
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -40,7 +39,7 @@ func TestConnectorV1InstallationListWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestConnectorV1InstallationEnsure(t *testing.T) {
+func TestConnectorV1ApplicationKeyRevoke(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -52,10 +51,11 @@ func TestConnectorV1InstallationEnsure(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Connectors.V1.Installations.Ensure(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1InstallationEnsureParams{
-		Application:      githubcomcasemarkcasedevgo.F("application"),
-		ExternalTenantID: githubcomcasemarkcasedevgo.F("external_tenant_id"),
-	})
+	err := client.Connectors.V1.Applications.Keys.Revoke(
+		context.TODO(),
+		"id",
+		"keyId",
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

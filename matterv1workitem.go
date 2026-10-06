@@ -86,17 +86,21 @@ func (r *MatterV1WorkItemService) Update(ctx context.Context, id string, workIte
 	return err
 }
 
-// List active work items for a matter.
-func (r *MatterV1WorkItemService) List(ctx context.Context, id string, query MatterV1WorkItemListParams, opts ...option.RequestOption) (err error) {
+// List active work items for a matter, newest update first. Pagination is opt-in:
+// pass `limit` (1-200) to receive a bounded page, then replay
+// `pagination.next_cursor` as `?cursor=` while `pagination.has_more` is true. A
+// request with neither `limit` nor `cursor` still returns every work item, and
+// `pagination.limit` is null. That default will become a bounded page in a future
+// release — paginate now to avoid the change.
+func (r *MatterV1WorkItemService) List(ctx context.Context, id string, query MatterV1WorkItemListParams, opts ...option.RequestOption) (res *MatterV1WorkItemListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if id == "" {
 		err = errors.New("missing required id parameter")
-		return err
+		return nil, err
 	}
 	path := fmt.Sprintf("matters/v1/%s/work-items", id)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return err
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
 }
 
 // Approve or block a work item.
@@ -114,6 +118,54 @@ func (r *MatterV1WorkItemService) Decide(ctx context.Context, id string, workIte
 	path := fmt.Sprintf("matters/v1/%s/work-items/%s/decision", id, workItemID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return err
+}
+
+type MatterV1WorkItemListResponse struct {
+	Data       []interface{}                          `json:"data"`
+	Pagination MatterV1WorkItemListResponsePagination `json:"pagination"`
+	JSON       matterV1WorkItemListResponseJSON       `json:"-"`
+}
+
+// matterV1WorkItemListResponseJSON contains the JSON metadata for the struct
+// [MatterV1WorkItemListResponse]
+type matterV1WorkItemListResponseJSON struct {
+	Data        apijson.Field
+	Pagination  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MatterV1WorkItemListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r matterV1WorkItemListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type MatterV1WorkItemListResponsePagination struct {
+	HasMore    bool                                       `json:"has_more"`
+	Limit      int64                                      `json:"limit" api:"nullable"`
+	NextCursor string                                     `json:"next_cursor" api:"nullable"`
+	JSON       matterV1WorkItemListResponsePaginationJSON `json:"-"`
+}
+
+// matterV1WorkItemListResponsePaginationJSON contains the JSON metadata for the
+// struct [MatterV1WorkItemListResponsePagination]
+type matterV1WorkItemListResponsePaginationJSON struct {
+	HasMore     apijson.Field
+	Limit       apijson.Field
+	NextCursor  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MatterV1WorkItemListResponsePagination) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r matterV1WorkItemListResponsePaginationJSON) RawJSON() string {
+	return r.raw
 }
 
 type MatterV1WorkItemNewParams struct {
@@ -252,7 +304,13 @@ func (r MatterV1WorkItemUpdateParamsType) IsKnown() bool {
 
 type MatterV1WorkItemListParams struct {
 	AssigneeID param.Field[string] `query:"assignee_id"`
-	Status     param.Field[string] `query:"status"`
+	// Opaque continuation cursor from `pagination.next_cursor` of the previous page.
+	// Must be replayed with the same filters that produced it.
+	Cursor param.Field[string] `query:"cursor"`
+	// Work items per page (1-200). Omit to receive every work item. Supplying a cursor
+	// without a limit uses 50.
+	Limit  param.Field[int64]  `query:"limit"`
+	Status param.Field[string] `query:"status"`
 }
 
 // URLQuery serializes [MatterV1WorkItemListParams]'s query parameters as

@@ -29,6 +29,10 @@ import (
 type MatterV1Service struct {
 	Options []option.RequestOption
 	// Matter-native legal workspaces and orchestration primitives
+	Purges *MatterV1PurgeService
+	// Matter-native legal workspaces and orchestration primitives
+	ContentPurges *MatterV1ContentPurgeService
+	// Matter-native legal workspaces and orchestration primitives
 	AgentTypes *MatterV1AgentTypeService
 	// Matter-native legal workspaces and orchestration primitives
 	Parties *MatterV1PartyService
@@ -51,6 +55,8 @@ type MatterV1Service struct {
 func NewMatterV1Service(opts ...option.RequestOption) (r *MatterV1Service) {
 	r = &MatterV1Service{}
 	r.Options = opts
+	r.Purges = NewMatterV1PurgeService(opts...)
+	r.ContentPurges = NewMatterV1ContentPurgeService(opts...)
 	r.AgentTypes = NewMatterV1AgentTypeService(opts...)
 	r.Parties = NewMatterV1PartyService(opts...)
 	r.Types = NewMatterV1TypeService(opts...)
@@ -97,13 +103,170 @@ func (r *MatterV1Service) Update(ctx context.Context, id string, body MatterV1Up
 	return err
 }
 
-// List matters for the authenticated organization.
-func (r *MatterV1Service) List(ctx context.Context, query MatterV1ListParams, opts ...option.RequestOption) (err error) {
+// List matters for the authenticated organization, newest update first. Pagination
+// is opt-in: pass `limit` (1-200) to receive a bounded page, then replay
+// `pagination.next_cursor` as `?cursor=` while `pagination.has_more` is true.
+// Cursors are opaque and are only valid for the exact filter set they were issued
+// under. A request with neither `limit` nor `cursor` still returns every matter,
+// and `pagination.limit` is null. That default will become a bounded page in a
+// future release — paginate now to avoid the change.
+func (r *MatterV1Service) List(ctx context.Context, query MatterV1ListParams, opts ...option.RequestOption) (res *MatterV1ListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "matters/v1"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return err
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
+}
+
+// Queues a durable, idempotent purge of a Matter and all linked live content. Use
+// matter purge webhooks for status changes; the inspection route is intended for
+// manual diagnostics only.
+func (r *MatterV1Service) Delete(ctx context.Context, id string, opts ...option.RequestOption) (res *MatterV1DeleteResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("matters/v1/%s", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
+	return res, err
+}
+
+type MatterV1ListResponse struct {
+	Data       []interface{}                  `json:"data"`
+	Pagination MatterV1ListResponsePagination `json:"pagination"`
+	JSON       matterV1ListResponseJSON       `json:"-"`
+}
+
+// matterV1ListResponseJSON contains the JSON metadata for the struct
+// [MatterV1ListResponse]
+type matterV1ListResponseJSON struct {
+	Data        apijson.Field
+	Pagination  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MatterV1ListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r matterV1ListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type MatterV1ListResponsePagination struct {
+	HasMore    bool                               `json:"has_more"`
+	Limit      int64                              `json:"limit" api:"nullable"`
+	NextCursor string                             `json:"next_cursor" api:"nullable"`
+	JSON       matterV1ListResponsePaginationJSON `json:"-"`
+}
+
+// matterV1ListResponsePaginationJSON contains the JSON metadata for the struct
+// [MatterV1ListResponsePagination]
+type matterV1ListResponsePaginationJSON struct {
+	HasMore     apijson.Field
+	Limit       apijson.Field
+	NextCursor  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *MatterV1ListResponsePagination) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r matterV1ListResponsePaginationJSON) RawJSON() string {
+	return r.raw
+}
+
+type MatterV1DeleteResponse struct {
+	Attempt     int64                        `json:"attempt" api:"required"`
+	MatterID    string                       `json:"matter_id" api:"required"`
+	PurgeID     string                       `json:"purge_id" api:"required"`
+	Status      MatterV1DeleteResponseStatus `json:"status" api:"required"`
+	VaultID     string                       `json:"vault_id" api:"required"`
+	WorkflowID  string                       `json:"workflow_id" api:"required,nullable"`
+	CompletedAt time.Time                    `json:"completed_at" api:"nullable" format:"date-time"`
+	Counts      MatterV1DeleteResponseCounts `json:"counts"`
+	FailedAt    time.Time                    `json:"failed_at" api:"nullable" format:"date-time"`
+	FailureCode string                       `json:"failure_code" api:"nullable"`
+	RequestedAt time.Time                    `json:"requested_at" format:"date-time"`
+	StartedAt   time.Time                    `json:"started_at" api:"nullable" format:"date-time"`
+	// Stable ID of the failed or completed terminal webhook event
+	TerminalEventID string                     `json:"terminal_event_id" api:"nullable"`
+	JSON            matterV1DeleteResponseJSON `json:"-"`
+}
+
+// matterV1DeleteResponseJSON contains the JSON metadata for the struct
+// [MatterV1DeleteResponse]
+type matterV1DeleteResponseJSON struct {
+	Attempt         apijson.Field
+	MatterID        apijson.Field
+	PurgeID         apijson.Field
+	Status          apijson.Field
+	VaultID         apijson.Field
+	WorkflowID      apijson.Field
+	CompletedAt     apijson.Field
+	Counts          apijson.Field
+	FailedAt        apijson.Field
+	FailureCode     apijson.Field
+	RequestedAt     apijson.Field
+	StartedAt       apijson.Field
+	TerminalEventID apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *MatterV1DeleteResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r matterV1DeleteResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type MatterV1DeleteResponseStatus string
+
+const (
+	MatterV1DeleteResponseStatusQueued     MatterV1DeleteResponseStatus = "queued"
+	MatterV1DeleteResponseStatusInProgress MatterV1DeleteResponseStatus = "in_progress"
+	MatterV1DeleteResponseStatusFailed     MatterV1DeleteResponseStatus = "failed"
+	MatterV1DeleteResponseStatusCompleted  MatterV1DeleteResponseStatus = "completed"
+)
+
+func (r MatterV1DeleteResponseStatus) IsKnown() bool {
+	switch r {
+	case MatterV1DeleteResponseStatusQueued, MatterV1DeleteResponseStatusInProgress, MatterV1DeleteResponseStatusFailed, MatterV1DeleteResponseStatusCompleted:
+		return true
+	}
+	return false
+}
+
+type MatterV1DeleteResponseCounts struct {
+	Chats          int64                            `json:"chats"`
+	Objects        int64                            `json:"objects"`
+	Sessions       int64                            `json:"sessions"`
+	Transcriptions int64                            `json:"transcriptions"`
+	JSON           matterV1DeleteResponseCountsJSON `json:"-"`
+}
+
+// matterV1DeleteResponseCountsJSON contains the JSON metadata for the struct
+// [MatterV1DeleteResponseCounts]
+type matterV1DeleteResponseCountsJSON struct {
+	Chats          apijson.Field
+	Objects        apijson.Field
+	Sessions       apijson.Field
+	Transcriptions apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *MatterV1DeleteResponseCounts) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r matterV1DeleteResponseCountsJSON) RawJSON() string {
+	return r.raw
 }
 
 type MatterV1NewParams struct {
@@ -150,7 +313,6 @@ func (r MatterV1NewParamsStatus) IsKnown() bool {
 
 type MatterV1NewParamsVault struct {
 	Description    param.Field[string]                 `json:"description"`
-	EnableGraph    param.Field[bool]                   `json:"enableGraph"`
 	EnableIndexing param.Field[bool]                   `json:"enableIndexing"`
 	Metadata       param.Field[map[string]interface{}] `json:"metadata"`
 }
@@ -201,6 +363,12 @@ func (r MatterV1UpdateParamsStatus) IsKnown() bool {
 }
 
 type MatterV1ListParams struct {
+	// Opaque continuation cursor from `pagination.next_cursor` of the previous page.
+	// Must be replayed with the same filters that produced it.
+	Cursor param.Field[string] `query:"cursor"`
+	// Matters per page (1-200). Omit to receive every matter. Supplying a cursor
+	// without a limit uses 50.
+	Limit        param.Field[int64]  `query:"limit"`
 	MatterType   param.Field[string] `query:"matter_type"`
 	PracticeArea param.Field[string] `query:"practice_area"`
 	Query        param.Field[string] `query:"query"`

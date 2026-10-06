@@ -30,7 +30,6 @@ func TestVaultNewWithOptionalParams(t *testing.T) {
 		Name:           githubcomcasemarkcasedevgo.F("Contract Review Archive"),
 		Description:    githubcomcasemarkcasedevgo.F("Repository for all client contract reviews and analysis"),
 		EmbeddingModel: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultNewParamsEmbeddingModelCasemarkEmbedV1),
-		EnableGraph:    githubcomcasemarkcasedevgo.F(true),
 		EnableIndexing: githubcomcasemarkcasedevgo.F(true),
 		GroupID:        githubcomcasemarkcasedevgo.F("grp_abc123"),
 		Metadata: githubcomcasemarkcasedevgo.F[any](map[string]interface{}{
@@ -86,7 +85,6 @@ func TestVaultUpdateWithOptionalParams(t *testing.T) {
 		"id",
 		githubcomcasemarkcasedevgo.VaultUpdateParams{
 			Description: githubcomcasemarkcasedevgo.F("description"),
-			EnableGraph: githubcomcasemarkcasedevgo.F(false),
 			GroupID:     githubcomcasemarkcasedevgo.F("groupId"),
 			Name:        githubcomcasemarkcasedevgo.F("Updated Vault Name"),
 		},
@@ -100,7 +98,7 @@ func TestVaultUpdateWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultList(t *testing.T) {
+func TestVaultListWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -112,7 +110,12 @@ func TestVaultList(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	_, err := client.Vault.List(context.TODO())
+	_, err := client.Vault.List(context.TODO(), githubcomcasemarkcasedevgo.VaultListParams{
+		Cursor:        githubcomcasemarkcasedevgo.F("cursor"),
+		IncludeTotals: githubcomcasemarkcasedevgo.F(true),
+		Limit:         githubcomcasemarkcasedevgo.F(int64(1)),
+		Query:         githubcomcasemarkcasedevgo.F("query"),
+	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -172,7 +175,7 @@ func TestVaultConfirmUploadWithOptionalParams(t *testing.T) {
 			ErrorCode:    githubcomcasemarkcasedevgo.F("errorCode"),
 			ErrorMessage: githubcomcasemarkcasedevgo.F("errorMessage"),
 			Etag:         githubcomcasemarkcasedevgo.F("etag"),
-			SizeBytes:    githubcomcasemarkcasedevgo.F(int64(1)),
+			SizeBytes:    githubcomcasemarkcasedevgo.F(int64(0)),
 		},
 	)
 	if err != nil {
@@ -184,7 +187,7 @@ func TestVaultConfirmUploadWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultIngest(t *testing.T) {
+func TestVaultIngestWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -200,6 +203,10 @@ func TestVaultIngest(t *testing.T) {
 		context.TODO(),
 		"id",
 		"objectId",
+		githubcomcasemarkcasedevgo.VaultIngestParams{
+			CallbackURL:    githubcomcasemarkcasedevgo.F("https://example.com"),
+			PageBoundaries: githubcomcasemarkcasedevgo.F([]int64{int64(2)}),
+		},
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -229,8 +236,12 @@ func TestVaultSearchWithOptionalParams(t *testing.T) {
 			Query: githubcomcasemarkcasedevgo.F("query"),
 			Filters: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultSearchParamsFilters{
 				ObjectID: githubcomcasemarkcasedevgo.F[githubcomcasemarkcasedevgo.VaultSearchParamsFiltersObjectIDUnion](shared.UnionString("string")),
+				PageRange: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultSearchParamsFiltersPageRange{
+					Start: githubcomcasemarkcasedevgo.F(int64(1)),
+					End:   githubcomcasemarkcasedevgo.F(int64(1)),
+				}),
 			}),
-			Method: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultSearchParamsMethodVector),
+			Method: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultSearchParamsMethodHybrid),
 			TopK:   githubcomcasemarkcasedevgo.F(int64(1)),
 		},
 	)
@@ -259,13 +270,16 @@ func TestVaultUploadWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.VaultUploadParams{
-			ContentType:    githubcomcasemarkcasedevgo.F("contentType"),
-			Filename:       githubcomcasemarkcasedevgo.F("filename"),
-			AutoIndex:      githubcomcasemarkcasedevgo.F(true),
+			ContentType: githubcomcasemarkcasedevgo.F("contentType"),
+			Filename:    githubcomcasemarkcasedevgo.F("filename"),
+			AutoIndex:   githubcomcasemarkcasedevgo.F(true),
+			FileOrigin: githubcomcasemarkcasedevgo.F(map[string]interface{}{
+				"foo": "bar",
+			}),
 			IsAIGenerated:  githubcomcasemarkcasedevgo.F(true),
 			Metadata:       githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
 			Path:           githubcomcasemarkcasedevgo.F("path"),
-			SizeBytes:      githubcomcasemarkcasedevgo.F(int64(1)),
+			SizeBytes:      githubcomcasemarkcasedevgo.F(int64(0)),
 			IdempotencyKey: githubcomcasemarkcasedevgo.F("Idempotency-Key"),
 		},
 	)

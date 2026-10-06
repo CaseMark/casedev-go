@@ -25,7 +25,7 @@ func TestWebhookV1EndpointNewWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Webhooks.V1.Endpoints.New(context.TODO(), githubcomcasemarkcasedevgo.WebhookV1EndpointNewParams{
+	_, err := client.Webhooks.V1.Endpoints.New(context.TODO(), githubcomcasemarkcasedevgo.WebhookV1EndpointNewParams{
 		EventTypeFilters: githubcomcasemarkcasedevgo.F([]string{"string"}),
 		URL:              githubcomcasemarkcasedevgo.F("https://example.com"),
 		Description:      githubcomcasemarkcasedevgo.F("description"),

@@ -14,7 +14,7 @@ import (
 // the [NewConnectorService] method instead.
 type ConnectorService struct {
 	Options []option.RequestOption
-	// Import and export between provider folders (Google Drive) and vaults
+	// Import and export between provider folders and vaults
 	V1 *ConnectorV1Service
 }
 

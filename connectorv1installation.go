@@ -15,7 +15,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Import and export between provider folders (Google Drive) and vaults
+// Import and export between provider folders and vaults
 //
 // ConnectorV1InstallationService contains methods and other services that help
 // with interacting with the casedev API.
@@ -25,7 +25,9 @@ import (
 // the [NewConnectorV1InstallationService] method instead.
 type ConnectorV1InstallationService struct {
 	Options []option.RequestOption
-	// Import and export between provider folders (Google Drive) and vaults
+	// Import and export between provider folders and vaults
+	Tokens *ConnectorV1InstallationTokenService
+	// Import and export between provider folders and vaults
 	Vaults *ConnectorV1InstallationVaultService
 }
 
@@ -35,17 +37,21 @@ type ConnectorV1InstallationService struct {
 func NewConnectorV1InstallationService(opts ...option.RequestOption) (r *ConnectorV1InstallationService) {
 	r = &ConnectorV1InstallationService{}
 	r.Options = opts
+	r.Tokens = NewConnectorV1InstallationTokenService(opts...)
 	r.Vaults = NewConnectorV1InstallationVaultService(opts...)
 	return
 }
 
-// List application installations (tenants) in this organization.
-func (r *ConnectorV1InstallationService) List(ctx context.Context, query ConnectorV1InstallationListParams, opts ...option.RequestOption) (err error) {
+// List application installations (tenants) in this organization. Returns at most
+// `limit` installations (default 200, maximum 200). When `pagination.has_more` is
+// true, replay `pagination.next_cursor` as `?cursor=` to fetch the following page.
+// Cursors are opaque and are only valid for the exact filter set and caller scope
+// they were issued under.
+func (r *ConnectorV1InstallationService) List(ctx context.Context, query ConnectorV1InstallationListParams, opts ...option.RequestOption) (res *ConnectorV1InstallationListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "connectors/v1/installations"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return err
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
 }
 
 // Idempotently create (or return) the installation for (application,
@@ -59,9 +65,62 @@ func (r *ConnectorV1InstallationService) Ensure(ctx context.Context, body Connec
 	return err
 }
 
+type ConnectorV1InstallationListResponse struct {
+	Installations []interface{}                                 `json:"installations"`
+	Pagination    ConnectorV1InstallationListResponsePagination `json:"pagination"`
+	JSON          connectorV1InstallationListResponseJSON       `json:"-"`
+}
+
+// connectorV1InstallationListResponseJSON contains the JSON metadata for the
+// struct [ConnectorV1InstallationListResponse]
+type connectorV1InstallationListResponseJSON struct {
+	Installations apijson.Field
+	Pagination    apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *ConnectorV1InstallationListResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r connectorV1InstallationListResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type ConnectorV1InstallationListResponsePagination struct {
+	HasMore    bool                                              `json:"has_more"`
+	Limit      int64                                             `json:"limit"`
+	NextCursor string                                            `json:"next_cursor" api:"nullable"`
+	JSON       connectorV1InstallationListResponsePaginationJSON `json:"-"`
+}
+
+// connectorV1InstallationListResponsePaginationJSON contains the JSON metadata for
+// the struct [ConnectorV1InstallationListResponsePagination]
+type connectorV1InstallationListResponsePaginationJSON struct {
+	HasMore     apijson.Field
+	Limit       apijson.Field
+	NextCursor  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *ConnectorV1InstallationListResponsePagination) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r connectorV1InstallationListResponsePaginationJSON) RawJSON() string {
+	return r.raw
+}
+
 type ConnectorV1InstallationListParams struct {
-	Application      param.Field[string] `query:"application"`
+	Application param.Field[string] `query:"application"`
+	// Opaque continuation cursor from `pagination.next_cursor` of the previous page.
+	// Must be replayed with the same filters and scope that produced it.
+	Cursor           param.Field[string] `query:"cursor"`
 	ExternalTenantID param.Field[string] `query:"external_tenant_id"`
+	// Installations per page (1-200). Defaults to 200.
+	Limit param.Field[int64] `query:"limit"`
 }
 
 // URLQuery serializes [ConnectorV1InstallationListParams]'s query parameters as

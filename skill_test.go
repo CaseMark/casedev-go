@@ -32,6 +32,7 @@ func TestSkillNewWithOptionalParams(t *testing.T) {
 			Content:     githubcomcasemarkcasedevgo.F("content"),
 			Path:        githubcomcasemarkcasedevgo.F("path"),
 			ContentType: githubcomcasemarkcasedevgo.F("contentType"),
+			Encoding:    githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.SkillNewParamsFilesEncodingUtf8),
 			Metadata:    githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
 			Name:        githubcomcasemarkcasedevgo.F("name"),
 			Summary:     githubcomcasemarkcasedevgo.F("summary"),
@@ -67,11 +68,13 @@ func TestSkillUpdateWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"slug",
 		githubcomcasemarkcasedevgo.SkillUpdateParams{
-			Content: githubcomcasemarkcasedevgo.F("content"),
+			Content:         githubcomcasemarkcasedevgo.F("content"),
+			ExpectedVersion: githubcomcasemarkcasedevgo.F(int64(0)),
 			Files: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.SkillUpdateParamsFile{{
 				Content:     githubcomcasemarkcasedevgo.F("content"),
 				Path:        githubcomcasemarkcasedevgo.F("path"),
 				ContentType: githubcomcasemarkcasedevgo.F("contentType"),
+				Encoding:    githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.SkillUpdateParamsFilesEncodingUtf8),
 				Metadata:    githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
 				Name:        githubcomcasemarkcasedevgo.F("name"),
 				Summary:     githubcomcasemarkcasedevgo.F("summary"),
@@ -106,6 +109,34 @@ func TestSkillDelete(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	_, err := client.Skills.Delete(context.TODO(), "slug")
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestSkillCatalogWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Skills.Catalog(context.TODO(), githubcomcasemarkcasedevgo.SkillCatalogParams{
+		Limit:  githubcomcasemarkcasedevgo.F(int64(1)),
+		Offset: githubcomcasemarkcasedevgo.F(int64(0)),
+		Q:      githubcomcasemarkcasedevgo.F("q"),
+		Source: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.SkillCatalogParamsSourceCustom),
+		Tag:    githubcomcasemarkcasedevgo.F("tag"),
+	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {

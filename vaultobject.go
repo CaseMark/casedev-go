@@ -57,9 +57,9 @@ func (r *VaultObjectService) Get(ctx context.Context, id string, objectID string
 	return res, err
 }
 
-// Update a document's filename, path, or metadata. Use this to rename files or
-// organize them into virtual folders. The path is stored in metadata.path and can
-// be used to build folder hierarchies in your application.
+// Update a document's filename, folder path, or metadata. Use this to rename files
+// or organize them into virtual folders. The path is a folder, not a complete file
+// path, and is stored separately from the filename.
 func (r *VaultObjectService) Update(ctx context.Context, id string, objectID string, body VaultObjectUpdateParams, opts ...option.RequestOption) (res *VaultObjectUpdateResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
@@ -75,8 +75,10 @@ func (r *VaultObjectService) Update(ctx context.Context, id string, objectID str
 	return res, err
 }
 
-// Retrieve all objects stored in a specific vault, including document metadata,
-// ingestion status, and processing statistics.
+// Retrieve the objects stored in a specific vault, oldest first, including
+// document metadata, ingestion status, and processing statistics. Pass `limit` to
+// page through large vaults: when `pagination.has_more` is true, the response is
+// incomplete and `pagination.next_cursor` fetches the rest.
 func (r *VaultObjectService) List(ctx context.Context, id string, query VaultObjectListParams, opts ...option.RequestOption) (res *VaultObjectListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
@@ -106,11 +108,15 @@ func (r *VaultObjectService) Delete(ctx context.Context, id string, objectID str
 }
 
 // Merges one or more PDF vault objects onto the end of an existing PDF vault
-// object, overwriting the target in place before returning. Optionally rewrites
-// citation links in the original target into internal PDF jumps and adds back
-// links on appended pages. The target object’s ingestion state is not affected;
-// appended pages are not searchable.
-func (r *VaultObjectService) Append(ctx context.Context, id string, objectID string, body VaultObjectAppendParams, opts ...option.RequestOption) (res *VaultObjectAppendResponse, err error) {
+// object. Sync mode is the default and overwrites the target in place before
+// returning. Async mode returns 202 immediately and reports completion through
+// vault.object.append webhooks. Optionally rewrites citation links in the original
+// target into internal PDF jumps and adds back links on appended pages. The target
+// object’s ingestion state is not affected; appended pages are not searchable.
+func (r *VaultObjectService) Append(ctx context.Context, id string, objectID string, params VaultObjectAppendParams, opts ...option.RequestOption) (res *VaultObjectAppendResponse, err error) {
+	if params.IdempotencyKey.Present {
+		opts = append(opts, option.WithHeader("Idempotency-Key", fmt.Sprintf("%v", params.IdempotencyKey)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	if id == "" {
 		err = errors.New("missing required id parameter")
@@ -121,7 +127,7 @@ func (r *VaultObjectService) Append(ctx context.Context, id string, objectID str
 		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s/append", id, objectID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return res, err
 }
 
@@ -264,6 +270,25 @@ func (r *VaultObjectService) Merge(ctx context.Context, id string, params VaultO
 	return res, err
 }
 
+// Copies storage and search data without downloading the file through the client.
+// Moves preserve object IDs; copies return new IDs. Extracted ZIP children travel
+// with their parent. Retry failed objects with the same Idempotency-Key;
+// successful objects are replayed without transfer. Object ID order does not
+// affect the key.
+func (r *VaultObjectService) Move(ctx context.Context, id string, params VaultObjectMoveParams, opts ...option.RequestOption) (res *VaultObjectMoveResponse, err error) {
+	if params.IdempotencyKey.Present {
+		opts = append(opts, option.WithHeader("Idempotency-Key", fmt.Sprintf("%v", params.IdempotencyKey)))
+	}
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("vault/%s/objects/move", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
+	return res, err
+}
+
 type VaultObjectGetResponse struct {
 	// Object ID
 	ID string `json:"id" api:"required"`
@@ -283,6 +308,8 @@ type VaultObjectGetResponse struct {
 	VaultID string `json:"vaultId" api:"required"`
 	// Number of text chunks created
 	ChunkCount int64 `json:"chunkCount"`
+	// Client-defined provenance metadata associated with the file
+	FileOrigin map[string]interface{} `json:"file_origin" api:"nullable"`
 	// Error details when ingestion fails
 	IngestionError string `json:"ingestionError" api:"nullable"`
 	// Whether the file was marked as AI-generated work product at upload time
@@ -316,6 +343,7 @@ type vaultObjectGetResponseJSON struct {
 	IngestionStatus    apijson.Field
 	VaultID            apijson.Field
 	ChunkCount         apijson.Field
+	FileOrigin         apijson.Field
 	IngestionError     apijson.Field
 	IsAIGenerated      apijson.Field
 	Metadata           apijson.Field
@@ -384,12 +412,17 @@ func (r vaultObjectUpdateResponseJSON) RawJSON() string {
 }
 
 type VaultObjectListResponse struct {
-	// Total number of objects in the vault
-	Count   float64                         `json:"count" api:"required"`
-	Objects []VaultObjectListResponseObject `json:"objects" api:"required"`
+	// Number of objects in this response. Equals the vault total only when
+	// `pagination.has_more` is false; use `totals.objects` for the total across pages.
+	Count      float64                           `json:"count" api:"required"`
+	Objects    []VaultObjectListResponseObject   `json:"objects" api:"required"`
+	Pagination VaultObjectListResponsePagination `json:"pagination" api:"required"`
 	// The ID of the vault
-	VaultID string                      `json:"vaultId" api:"required"`
-	JSON    vaultObjectListResponseJSON `json:"-"`
+	VaultID string `json:"vaultId" api:"required"`
+	// Present only with `include_totals=true`. Covers every object matching the
+	// filters, across all pages.
+	Totals VaultObjectListResponseTotals `json:"totals"`
+	JSON   vaultObjectListResponseJSON   `json:"-"`
 }
 
 // vaultObjectListResponseJSON contains the JSON metadata for the struct
@@ -397,7 +430,9 @@ type VaultObjectListResponse struct {
 type vaultObjectListResponseJSON struct {
 	Count       apijson.Field
 	Objects     apijson.Field
+	Pagination  apijson.Field
 	VaultID     apijson.Field
+	Totals      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }
@@ -423,13 +458,16 @@ type VaultObjectListResponseObject struct {
 	IngestionStatus string `json:"ingestionStatus" api:"required"`
 	// Number of text chunks created for vectorization
 	ChunkCount float64 `json:"chunkCount"`
+	// Client-defined provenance metadata associated with the file
+	FileOrigin map[string]interface{} `json:"file_origin" api:"nullable"`
 	// Processing completion timestamp
 	IngestionCompletedAt time.Time `json:"ingestionCompletedAt" format:"date-time"`
 	// Failure reason when ingestion status is a failed state
 	IngestionError string `json:"ingestionError" api:"nullable"`
 	// When ingestion processing began
 	IngestionStartedAt time.Time `json:"ingestionStartedAt" api:"nullable" format:"date-time"`
-	// Durable workflow run ID for the active or last ingestion attempt
+	// Durable workflow run ID for the active or last ingestion attempt. Null while a
+	// dispatch claim is being reconciled or when no workflow applies.
 	IngestionWorkflowID string `json:"ingestionWorkflowId" api:"nullable"`
 	// Whether the file was marked as AI-generated work product at upload time
 	IsAIGenerated bool `json:"is_ai_generated"`
@@ -459,6 +497,7 @@ type vaultObjectListResponseObjectJSON struct {
 	Filename             apijson.Field
 	IngestionStatus      apijson.Field
 	ChunkCount           apijson.Field
+	FileOrigin           apijson.Field
 	IngestionCompletedAt apijson.Field
 	IngestionError       apijson.Field
 	IngestionStartedAt   apijson.Field
@@ -480,6 +519,61 @@ func (r *VaultObjectListResponseObject) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r vaultObjectListResponseObjectJSON) RawJSON() string {
+	return r.raw
+}
+
+type VaultObjectListResponsePagination struct {
+	// Whether more objects exist beyond this page.
+	HasMore bool `json:"has_more" api:"required"`
+	// Page size applied, or null when every object was returned.
+	Limit int64 `json:"limit" api:"required,nullable"`
+	// Pass as `cursor` to fetch the next page. Null on the final page.
+	NextCursor string                                `json:"next_cursor" api:"required,nullable"`
+	JSON       vaultObjectListResponsePaginationJSON `json:"-"`
+}
+
+// vaultObjectListResponsePaginationJSON contains the JSON metadata for the struct
+// [VaultObjectListResponsePagination]
+type vaultObjectListResponsePaginationJSON struct {
+	HasMore     apijson.Field
+	Limit       apijson.Field
+	NextCursor  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultObjectListResponsePagination) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectListResponsePaginationJSON) RawJSON() string {
+	return r.raw
+}
+
+// Present only with `include_totals=true`. Covers every object matching the
+// filters, across all pages.
+type VaultObjectListResponseTotals struct {
+	// Number of matching objects
+	Objects int64 `json:"objects"`
+	// Combined size of matching objects
+	TotalBytes float64                           `json:"totalBytes"`
+	JSON       vaultObjectListResponseTotalsJSON `json:"-"`
+}
+
+// vaultObjectListResponseTotalsJSON contains the JSON metadata for the struct
+// [VaultObjectListResponseTotals]
+type vaultObjectListResponseTotalsJSON struct {
+	Objects     apijson.Field
+	TotalBytes  apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultObjectListResponseTotals) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectListResponseTotalsJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -538,42 +632,48 @@ func (r vaultObjectDeleteResponseDeletedObjectJSON) RawJSON() string {
 }
 
 type VaultObjectAppendResponse struct {
-	ID              string                        `json:"id"`
-	Bates           interface{}                   `json:"bates"`
-	Checksum        string                        `json:"checksum"`
-	ContentType     string                        `json:"contentType"`
-	CreatedAt       time.Time                     `json:"createdAt" format:"date-time"`
-	DownloadURL     string                        `json:"downloadUrl"`
-	ExpiresIn       int64                         `json:"expiresIn"`
-	Filename        string                        `json:"filename"`
-	IngestionStatus string                        `json:"ingestionStatus"`
-	Metadata        interface{}                   `json:"metadata"`
-	ObjectID        string                        `json:"objectId"`
-	PageCount       int64                         `json:"pageCount"`
-	SizeBytes       int64                         `json:"sizeBytes"`
-	VaultID         string                        `json:"vaultId"`
-	JSON            vaultObjectAppendResponseJSON `json:"-"`
+	ID string `json:"id"`
+	// Last 1-indexed page added by this append operation.
+	AppendedPageEnd int64 `json:"appendedPageEnd"`
+	// First 1-indexed page added by this append operation.
+	AppendedPageStart int64                         `json:"appendedPageStart"`
+	Bates             interface{}                   `json:"bates"`
+	Checksum          string                        `json:"checksum"`
+	ContentType       string                        `json:"contentType"`
+	CreatedAt         time.Time                     `json:"createdAt" format:"date-time"`
+	DownloadURL       string                        `json:"downloadUrl"`
+	ExpiresIn         int64                         `json:"expiresIn"`
+	Filename          string                        `json:"filename"`
+	IngestionStatus   string                        `json:"ingestionStatus"`
+	Metadata          interface{}                   `json:"metadata"`
+	ObjectID          string                        `json:"objectId"`
+	PageCount         int64                         `json:"pageCount"`
+	SizeBytes         int64                         `json:"sizeBytes"`
+	VaultID           string                        `json:"vaultId"`
+	JSON              vaultObjectAppendResponseJSON `json:"-"`
 }
 
 // vaultObjectAppendResponseJSON contains the JSON metadata for the struct
 // [VaultObjectAppendResponse]
 type vaultObjectAppendResponseJSON struct {
-	ID              apijson.Field
-	Bates           apijson.Field
-	Checksum        apijson.Field
-	ContentType     apijson.Field
-	CreatedAt       apijson.Field
-	DownloadURL     apijson.Field
-	ExpiresIn       apijson.Field
-	Filename        apijson.Field
-	IngestionStatus apijson.Field
-	Metadata        apijson.Field
-	ObjectID        apijson.Field
-	PageCount       apijson.Field
-	SizeBytes       apijson.Field
-	VaultID         apijson.Field
-	raw             string
-	ExtraFields     map[string]apijson.Field
+	ID                apijson.Field
+	AppendedPageEnd   apijson.Field
+	AppendedPageStart apijson.Field
+	Bates             apijson.Field
+	Checksum          apijson.Field
+	ContentType       apijson.Field
+	CreatedAt         apijson.Field
+	DownloadURL       apijson.Field
+	ExpiresIn         apijson.Field
+	Filename          apijson.Field
+	IngestionStatus   apijson.Field
+	Metadata          apijson.Field
+	ObjectID          apijson.Field
+	PageCount         apijson.Field
+	SizeBytes         apijson.Field
+	VaultID           apijson.Field
+	raw               string
+	ExtraFields       map[string]apijson.Field
 }
 
 func (r *VaultObjectAppendResponse) UnmarshalJSON(data []byte) (err error) {
@@ -1033,13 +1133,40 @@ func (r VaultObjectMergeResponseStatus) IsKnown() bool {
 	return false
 }
 
+type VaultObjectMoveResponse struct {
+	DestinationVaultID string                      `json:"destinationVaultId"`
+	Mode               string                      `json:"mode"`
+	Results            []interface{}               `json:"results"`
+	SourceVaultID      string                      `json:"sourceVaultId"`
+	JSON               vaultObjectMoveResponseJSON `json:"-"`
+}
+
+// vaultObjectMoveResponseJSON contains the JSON metadata for the struct
+// [VaultObjectMoveResponse]
+type vaultObjectMoveResponseJSON struct {
+	DestinationVaultID apijson.Field
+	Mode               apijson.Field
+	Results            apijson.Field
+	SourceVaultID      apijson.Field
+	raw                string
+	ExtraFields        map[string]apijson.Field
+}
+
+func (r *VaultObjectMoveResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectMoveResponseJSON) RawJSON() string {
+	return r.raw
+}
+
 type VaultObjectUpdateParams struct {
 	// New filename for the document (affects display name and downloads)
 	Filename param.Field[string] `json:"filename"`
 	// Additional metadata to merge with existing metadata
 	Metadata param.Field[interface{}] `json:"metadata"`
-	// Folder path for hierarchy preservation (e.g., '/Discovery/Depositions'). Set to
-	// null or empty string to remove.
+	// Folder path, excluding the filename, for hierarchy preservation (e.g.,
+	// '/Discovery/Depositions'). Set to null or empty string to remove.
 	Path param.Field[string] `json:"path"`
 }
 
@@ -1048,9 +1175,24 @@ func (r VaultObjectUpdateParams) MarshalJSON() (data []byte, err error) {
 }
 
 type VaultObjectListParams struct {
+	// Opaque continuation cursor from `pagination.next_cursor` of the previous page.
+	// Must be replayed with the same API key scope and the same `query`, `file_origin`
+	// and `includeUnconfirmed` values that produced it.
+	Cursor param.Field[string] `query:"cursor"`
+	// JSON-encoded provenance object used as a partial match. For example,
+	// {"provider":"clio"} returns objects whose file_origin contains that value.
+	FileOrigin param.Field[string] `query:"file_origin"`
+	// When `true`, adds `totals` covering every object matching the filters, not just
+	// this page. Request it once per filter change rather than on every page.
+	IncludeTotals param.Field[bool] `query:"include_totals"`
 	// Include placeholders for uploads that were never completed (awaiting_upload) or
 	// were cancelled (aborted). Excluded by default.
 	IncludeUnconfirmed param.Field[bool] `query:"includeUnconfirmed"`
+	// Objects per page (1-200). Omit to receive every object. Supplying a cursor
+	// without a limit uses 50.
+	Limit param.Field[int64] `query:"limit"`
+	// Case-insensitive substring match on the filename.
+	Query param.Field[string] `query:"query"`
 }
 
 // URLQuery serializes [VaultObjectListParams]'s query parameters as `url.Values`.
@@ -1094,7 +1236,8 @@ func (r VaultObjectDeleteParamsForce) IsKnown() bool {
 
 type VaultObjectAppendParams struct {
 	// Vault object IDs whose pages will be appended onto the target object, in order.
-	// Must not include the target object itself.
+	// Must not include the target object itself. Sync mode accepts at most 20; async
+	// mode accepts at most 1000.
 	AppendObjectIDs param.Field[[]string] `json:"appendObjectIds" api:"required"`
 	// Adds back links on appended pages
 	BackLinks param.Field[bool] `json:"backLinks"`
@@ -1104,10 +1247,16 @@ type VaultObjectAppendParams struct {
 	// Optional Bates stamping for appended source PDFs. Numbering is deterministic
 	// across appendObjectIds order and does not stamp the target report pages.
 	Bates param.Field[VaultObjectAppendParamsBates] `json:"bates"`
+	// Caller-provided correlation value returned in async responses and webhooks.
+	ClientReference param.Field[string] `json:"clientReference"`
+	// Use async to return immediately and receive completion through
+	// vault.object.append webhooks.
+	Mode param.Field[VaultObjectAppendParamsMode] `json:"mode"`
 	// When true, rewrites links in the target object to internal PDF jumps when the
 	// URL contains exactly one appended object ID as a standalone query parameter
 	// value or decoded path segment.
-	RewriteLinks param.Field[bool] `json:"rewriteLinks"`
+	RewriteLinks   param.Field[bool]   `json:"rewriteLinks"`
+	IdempotencyKey param.Field[string] `header:"Idempotency-Key"`
 }
 
 func (r VaultObjectAppendParams) MarshalJSON() (data []byte, err error) {
@@ -1126,6 +1275,23 @@ type VaultObjectAppendParamsBates struct {
 
 func (r VaultObjectAppendParamsBates) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// Use async to return immediately and receive completion through
+// vault.object.append webhooks.
+type VaultObjectAppendParamsMode string
+
+const (
+	VaultObjectAppendParamsModeSync  VaultObjectAppendParamsMode = "sync"
+	VaultObjectAppendParamsModeAsync VaultObjectAppendParamsMode = "async"
+)
+
+func (r VaultObjectAppendParamsMode) IsKnown() bool {
+	switch r {
+	case VaultObjectAppendParamsModeSync, VaultObjectAppendParamsModeAsync:
+		return true
+	}
+	return false
 }
 
 type VaultObjectNewPresignedURLParams struct {
@@ -1256,4 +1422,31 @@ type VaultObjectMergeParamsBates struct {
 
 func (r VaultObjectMergeParamsBates) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type VaultObjectMoveParams struct {
+	DestinationVaultID param.Field[string]                    `json:"destinationVaultId" api:"required"`
+	Mode               param.Field[VaultObjectMoveParamsMode] `json:"mode" api:"required"`
+	ObjectIDs          param.Field[[]string]                  `json:"objectIds" api:"required"`
+	IdempotencyKey     param.Field[string]                    `header:"Idempotency-Key" api:"required"`
+	Path               param.Field[string]                    `json:"path"`
+}
+
+func (r VaultObjectMoveParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+type VaultObjectMoveParamsMode string
+
+const (
+	VaultObjectMoveParamsModeMove VaultObjectMoveParamsMode = "move"
+	VaultObjectMoveParamsModeCopy VaultObjectMoveParamsMode = "copy"
+)
+
+func (r VaultObjectMoveParamsMode) IsKnown() bool {
+	switch r {
+	case VaultObjectMoveParamsModeMove, VaultObjectMoveParamsModeCopy:
+		return true
+	}
+	return false
 }

@@ -106,10 +106,12 @@ func TestMatterV1PartyListWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Matters.V1.Parties.List(context.TODO(), githubcomcasemarkcasedevgo.MatterV1PartyListParams{
-		Email: githubcomcasemarkcasedevgo.F("email"),
-		Query: githubcomcasemarkcasedevgo.F("query"),
-		Type:  githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.MatterV1PartyListParamsTypePerson),
+	_, err := client.Matters.V1.Parties.List(context.TODO(), githubcomcasemarkcasedevgo.MatterV1PartyListParams{
+		Cursor: githubcomcasemarkcasedevgo.F("cursor"),
+		Email:  githubcomcasemarkcasedevgo.F("email"),
+		Limit:  githubcomcasemarkcasedevgo.F(int64(1)),
+		Query:  githubcomcasemarkcasedevgo.F("query"),
+		Type:   githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.MatterV1PartyListParamsTypePerson),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error

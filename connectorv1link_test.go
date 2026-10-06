@@ -13,7 +13,7 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-func TestConnectorV1LinkGet(t *testing.T) {
+func TestConnectorV1LinkGetWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,13 @@ func TestConnectorV1LinkGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Connectors.V1.Links.Get(context.TODO(), "id")
+	err := client.Connectors.V1.Links.Get(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.ConnectorV1LinkGetParams{
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
+		},
+	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
 		if errors.As(err, &apierr) {
@@ -51,9 +57,10 @@ func TestConnectorV1LinkUpdateWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.ConnectorV1LinkUpdateParams{
-			Mode:   githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkUpdateParamsModeOnce),
-			Policy: githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
-			State:  githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkUpdateParamsStatePaused),
+			Mode:                  githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkUpdateParamsModeOnce),
+			Policy:                githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
+			State:                 githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkUpdateParamsStatePaused),
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
 		},
 	)
 	if err != nil {
@@ -78,12 +85,14 @@ func TestConnectorV1LinkListWithOptionalParams(t *testing.T) {
 		option.WithAPIKey("My API Key"),
 	)
 	err := client.Connectors.V1.Links.List(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1LinkListParams{
-		ConnectionID: githubcomcasemarkcasedevgo.F("connection_id"),
-		Direction:    githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkListParamsDirectionImport),
-		Mode:         githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkListParamsModeOnce),
-		PairID:       githubcomcasemarkcasedevgo.F("pair_id"),
-		State:        githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkListParamsStateReady),
-		VaultID:      githubcomcasemarkcasedevgo.F("vault_id"),
+		ConnectionID:          githubcomcasemarkcasedevgo.F("connection_id"),
+		Cursor:                githubcomcasemarkcasedevgo.F("cursor"),
+		Direction:             githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkListParamsDirectionImport),
+		Mode:                  githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkListParamsModeOnce),
+		PairID:                githubcomcasemarkcasedevgo.F("pair_id"),
+		State:                 githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkListParamsStateReady),
+		VaultID:               githubcomcasemarkcasedevgo.F("vault_id"),
+		XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
 	})
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -110,7 +119,8 @@ func TestConnectorV1LinkDeleteWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.ConnectorV1LinkDeleteParams{
-			VaultDocs: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkDeleteParamsVaultDocsKeep),
+			VaultDocs:             githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkDeleteParamsVaultDocsKeep),
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
 		},
 	)
 	if err != nil {
@@ -138,8 +148,9 @@ func TestConnectorV1LinkListObjectsWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.ConnectorV1LinkListObjectsParams{
-			Cursor: githubcomcasemarkcasedevgo.F("cursor"),
-			State:  githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkListObjectsParamsStatePending),
+			Cursor:                githubcomcasemarkcasedevgo.F("cursor"),
+			State:                 githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkListObjectsParamsStatePending),
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
 		},
 	)
 	if err != nil {

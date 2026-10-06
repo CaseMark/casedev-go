@@ -4,6 +4,7 @@ package githubcomcasemarkcasedevgo
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"slices"
 
@@ -38,10 +39,16 @@ func NewLlmV1ChatService(opts ...option.RequestOption) (r *LlmV1ChatService) {
 // OpenAI's chat completions API. Supports 40+ models including GPT-4, Claude,
 // Gemini, and CaseMark legal AI models. Includes streaming support, token
 // counting, and usage tracking.
-func (r *LlmV1ChatService) NewCompletion(ctx context.Context, body LlmV1ChatNewCompletionParams, opts ...option.RequestOption) (res *LlmV1ChatNewCompletionResponse, err error) {
+func (r *LlmV1ChatService) NewCompletion(ctx context.Context, params LlmV1ChatNewCompletionParams, opts ...option.RequestOption) (res *LlmV1ChatNewCompletionResponse, err error) {
+	if params.AIReportingTags.Present {
+		opts = append(opts, option.WithHeader("ai-reporting-tags", fmt.Sprintf("%v", params.AIReportingTags)))
+	}
+	if params.AIReportingUser.Present {
+		opts = append(opts, option.WithHeader("ai-reporting-user", fmt.Sprintf("%v", params.AIReportingUser)))
+	}
 	opts = slices.Concat(r.Options, opts)
 	path := "llm/v1/chat/completions"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
 	return res, err
 }
 
@@ -175,7 +182,9 @@ type LlmV1ChatNewCompletionParams struct {
 	// Sampling temperature between 0 and 2
 	Temperature param.Field[float64] `json:"temperature"`
 	// Nucleus sampling parameter
-	TopP param.Field[float64] `json:"top_p"`
+	TopP            param.Field[float64] `json:"top_p"`
+	AIReportingTags param.Field[string]  `header:"ai-reporting-tags"`
+	AIReportingUser param.Field[string]  `header:"ai-reporting-user"`
 }
 
 func (r LlmV1ChatNewCompletionParams) MarshalJSON() (data []byte, err error) {
