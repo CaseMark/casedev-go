@@ -181,18 +181,33 @@ type LincV1SessionNewParams struct {
 	// Specific document template slugs to inject into the using-document-templates
 	// skill.
 	DocumentTemplateSlugs param.Field[[]string] `json:"documentTemplateSlugs"`
-	IdleTimeoutMs         param.Field[int64]    `json:"idleTimeoutMs"`
+	// Optional caller-supplied executable tool files to install into .linc/extensions/
+	// before the agent starts. Only supported for standalone sessions without
+	// capabilityPolicy: read_only. Rejected with a 400 on persistent
+	// (workspaceKey/conversationKey) or read_only sessions. At most 10 files, 64KB
+	// each, 256KB total. Extension destinations and content hashes are recorded in the
+	// session-created audit event; raw code is not logged.
+	Extensions    param.Field[[]LincV1SessionNewParamsExtension] `json:"extensions"`
+	IdleTimeoutMs param.Field[int64]                             `json:"idleTimeoutMs"`
 	// When true, inject all active org document templates into the
 	// using-document-templates skill.
 	IncludeDocumentTemplates param.Field[bool] `json:"includeDocumentTemplates"`
 	// Privileged C3-only hidden app instructions to append to the sandbox AGENTS.md.
 	Instructions param.Field[string] `json:"instructions"`
 	Model        param.Field[string] `json:"model"`
+	// Optional ordered availability fallbacks for this session. Requires an explicit
+	// model. An empty array disables fallbacks; omission preserves existing runtime
+	// behavior. Linc switches within the same session, preserving context.
+	ModelFallbacks param.Field[[]string] `json:"modelFallbacks"`
 	// Optional caller-provided scoped Case.dev API key for the runtime.
 	ScopedAPIKey param.Field[string] `json:"scopedApiKey"`
 	// Processing tier for eligible OpenAI GPT models. Priority provides lower latency
 	// at premium cost.
 	ServiceTier param.Field[LincV1SessionNewParamsServiceTier] `json:"serviceTier"`
+	// Defaults to local preinstallation. MCP is an opt-in, org-allowlisted rollout on
+	// a separately pinned image; requires a new standalone session and no skillSlugs
+	// preinstallation. Execution remains content-approval gated.
+	SkillsDelivery param.Field[LincV1SessionNewParamsSkillsDelivery] `json:"skillsDelivery"`
 	// Skills API slugs to install into the runtime sandbox before the native session
 	// starts.
 	SkillSlugs param.Field[[]string] `json:"skillSlugs"`
@@ -230,6 +245,21 @@ func (r LincV1SessionNewParamsCapabilityPolicy) IsKnown() bool {
 	return false
 }
 
+type LincV1SessionNewParamsExtension struct {
+	// UTF-8 tool file content, at most 64KB.
+	Content param.Field[string] `json:"content" api:"required"`
+	// Bare .ts/.js filename or one-level subdir (e.g. create-automations.ts or
+	// automations/index.ts). Each directory must include exactly one index.ts or
+	// index.js entrypoint; helper files may accompany it. Platform names
+	// (casedev/subagent), root index.ts/index.js, node_modules, hidden top-level
+	// names, absolute paths, "..", and other extensions or nesting are rejected.
+	Path param.Field[string] `json:"path" api:"required"`
+}
+
+func (r LincV1SessionNewParamsExtension) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 // Processing tier for eligible OpenAI GPT models. Priority provides lower latency
 // at premium cost.
 type LincV1SessionNewParamsServiceTier string
@@ -242,6 +272,24 @@ const (
 func (r LincV1SessionNewParamsServiceTier) IsKnown() bool {
 	switch r {
 	case LincV1SessionNewParamsServiceTierDefault, LincV1SessionNewParamsServiceTierPriority:
+		return true
+	}
+	return false
+}
+
+// Defaults to local preinstallation. MCP is an opt-in, org-allowlisted rollout on
+// a separately pinned image; requires a new standalone session and no skillSlugs
+// preinstallation. Execution remains content-approval gated.
+type LincV1SessionNewParamsSkillsDelivery string
+
+const (
+	LincV1SessionNewParamsSkillsDeliveryLocal LincV1SessionNewParamsSkillsDelivery = "local"
+	LincV1SessionNewParamsSkillsDeliveryMcp   LincV1SessionNewParamsSkillsDelivery = "mcp"
+)
+
+func (r LincV1SessionNewParamsSkillsDelivery) IsKnown() bool {
+	switch r {
+	case LincV1SessionNewParamsSkillsDeliveryLocal, LincV1SessionNewParamsSkillsDeliveryMcp:
 		return true
 	}
 	return false

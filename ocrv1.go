@@ -83,12 +83,30 @@ type OcrV1GetResponse struct {
 	CreatedAt time.Time `json:"created_at" api:"required" format:"date-time"`
 	// Current job status
 	Status OcrV1GetResponseStatus `json:"status" api:"required"`
+	// Total number of OCR chunks.
+	ChunkCount int64 `json:"chunk_count"`
+	// Exact number of failed OCR chunks.
+	ChunksFailed int64 `json:"chunks_failed"`
 	// Job completion timestamp
 	CompletedAt time.Time `json:"completed_at" format:"date-time"`
+	// Safe human-readable failure message; null when no failure is recorded.
+	Error string `json:"error" api:"nullable"`
+	// Stable failure identifier, such as source_access_denied, invalid_pdf,
+	// inference_failed, chunks_failed, or result_upload_failed. Historic failures may
+	// be unclassified.
+	ErrorCode string `json:"error_code" api:"nullable"`
+	// Operation that failed.
+	ErrorStage OcrV1GetResponseErrorStage `json:"error_stage" api:"nullable"`
+	// Bounded failure samples. Page ranges are one-based and inclusive; chunks_failed
+	// and chunk_count retain exact totals.
+	FailedChunks []OcrV1GetResponseFailedChunk `json:"failed_chunks" api:"nullable"`
 	// Additional processing metadata
 	Metadata interface{} `json:"metadata"`
 	// Number of pages processed
 	PageCount int64 `json:"page_count"`
+	// Whether retrying the same document may help. Unknown failures retain bounded
+	// retry behavior.
+	Retryable bool `json:"retryable" api:"nullable"`
 	// Extracted text content when completed and include_text=true
 	Text string               `json:"text"`
 	JSON ocrV1GetResponseJSON `json:"-"`
@@ -97,15 +115,22 @@ type OcrV1GetResponse struct {
 // ocrV1GetResponseJSON contains the JSON metadata for the struct
 // [OcrV1GetResponse]
 type ocrV1GetResponseJSON struct {
-	ID          apijson.Field
-	CreatedAt   apijson.Field
-	Status      apijson.Field
-	CompletedAt apijson.Field
-	Metadata    apijson.Field
-	PageCount   apijson.Field
-	Text        apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	ID           apijson.Field
+	CreatedAt    apijson.Field
+	Status       apijson.Field
+	ChunkCount   apijson.Field
+	ChunksFailed apijson.Field
+	CompletedAt  apijson.Field
+	Error        apijson.Field
+	ErrorCode    apijson.Field
+	ErrorStage   apijson.Field
+	FailedChunks apijson.Field
+	Metadata     apijson.Field
+	PageCount    apijson.Field
+	Retryable    apijson.Field
+	Text         apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
 }
 
 func (r *OcrV1GetResponse) UnmarshalJSON(data []byte) (err error) {
@@ -132,6 +157,64 @@ func (r OcrV1GetResponseStatus) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// Operation that failed.
+type OcrV1GetResponseErrorStage string
+
+const (
+	OcrV1GetResponseErrorStageDispatch           OcrV1GetResponseErrorStage = "dispatch"
+	OcrV1GetResponseErrorStageDownload           OcrV1GetResponseErrorStage = "download"
+	OcrV1GetResponseErrorStageDocumentValidation OcrV1GetResponseErrorStage = "document_validation"
+	OcrV1GetResponseErrorStageChunking           OcrV1GetResponseErrorStage = "chunking"
+	OcrV1GetResponseErrorStageEngineInit         OcrV1GetResponseErrorStage = "engine_init"
+	OcrV1GetResponseErrorStageInference          OcrV1GetResponseErrorStage = "inference"
+	OcrV1GetResponseErrorStageFeatureProcessing  OcrV1GetResponseErrorStage = "feature_processing"
+	OcrV1GetResponseErrorStageResultWrite        OcrV1GetResponseErrorStage = "result_write"
+	OcrV1GetResponseErrorStageChunkProcessing    OcrV1GetResponseErrorStage = "chunk_processing"
+	OcrV1GetResponseErrorStageResultAssembly     OcrV1GetResponseErrorStage = "result_assembly"
+	OcrV1GetResponseErrorStageResultUpload       OcrV1GetResponseErrorStage = "result_upload"
+)
+
+func (r OcrV1GetResponseErrorStage) IsKnown() bool {
+	switch r {
+	case OcrV1GetResponseErrorStageDispatch, OcrV1GetResponseErrorStageDownload, OcrV1GetResponseErrorStageDocumentValidation, OcrV1GetResponseErrorStageChunking, OcrV1GetResponseErrorStageEngineInit, OcrV1GetResponseErrorStageInference, OcrV1GetResponseErrorStageFeatureProcessing, OcrV1GetResponseErrorStageResultWrite, OcrV1GetResponseErrorStageChunkProcessing, OcrV1GetResponseErrorStageResultAssembly, OcrV1GetResponseErrorStageResultUpload:
+		return true
+	}
+	return false
+}
+
+type OcrV1GetResponseFailedChunk struct {
+	ChunkID    string                          `json:"chunk_id"`
+	Error      string                          `json:"error"`
+	ErrorCode  string                          `json:"error_code"`
+	ErrorStage string                          `json:"error_stage"`
+	PageEnd    int64                           `json:"page_end"`
+	PageStart  int64                           `json:"page_start"`
+	Retryable  bool                            `json:"retryable"`
+	JSON       ocrV1GetResponseFailedChunkJSON `json:"-"`
+}
+
+// ocrV1GetResponseFailedChunkJSON contains the JSON metadata for the struct
+// [OcrV1GetResponseFailedChunk]
+type ocrV1GetResponseFailedChunkJSON struct {
+	ChunkID     apijson.Field
+	Error       apijson.Field
+	ErrorCode   apijson.Field
+	ErrorStage  apijson.Field
+	PageEnd     apijson.Field
+	PageStart   apijson.Field
+	Retryable   apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *OcrV1GetResponseFailedChunk) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r ocrV1GetResponseFailedChunkJSON) RawJSON() string {
+	return r.raw
 }
 
 type OcrV1ProcessResponse struct {
