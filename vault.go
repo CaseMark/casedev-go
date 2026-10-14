@@ -28,6 +28,8 @@ import (
 // the [NewVaultService] method instead.
 type VaultService struct {
 	Options []option.RequestOption
+	// Secure document storage with semantic search
+	Folders *VaultFolderService
 	Events  *VaultEventService
 	// Secure document storage with semantic search
 	Groups *VaultGroupService
@@ -45,6 +47,7 @@ type VaultService struct {
 func NewVaultService(opts ...option.RequestOption) (r *VaultService) {
 	r = &VaultService{}
 	r.Options = opts
+	r.Folders = NewVaultFolderService(opts...)
 	r.Events = NewVaultEventService(opts...)
 	r.Groups = NewVaultGroupService(opts...)
 	r.Multipart = NewVaultMultipartService(opts...)
