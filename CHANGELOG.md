@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.59.0](https://github.com/CaseMark/casedev-go/compare/v0.58.0...v0.59.0) (2026-10-14)
+
+
+### Features
+
+* **api:** CD-1814: add vault folder and object organization APIs ([c270584](https://github.com/CaseMark/casedev-go/commit/c2705841b31f23443b98b152373c26e5f69630fb))
+
 ## [0.58.0](https://github.com/CaseMark/casedev-go/compare/v0.57.0...v0.58.0) (2026-10-06)
 
 
