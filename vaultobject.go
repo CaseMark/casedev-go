@@ -289,6 +289,21 @@ func (r *VaultObjectService) Move(ctx context.Context, id string, params VaultOb
 	return res, err
 }
 
+// Atomically moves up to 500 files to a folder. Authoritative transcription
+// results follow source media. Selecting a transcription result requires selecting
+// its source media too. Source and destination folders remain durable even when
+// empty. Metadata only; requires vault-wide write access and vault ownership.
+func (r *VaultObjectService) Organize(ctx context.Context, id string, body VaultObjectOrganizeParams, opts ...option.RequestOption) (res *VaultObjectOrganizeResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("vault/%s/objects/organize", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
 type VaultObjectGetResponse struct {
 	// Object ID
 	ID string `json:"id" api:"required"`
@@ -460,6 +475,8 @@ type VaultObjectListResponseObject struct {
 	ChunkCount float64 `json:"chunkCount"`
 	// Client-defined provenance metadata associated with the file
 	FileOrigin map[string]interface{} `json:"file_origin" api:"nullable"`
+	// Canonical folder path, excluding the filename even for legacy ZIP imports.
+	FolderPath string `json:"folderPath"`
 	// Processing completion timestamp
 	IngestionCompletedAt time.Time `json:"ingestionCompletedAt" format:"date-time"`
 	// Failure reason when ingestion status is a failed state
@@ -498,6 +515,7 @@ type vaultObjectListResponseObjectJSON struct {
 	IngestionStatus      apijson.Field
 	ChunkCount           apijson.Field
 	FileOrigin           apijson.Field
+	FolderPath           apijson.Field
 	IngestionCompletedAt apijson.Field
 	IngestionError       apijson.Field
 	IngestionStartedAt   apijson.Field
@@ -1160,6 +1178,54 @@ func (r vaultObjectMoveResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+type VaultObjectOrganizeResponse struct {
+	FolderPaths []string                          `json:"folderPaths"`
+	Moves       []VaultObjectOrganizeResponseMove `json:"moves"`
+	JSON        vaultObjectOrganizeResponseJSON   `json:"-"`
+}
+
+// vaultObjectOrganizeResponseJSON contains the JSON metadata for the struct
+// [VaultObjectOrganizeResponse]
+type vaultObjectOrganizeResponseJSON struct {
+	FolderPaths apijson.Field
+	Moves       apijson.Field
+	raw         string
+	ExtraFields map[string]apijson.Field
+}
+
+func (r *VaultObjectOrganizeResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectOrganizeResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type VaultObjectOrganizeResponseMove struct {
+	ID           string                              `json:"id"`
+	Path         string                              `json:"path"`
+	PreviousPath string                              `json:"previousPath"`
+	JSON         vaultObjectOrganizeResponseMoveJSON `json:"-"`
+}
+
+// vaultObjectOrganizeResponseMoveJSON contains the JSON metadata for the struct
+// [VaultObjectOrganizeResponseMove]
+type vaultObjectOrganizeResponseMoveJSON struct {
+	ID           apijson.Field
+	Path         apijson.Field
+	PreviousPath apijson.Field
+	raw          string
+	ExtraFields  map[string]apijson.Field
+}
+
+func (r *VaultObjectOrganizeResponseMove) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultObjectOrganizeResponseMoveJSON) RawJSON() string {
+	return r.raw
+}
+
 type VaultObjectUpdateParams struct {
 	// New filename for the document (affects display name and downloads)
 	Filename param.Field[string] `json:"filename"`
@@ -1449,4 +1515,69 @@ func (r VaultObjectMoveParamsMode) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type VaultObjectOrganizeParams struct {
+	Body VaultObjectOrganizeParamsBodyUnion `json:"body" api:"required"`
+}
+
+func (r VaultObjectOrganizeParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r.Body)
+}
+
+type VaultObjectOrganizeParamsBody struct {
+	ExpectedPaths param.Field[interface{}] `json:"expectedPaths"`
+	Moves         param.Field[interface{}] `json:"moves"`
+	ObjectIDs     param.Field[interface{}] `json:"objectIds"`
+	Path          param.Field[string]      `json:"path"`
+}
+
+func (r VaultObjectOrganizeParamsBody) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r VaultObjectOrganizeParamsBody) implementsVaultObjectOrganizeParamsBodyUnion() {}
+
+// Satisfied by [VaultObjectOrganizeParamsBodyObject],
+// [VaultObjectOrganizeParamsBodyMoves], [VaultObjectOrganizeParamsBody].
+type VaultObjectOrganizeParamsBodyUnion interface {
+	implementsVaultObjectOrganizeParamsBodyUnion()
+}
+
+type VaultObjectOrganizeParamsBodyObject struct {
+	ObjectIDs param.Field[[]string] `json:"objectIds" api:"required"`
+	Path      param.Field[string]   `json:"path" api:"required"`
+	// Optional current folder preconditions for the supplied object IDs only.
+	// Automatically included transcription results do not require entries; supplied
+	// result entries are checked.
+	ExpectedPaths param.Field[map[string]string] `json:"expectedPaths"`
+}
+
+func (r VaultObjectOrganizeParamsBodyObject) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r VaultObjectOrganizeParamsBodyObject) implementsVaultObjectOrganizeParamsBodyUnion() {}
+
+type VaultObjectOrganizeParamsBodyMoves struct {
+	// Restore confirmed move receipts with optimistic concurrency checks. Include
+	// every receipt for each media/transcription family. Cannot combine with objectIds
+	// or path.
+	Moves param.Field[[]VaultObjectOrganizeParamsBodyMovesMove] `json:"moves" api:"required"`
+}
+
+func (r VaultObjectOrganizeParamsBodyMoves) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r VaultObjectOrganizeParamsBodyMoves) implementsVaultObjectOrganizeParamsBodyUnion() {}
+
+type VaultObjectOrganizeParamsBodyMovesMove struct {
+	ID           param.Field[string] `json:"id" api:"required"`
+	ExpectedPath param.Field[string] `json:"expectedPath" api:"required"`
+	Path         param.Field[string] `json:"path" api:"required"`
+}
+
+func (r VaultObjectOrganizeParamsBodyMovesMove) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
