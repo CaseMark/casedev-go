@@ -57,8 +57,11 @@ func TestConnectorV1LinkUpdateWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.ConnectorV1LinkUpdateParams{
+			ExpectedPolicy:        githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
+			ExpectedRemote:        githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
 			Mode:                  githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkUpdateParamsModeOnce),
 			Policy:                githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
+			Remote:                githubcomcasemarkcasedevgo.F[any](map[string]interface{}{}),
 			State:                 githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkUpdateParamsStatePaused),
 			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
 		},
@@ -150,6 +153,34 @@ func TestConnectorV1LinkListObjectsWithOptionalParams(t *testing.T) {
 		githubcomcasemarkcasedevgo.ConnectorV1LinkListObjectsParams{
 			Cursor:                githubcomcasemarkcasedevgo.F("cursor"),
 			State:                 githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1LinkListObjectsParamsStatePending),
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestConnectorV1LinkGetSelectionRootWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.Connectors.V1.Links.GetSelectionRoot(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.ConnectorV1LinkGetSelectionRootParams{
 			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
 		},
 	)

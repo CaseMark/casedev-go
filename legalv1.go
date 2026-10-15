@@ -133,6 +133,24 @@ func (r *LegalV1Service) SecFiling(ctx context.Context, body LegalV1SecFilingPar
 	return res, err
 }
 
+// Retrieve structured financial values reported to the SEC in XBRL, via
+// data.sec.gov. Use this endpoint when you need numbers (net income, assets,
+// shares outstanding, and so on); use sec-filing to find filing documents. Three
+// types: "concept" returns one line item for one company over time; "facts"
+// returns a catalog of every concept a company reports (or normalized facts for
+// the concepts you name); "frames" returns one concept across all reporting
+// companies for one calendar period. Each fact links back to its EDGAR filing
+// index via secUrl. The same value is re-reported in later filings as a
+// prior-period comparative, so by default (dedupe: true) only facts the SEC
+// assigned a calendar frame are returned; set dedupe to false for every reported
+// fact. Free.
+func (r *LegalV1Service) SecXbrl(ctx context.Context, body LegalV1SecXbrlParams, opts ...option.RequestOption) (res *LegalV1SecXbrlResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "legal/v1/sec-xbrl"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
 // Find cases and documents similar to a given legal source. Useful for finding
 // citing cases, related precedents, or similar statutes.
 func (r *LegalV1Service) Similar(ctx context.Context, body LegalV1SimilarParams, opts ...option.RequestOption) (res *LegalV1SimilarResponse, err error) {
@@ -1277,6 +1295,241 @@ func (r LegalV1SecFilingResponseType) IsKnown() bool {
 	return false
 }
 
+type LegalV1SecXbrlResponse struct {
+	// Padded CIK (concept and facts)
+	Cik string `json:"cik"`
+	// facts without concepts: the catalog of concepts the company reports
+	Concepts []LegalV1SecXbrlResponseConcept `json:"concepts"`
+	// frames: one row per reporting company
+	Data       []LegalV1SecXbrlResponseData `json:"data"`
+	DateAfter  time.Time                    `json:"dateAfter" api:"nullable" format:"date"`
+	DateBefore time.Time                    `json:"dateBefore" api:"nullable" format:"date"`
+	// concept and facts with concepts
+	Dedupe      bool   `json:"dedupe"`
+	Description string `json:"description" api:"nullable"`
+	EntityName  string `json:"entityName" api:"nullable"`
+	// concept, and facts when concepts is provided
+	Facts         []LegalV1SecXbrlResponseFact `json:"facts"`
+	FiscalPeriods []string                     `json:"fiscalPeriods"`
+	FormTypes     []string                     `json:"formTypes"`
+	Label         string                       `json:"label" api:"nullable"`
+	Limit         int64                        `json:"limit"`
+	Offset        int64                        `json:"offset"`
+	// frames only
+	Period string `json:"period"`
+	// frames only
+	Sort string `json:"sort"`
+	// concept and frames
+	Tag      string `json:"tag"`
+	Taxonomy string `json:"taxonomy" api:"nullable"`
+	Ticker   string `json:"ticker" api:"nullable"`
+	// Rows matching before pagination
+	Total int64                      `json:"total"`
+	Type  LegalV1SecXbrlResponseType `json:"type"`
+	Unit  string                     `json:"unit" api:"nullable"`
+	JSON  legalV1SecXbrlResponseJSON `json:"-"`
+}
+
+// legalV1SecXbrlResponseJSON contains the JSON metadata for the struct
+// [LegalV1SecXbrlResponse]
+type legalV1SecXbrlResponseJSON struct {
+	Cik           apijson.Field
+	Concepts      apijson.Field
+	Data          apijson.Field
+	DateAfter     apijson.Field
+	DateBefore    apijson.Field
+	Dedupe        apijson.Field
+	Description   apijson.Field
+	EntityName    apijson.Field
+	Facts         apijson.Field
+	FiscalPeriods apijson.Field
+	FormTypes     apijson.Field
+	Label         apijson.Field
+	Limit         apijson.Field
+	Offset        apijson.Field
+	Period        apijson.Field
+	Sort          apijson.Field
+	Tag           apijson.Field
+	Taxonomy      apijson.Field
+	Ticker        apijson.Field
+	Total         apijson.Field
+	Type          apijson.Field
+	Unit          apijson.Field
+	raw           string
+	ExtraFields   map[string]apijson.Field
+}
+
+func (r *LegalV1SecXbrlResponse) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1SecXbrlResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1SecXbrlResponseConcept struct {
+	FactCount       int64                             `json:"factCount"`
+	Label           string                            `json:"label" api:"nullable"`
+	LatestPeriodEnd time.Time                         `json:"latestPeriodEnd" api:"nullable" format:"date"`
+	Tag             string                            `json:"tag"`
+	Taxonomy        string                            `json:"taxonomy"`
+	Units           []string                          `json:"units"`
+	JSON            legalV1SecXbrlResponseConceptJSON `json:"-"`
+}
+
+// legalV1SecXbrlResponseConceptJSON contains the JSON metadata for the struct
+// [LegalV1SecXbrlResponseConcept]
+type legalV1SecXbrlResponseConceptJSON struct {
+	FactCount       apijson.Field
+	Label           apijson.Field
+	LatestPeriodEnd apijson.Field
+	Tag             apijson.Field
+	Taxonomy        apijson.Field
+	Units           apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *LegalV1SecXbrlResponseConcept) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1SecXbrlResponseConceptJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1SecXbrlResponseData struct {
+	AccessionNumber string    `json:"accessionNumber" api:"nullable"`
+	Cik             string    `json:"cik"`
+	End             time.Time `json:"end" format:"date"`
+	EntityName      string    `json:"entityName" api:"nullable"`
+	Filed           time.Time `json:"filed" api:"nullable" format:"date"`
+	FiscalPeriod    string    `json:"fiscalPeriod" api:"nullable"`
+	FiscalYear      int64     `json:"fiscalYear" api:"nullable"`
+	Form            string    `json:"form" api:"nullable"`
+	// SEC calendar frame, null if not assigned
+	Frame string `json:"frame" api:"nullable"`
+	Label string `json:"label" api:"nullable"`
+	// frames only. Reporting company location code
+	Loc string `json:"loc" api:"nullable"`
+	// EDGAR filing index URL
+	SecURL string `json:"secUrl" api:"nullable"`
+	// Null for instantaneous facts
+	Start    time.Time `json:"start" api:"nullable" format:"date"`
+	Tag      string    `json:"tag"`
+	Taxonomy string    `json:"taxonomy"`
+	// For example USD, shares, or USD/shares
+	Unit  string                         `json:"unit"`
+	Value float64                        `json:"value"`
+	JSON  legalV1SecXbrlResponseDataJSON `json:"-"`
+}
+
+// legalV1SecXbrlResponseDataJSON contains the JSON metadata for the struct
+// [LegalV1SecXbrlResponseData]
+type legalV1SecXbrlResponseDataJSON struct {
+	AccessionNumber apijson.Field
+	Cik             apijson.Field
+	End             apijson.Field
+	EntityName      apijson.Field
+	Filed           apijson.Field
+	FiscalPeriod    apijson.Field
+	FiscalYear      apijson.Field
+	Form            apijson.Field
+	Frame           apijson.Field
+	Label           apijson.Field
+	Loc             apijson.Field
+	SecURL          apijson.Field
+	Start           apijson.Field
+	Tag             apijson.Field
+	Taxonomy        apijson.Field
+	Unit            apijson.Field
+	Value           apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *LegalV1SecXbrlResponseData) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1SecXbrlResponseDataJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1SecXbrlResponseFact struct {
+	AccessionNumber string    `json:"accessionNumber" api:"nullable"`
+	Cik             string    `json:"cik"`
+	End             time.Time `json:"end" format:"date"`
+	EntityName      string    `json:"entityName" api:"nullable"`
+	Filed           time.Time `json:"filed" api:"nullable" format:"date"`
+	FiscalPeriod    string    `json:"fiscalPeriod" api:"nullable"`
+	FiscalYear      int64     `json:"fiscalYear" api:"nullable"`
+	Form            string    `json:"form" api:"nullable"`
+	// SEC calendar frame, null if not assigned
+	Frame string `json:"frame" api:"nullable"`
+	Label string `json:"label" api:"nullable"`
+	// frames only. Reporting company location code
+	Loc string `json:"loc" api:"nullable"`
+	// EDGAR filing index URL
+	SecURL string `json:"secUrl" api:"nullable"`
+	// Null for instantaneous facts
+	Start    time.Time `json:"start" api:"nullable" format:"date"`
+	Tag      string    `json:"tag"`
+	Taxonomy string    `json:"taxonomy"`
+	// For example USD, shares, or USD/shares
+	Unit  string                         `json:"unit"`
+	Value float64                        `json:"value"`
+	JSON  legalV1SecXbrlResponseFactJSON `json:"-"`
+}
+
+// legalV1SecXbrlResponseFactJSON contains the JSON metadata for the struct
+// [LegalV1SecXbrlResponseFact]
+type legalV1SecXbrlResponseFactJSON struct {
+	AccessionNumber apijson.Field
+	Cik             apijson.Field
+	End             apijson.Field
+	EntityName      apijson.Field
+	Filed           apijson.Field
+	FiscalPeriod    apijson.Field
+	FiscalYear      apijson.Field
+	Form            apijson.Field
+	Frame           apijson.Field
+	Label           apijson.Field
+	Loc             apijson.Field
+	SecURL          apijson.Field
+	Start           apijson.Field
+	Tag             apijson.Field
+	Taxonomy        apijson.Field
+	Unit            apijson.Field
+	Value           apijson.Field
+	raw             string
+	ExtraFields     map[string]apijson.Field
+}
+
+func (r *LegalV1SecXbrlResponseFact) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r legalV1SecXbrlResponseFactJSON) RawJSON() string {
+	return r.raw
+}
+
+type LegalV1SecXbrlResponseType string
+
+const (
+	LegalV1SecXbrlResponseTypeConcept LegalV1SecXbrlResponseType = "concept"
+	LegalV1SecXbrlResponseTypeFacts   LegalV1SecXbrlResponseType = "facts"
+	LegalV1SecXbrlResponseTypeFrames  LegalV1SecXbrlResponseType = "frames"
+)
+
+func (r LegalV1SecXbrlResponseType) IsKnown() bool {
+	switch r {
+	case LegalV1SecXbrlResponseTypeConcept, LegalV1SecXbrlResponseTypeFacts, LegalV1SecXbrlResponseTypeFrames:
+		return true
+	}
+	return false
+}
+
 type LegalV1SimilarResponse struct {
 	// Number of similar sources found
 	Found int64 `json:"found"`
@@ -1932,6 +2185,129 @@ const (
 func (r LegalV1SecFilingParamsType) IsKnown() bool {
 	switch r {
 	case LegalV1SecFilingParamsTypeSearch, LegalV1SecFilingParamsTypeEntity:
+		return true
+	}
+	return false
+}
+
+type LegalV1SecXbrlParams struct {
+	// concept: one line item for one company over time. facts: all concepts for one
+	// company (catalog, or values for the concepts you list). frames: one concept
+	// across all companies for one period.
+	Type param.Field[LegalV1SecXbrlParamsType] `json:"type" api:"required"`
+	// Company CIK, padded or unpadded (concept and facts). Provide exactly one of cik
+	// or ticker.
+	Cik param.Field[string] `json:"cik"`
+	// frames only. Restrict results to these CIKs (peer set).
+	Ciks param.Field[[]string] `json:"ciks"`
+	// facts only. "taxonomy:tag" strings or bare tags (default us-gaap). Omit to get
+	// the concept catalog, which has no values.
+	Concepts param.Field[[]string] `json:"concepts"`
+	// concept and facts. Only facts whose period end date is on or after this date
+	// (YYYY-MM-DD).
+	DateAfter param.Field[time.Time] `json:"dateAfter" format:"date"`
+	// concept and facts. Only facts whose period end date is on or before this date
+	// (YYYY-MM-DD).
+	DateBefore param.Field[time.Time] `json:"dateBefore" format:"date"`
+	// concept and facts. When true, keep only facts the SEC assigned a calendar frame
+	// (its canonical fact per period), dropping prior-period comparatives re-reported
+	// in later filings. When false, return every reported fact.
+	Dedupe param.Field[bool] `json:"dedupe"`
+	// concept and facts. Filter by fiscal period.
+	FiscalPeriods param.Field[[]LegalV1SecXbrlParamsFiscalPeriod] `json:"fiscalPeriods"`
+	// concept and facts. Filter by SEC form type such as 10-K or 10-Q.
+	FormTypes param.Field[[]string] `json:"formTypes"`
+	// Maximum rows to return
+	Limit param.Field[int64] `json:"limit"`
+	// Result offset for pagination
+	Offset param.Field[int64] `json:"offset"`
+	// frames only, required. CY2024 = annual duration, CY2024Q1 = quarterly duration,
+	// CY2024Q1I = instantaneous (balance sheet items).
+	Period param.Field[string] `json:"period"`
+	// frames only. Sort order by value.
+	Sort param.Field[LegalV1SecXbrlParamsSort] `json:"sort"`
+	// XBRL element name such as NetIncomeLoss (required for concept and frames)
+	Tag param.Field[string] `json:"tag"`
+	// XBRL taxonomy. For facts it only filters the catalog and has no default.
+	Taxonomy param.Field[LegalV1SecXbrlParamsTaxonomy] `json:"taxonomy"`
+	// Company ticker (concept and facts). Provide exactly one of cik or ticker.
+	Ticker param.Field[string] `json:"ticker"`
+	// frames only. Restrict results to these tickers (peer set).
+	Tickers param.Field[[]string] `json:"tickers"`
+	// Unit such as USD, shares, or USD/shares. Optional filter for concept; defaults
+	// to USD for frames (the SEC URL form USD-per-shares is also accepted).
+	Unit param.Field[string] `json:"unit"`
+}
+
+func (r LegalV1SecXbrlParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+// concept: one line item for one company over time. facts: all concepts for one
+// company (catalog, or values for the concepts you list). frames: one concept
+// across all companies for one period.
+type LegalV1SecXbrlParamsType string
+
+const (
+	LegalV1SecXbrlParamsTypeConcept LegalV1SecXbrlParamsType = "concept"
+	LegalV1SecXbrlParamsTypeFacts   LegalV1SecXbrlParamsType = "facts"
+	LegalV1SecXbrlParamsTypeFrames  LegalV1SecXbrlParamsType = "frames"
+)
+
+func (r LegalV1SecXbrlParamsType) IsKnown() bool {
+	switch r {
+	case LegalV1SecXbrlParamsTypeConcept, LegalV1SecXbrlParamsTypeFacts, LegalV1SecXbrlParamsTypeFrames:
+		return true
+	}
+	return false
+}
+
+type LegalV1SecXbrlParamsFiscalPeriod string
+
+const (
+	LegalV1SecXbrlParamsFiscalPeriodFy LegalV1SecXbrlParamsFiscalPeriod = "FY"
+	LegalV1SecXbrlParamsFiscalPeriodQ1 LegalV1SecXbrlParamsFiscalPeriod = "Q1"
+	LegalV1SecXbrlParamsFiscalPeriodQ2 LegalV1SecXbrlParamsFiscalPeriod = "Q2"
+	LegalV1SecXbrlParamsFiscalPeriodQ3 LegalV1SecXbrlParamsFiscalPeriod = "Q3"
+)
+
+func (r LegalV1SecXbrlParamsFiscalPeriod) IsKnown() bool {
+	switch r {
+	case LegalV1SecXbrlParamsFiscalPeriodFy, LegalV1SecXbrlParamsFiscalPeriodQ1, LegalV1SecXbrlParamsFiscalPeriodQ2, LegalV1SecXbrlParamsFiscalPeriodQ3:
+		return true
+	}
+	return false
+}
+
+// frames only. Sort order by value.
+type LegalV1SecXbrlParamsSort string
+
+const (
+	LegalV1SecXbrlParamsSortValueDesc LegalV1SecXbrlParamsSort = "value_desc"
+	LegalV1SecXbrlParamsSortValueAsc  LegalV1SecXbrlParamsSort = "value_asc"
+)
+
+func (r LegalV1SecXbrlParamsSort) IsKnown() bool {
+	switch r {
+	case LegalV1SecXbrlParamsSortValueDesc, LegalV1SecXbrlParamsSortValueAsc:
+		return true
+	}
+	return false
+}
+
+// XBRL taxonomy. For facts it only filters the catalog and has no default.
+type LegalV1SecXbrlParamsTaxonomy string
+
+const (
+	LegalV1SecXbrlParamsTaxonomyUsGaap   LegalV1SecXbrlParamsTaxonomy = "us-gaap"
+	LegalV1SecXbrlParamsTaxonomyIfrsFull LegalV1SecXbrlParamsTaxonomy = "ifrs-full"
+	LegalV1SecXbrlParamsTaxonomyDei      LegalV1SecXbrlParamsTaxonomy = "dei"
+	LegalV1SecXbrlParamsTaxonomySrt      LegalV1SecXbrlParamsTaxonomy = "srt"
+)
+
+func (r LegalV1SecXbrlParamsTaxonomy) IsKnown() bool {
+	switch r {
+	case LegalV1SecXbrlParamsTaxonomyUsGaap, LegalV1SecXbrlParamsTaxonomyIfrsFull, LegalV1SecXbrlParamsTaxonomyDei, LegalV1SecXbrlParamsTaxonomySrt:
 		return true
 	}
 	return false
