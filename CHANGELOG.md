@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.0](https://github.com/CaseMark/casedev-go/compare/v0.59.0...v0.60.0) (2026-10-15)
+
+
+### Features
+
+* **api:** add SEC XBRL financial data and skill alias metadata (CD-1816) ([ddb2d01](https://github.com/CaseMark/casedev-go/commit/ddb2d015b45a4c1f4174c64351f67b2b9f171861))
+
 ## [0.59.0](https://github.com/CaseMark/casedev-go/compare/v0.58.0...v0.59.0) (2026-10-14)
 
 
