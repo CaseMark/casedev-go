@@ -1,5 +1,60 @@
 # Changelog
 
+## [0.59.0](https://github.com/CaseMark/casedev-go/compare/v0.58.0...v0.59.0) (2026-10-14)
+
+
+### Features
+
+* **api:** CD-1814: add vault folder and object organization APIs ([c270584](https://github.com/CaseMark/casedev-go/commit/c2705841b31f23443b98b152373c26e5f69630fb))
+
+## [0.58.0](https://github.com/CaseMark/casedev-go/compare/v0.57.0...v0.58.0) (2026-10-06)
+
+
+### Compatibility and migration
+
+This pre-1.0 minor release includes breaking API signatures. Vault GraphRAG settings and graph/global/local/entity search modes are retired; use hybrid, fast, or vector search instead. Matter, party and work-item lists and multipart completion now expose typed response envelopes; consume pagination.next_cursor and pagination.has_more rather than assuming an array or empty response.
+
+Go callers must pass generated parameter structs to Vault.List, Vault.Ingest, connector connection/link Get, and Linc session Delete, including empty structs when no options are needed. Methods that now return typed responses require response/error assignments instead of error-only assignments. The Go module import path remains github.com/CaseMark/casedev-go.
+
+Migration examples and operational guidance: https://github.com/CaseMark/casedotdev-mono/blob/preview/stainless/RELEASE_RECONCILIATION.md. Connector token creation and webhook endpoint creation return one-time credentials; protect them and exclude responses from logs.
+
+### Features
+
+* **api:** api update ([17dd05d](https://github.com/CaseMark/casedev-go/commit/17dd05de36d83e0b6f9a2f486c86edf0a5f823bb))
+* **api:** api update ([#9](https://github.com/CaseMark/casedev-go/issues/9)) ([7b26155](https://github.com/CaseMark/casedev-go/commit/7b2615593e2977ae75d01fe2e20fd2f75087d038))
+
+## [0.57.0](https://github.com/CaseMark/casedev-go/compare/v0.56.0...v0.57.0) (2026-08-05)
+
+
+### Features
+
+* **api:** api update ([2a41744](https://github.com/CaseMark/casedev-go/commit/2a417445509da540dd7de52beae33e8da1fe6226))
+* **api:** api update ([f07eceb](https://github.com/CaseMark/casedev-go/commit/f07ecebb4c202aff6f2beed60c2fc81e9dcbf15a))
+* **api:** api update ([#6](https://github.com/CaseMark/casedev-go/issues/6)) ([71ba2de](https://github.com/CaseMark/casedev-go/commit/71ba2de67b60e4bdcf9352f54ecccaef548ad4b1))
+
+## [0.56.0](https://github.com/CaseMark/casedev-go/compare/v0.55.1...v0.56.0) (2026-06-09)
+
+
+### Features
+
+* **api:** api update ([3824758](https://github.com/CaseMark/casedev-go/commit/38247588b0a8ab625e4542c951f67a12a10352b5))
+
+## 0.55.1 (2026-06-02)
+
+Full Changelog: [v0.55.0...v0.55.1](https://github.com/CaseMark/casedev-go/compare/v0.55.0...v0.55.1)
+
+### Chores
+
+* use stable release metadata ([#97](https://github.com/CaseMark/casedev-go/issues/97)) ([18b53fd](https://github.com/CaseMark/casedev-go/commit/18b53fdc97f8d3d8820fba2238826eee2b1bc1a9))
+
+## [0.55.0](https://github.com/CaseMark/casedev-go/compare/v0.54.0...v0.55.0) (2026-06-01)
+
+
+### Features
+
+* **api:** api update ([8653545](https://github.com/CaseMark/casedev-go/commit/865354568a3717450b1a5ab838d6392c1d69b0c9))
+* **api:** api update ([dc47e0d](https://github.com/CaseMark/casedev-go/commit/dc47e0d82ab6a34cac7f353097a887fd0403ab2a))
+
 ## 0.54.0 (2026-05-19)
 
 Full Changelog: [v0.53.0...v0.54.0](https://github.com/CaseMark/casedev-go/compare/v0.53.0...v0.54.0)
