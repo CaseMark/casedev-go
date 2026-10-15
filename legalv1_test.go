@@ -297,6 +297,47 @@ func TestLegalV1SecFilingWithOptionalParams(t *testing.T) {
 	}
 }
 
+func TestLegalV1SecXbrlWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Legal.V1.SecXbrl(context.TODO(), githubcomcasemarkcasedevgo.LegalV1SecXbrlParams{
+		Type:          githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LegalV1SecXbrlParamsTypeConcept),
+		Cik:           githubcomcasemarkcasedevgo.F("cik"),
+		Ciks:          githubcomcasemarkcasedevgo.F([]string{"string"}),
+		Concepts:      githubcomcasemarkcasedevgo.F([]string{"string"}),
+		DateAfter:     githubcomcasemarkcasedevgo.F(time.Now()),
+		DateBefore:    githubcomcasemarkcasedevgo.F(time.Now()),
+		Dedupe:        githubcomcasemarkcasedevgo.F(true),
+		FiscalPeriods: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.LegalV1SecXbrlParamsFiscalPeriod{githubcomcasemarkcasedevgo.LegalV1SecXbrlParamsFiscalPeriodFy}),
+		FormTypes:     githubcomcasemarkcasedevgo.F([]string{"string"}),
+		Limit:         githubcomcasemarkcasedevgo.F(int64(1)),
+		Offset:        githubcomcasemarkcasedevgo.F(int64(0)),
+		Period:        githubcomcasemarkcasedevgo.F("CY7321"),
+		Sort:          githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LegalV1SecXbrlParamsSortValueDesc),
+		Tag:           githubcomcasemarkcasedevgo.F("tag"),
+		Taxonomy:      githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LegalV1SecXbrlParamsTaxonomyUsGaap),
+		Ticker:        githubcomcasemarkcasedevgo.F("ticker"),
+		Tickers:       githubcomcasemarkcasedevgo.F([]string{"string"}),
+		Unit:          githubcomcasemarkcasedevgo.F("unit"),
+	})
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestLegalV1SimilarWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {

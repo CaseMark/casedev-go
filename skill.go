@@ -89,7 +89,10 @@ func (r *SkillService) Catalog(ctx context.Context, query SkillCatalogParams, op
 }
 
 // Export a skill as an installable filesystem tree for sandbox runtimes.
-// Authenticated org-scoped custom skills are resolved before curated skills.
+// Authenticated org-scoped custom skills are resolved before curated skills. Slugs
+// of merged skills are permanent aliases: they export the surviving skill (slug,
+// root and files describe the target) with `redirected_from` set to the requested
+// slug.
 func (r *SkillService) Export(ctx context.Context, slug string, query SkillExportParams, opts ...option.RequestOption) (res *SkillExportResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if slug == "" {
@@ -102,7 +105,9 @@ func (r *SkillService) Export(ctx context.Context, slug string, query SkillExpor
 }
 
 // Read the full content of a legal skill by its slug. Returns markdown content,
-// tags, and metadata.
+// tags, and metadata. Slugs of merged skills are permanent aliases: they return
+// the surviving skill with `redirected_from` set to the requested slug instead of
+// an error.
 func (r *SkillService) Read(ctx context.Context, slug string, opts ...option.RequestOption) (res *SkillReadResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if slug == "" {
@@ -447,24 +452,28 @@ func (r SkillCatalogResponseSkillsSource) IsKnown() bool {
 }
 
 type SkillExportResponse struct {
-	Files  []SkillExportResponseFile `json:"files"`
-	Root   string                    `json:"root"`
-	Slug   string                    `json:"slug"`
-	Source SkillExportResponseSource `json:"source"`
-	Target string                    `json:"target"`
-	JSON   skillExportResponseJSON   `json:"-"`
+	Files []SkillExportResponseFile `json:"files"`
+	// Present only when the requested slug is a permanent alias of a merged skill.
+	// Holds the requested slug; slug, root and files describe the target skill.
+	RedirectedFrom string                    `json:"redirected_from"`
+	Root           string                    `json:"root"`
+	Slug           string                    `json:"slug"`
+	Source         SkillExportResponseSource `json:"source"`
+	Target         string                    `json:"target"`
+	JSON           skillExportResponseJSON   `json:"-"`
 }
 
 // skillExportResponseJSON contains the JSON metadata for the struct
 // [SkillExportResponse]
 type skillExportResponseJSON struct {
-	Files       apijson.Field
-	Root        apijson.Field
-	Slug        apijson.Field
-	Source      apijson.Field
-	Target      apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	Files          apijson.Field
+	RedirectedFrom apijson.Field
+	Root           apijson.Field
+	Slug           apijson.Field
+	Source         apijson.Field
+	Target         apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
 }
 
 func (r *SkillExportResponse) UnmarshalJSON(data []byte) (err error) {
@@ -551,6 +560,10 @@ type SkillReadResponse struct {
 	Metadata interface{} `json:"metadata"`
 	// Skill name
 	Name string `json:"name"`
+	// Present only when the requested slug is a permanent alias of a merged skill.
+	// Holds the slug that was requested; every other field (including slug) describes
+	// the target skill. Omitted for non-alias reads.
+	RedirectedFrom string `json:"redirected_from"`
 	// Unique skill identifier
 	Slug string `json:"slug"`
 	// Skill source (authenticated requests only)
@@ -567,19 +580,20 @@ type SkillReadResponse struct {
 // skillReadResponseJSON contains the JSON metadata for the struct
 // [SkillReadResponse]
 type skillReadResponseJSON struct {
-	AuthorName  apijson.Field
-	Bundle      apijson.Field
-	Content     apijson.Field
-	License     apijson.Field
-	Metadata    apijson.Field
-	Name        apijson.Field
-	Slug        apijson.Field
-	Source      apijson.Field
-	Summary     apijson.Field
-	Tags        apijson.Field
-	Version     apijson.Field
-	raw         string
-	ExtraFields map[string]apijson.Field
+	AuthorName     apijson.Field
+	Bundle         apijson.Field
+	Content        apijson.Field
+	License        apijson.Field
+	Metadata       apijson.Field
+	Name           apijson.Field
+	RedirectedFrom apijson.Field
+	Slug           apijson.Field
+	Source         apijson.Field
+	Summary        apijson.Field
+	Tags           apijson.Field
+	Version        apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
 }
 
 func (r *SkillReadResponse) UnmarshalJSON(data []byte) (err error) {

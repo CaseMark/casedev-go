@@ -119,16 +119,42 @@ func (r *ConnectorV1LinkService) ListObjects(ctx context.Context, id string, par
 	return err
 }
 
+// Resolve the linked Clio matter root and existing folder ancestry for managing
+// synced folders. Applies the provider account ACLs.
+func (r *ConnectorV1LinkService) GetSelectionRoot(ctx context.Context, id string, query ConnectorV1LinkGetSelectionRootParams, opts ...option.RequestOption) (err error) {
+	if query.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", query.XCaseConnectorSubject)))
+	}
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return err
+	}
+	path := fmt.Sprintf("connectors/v1/links/%s/selection", id)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, nil, opts...)
+	return err
+}
+
 type ConnectorV1LinkGetParams struct {
 	XCaseConnectorSubject param.Field[string] `header:"x-case-connector-subject"`
 }
 
 type ConnectorV1LinkUpdateParams struct {
-	Mode param.Field[ConnectorV1LinkUpdateParamsMode] `json:"mode"`
+	// Optional saved Clio import policy. Rejects concurrent changes to its folder/file
+	// exclusions.
+	ExpectedPolicy param.Field[interface{}] `json:"expected_policy"`
+	// Required saved remote when expanding a Clio import root; detects concurrent
+	// source changes.
+	ExpectedRemote param.Field[interface{}]                     `json:"expected_remote"`
+	Mode           param.Field[ConnectorV1LinkUpdateParamsMode] `json:"mode"`
 	// Replaces the entire stored policy; omitted fields return to defaults. Repeat
 	// deletes, collisions and filters that should be retained. Folder/file exclusions
 	// require deletes: preserve (the default).
-	Policy                param.Field[interface{}]                      `json:"policy"`
+	Policy param.Field[interface{}] `json:"policy"`
+	// For unpaired Clio document imports only: expand folder_id to its verified Clio
+	// matter root. Connection, matter, vault and ledger remain unchanged.
+	Remote                param.Field[interface{}]                      `json:"remote"`
 	State                 param.Field[ConnectorV1LinkUpdateParamsState] `json:"state"`
 	XCaseConnectorSubject param.Field[string]                           `header:"x-case-connector-subject"`
 }
@@ -299,4 +325,8 @@ func (r ConnectorV1LinkListObjectsParamsState) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+type ConnectorV1LinkGetSelectionRootParams struct {
+	XCaseConnectorSubject param.Field[string] `header:"x-case-connector-subject"`
 }
