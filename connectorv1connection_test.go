@@ -52,7 +52,7 @@ func TestConnectorV1ConnectionGetWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAPIKey("My API Key"),
 	)
-	err := client.Connectors.V1.Connections.Get(
+	_, err := client.Connectors.V1.Connections.Get(
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.ConnectorV1ConnectionGetParams{
@@ -146,6 +146,163 @@ func TestConnectorV1ConnectionBrowseWithOptionalParams(t *testing.T) {
 			PageSize:              githubcomcasemarkcasedevgo.F(int64(1000)),
 			Parent:                githubcomcasemarkcasedevgo.F("parent"),
 			Query:                 githubcomcasemarkcasedevgo.F("query"),
+			Site:                  githubcomcasemarkcasedevgo.F("site"),
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestConnectorV1ConnectionNewFolderWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.Connectors.V1.Connections.NewFolder(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.ConnectorV1ConnectionNewFolderParams{
+			Name:                  githubcomcasemarkcasedevgo.F("name"),
+			Container:             githubcomcasemarkcasedevgo.F("container"),
+			Parent:                githubcomcasemarkcasedevgo.F("parent"),
+			Site:                  githubcomcasemarkcasedevgo.F("site"),
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestConnectorV1ConnectionNewMicrosoftAdminApprovalWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Connectors.V1.Connections.NewMicrosoftAdminApproval(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.ConnectorV1ConnectionNewMicrosoftAdminApprovalParams{
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestConnectorV1ConnectionListContentsWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Connectors.V1.Connections.ListContents(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.ConnectorV1ConnectionListContentsParams{
+			Container:             githubcomcasemarkcasedevgo.F("container"),
+			Cursor:                githubcomcasemarkcasedevgo.F("cursor"),
+			PageSize:              githubcomcasemarkcasedevgo.F(int64(1)),
+			Parent:                githubcomcasemarkcasedevgo.F("parent"),
+			Site:                  githubcomcasemarkcasedevgo.F("site"),
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestConnectorV1ConnectionResolveLinkWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Connectors.V1.Connections.ResolveLink(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.ConnectorV1ConnectionResolveLinkParams{
+			URL:                   githubcomcasemarkcasedevgo.F("url"),
+			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestConnectorV1ConnectionSearchWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	_, err := client.Connectors.V1.Connections.Search(
+		context.TODO(),
+		"id",
+		githubcomcasemarkcasedevgo.ConnectorV1ConnectionSearchParams{
+			Query:                 githubcomcasemarkcasedevgo.F("query"),
+			Container:             githubcomcasemarkcasedevgo.F("container"),
+			Cursor:                githubcomcasemarkcasedevgo.F("cursor"),
+			Kind:                  githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1ConnectionSearchParamsKindFile),
+			PageSize:              githubcomcasemarkcasedevgo.F(int64(1000)),
+			Parent:                githubcomcasemarkcasedevgo.F("parent"),
 			Site:                  githubcomcasemarkcasedevgo.F("site"),
 			XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
 		},

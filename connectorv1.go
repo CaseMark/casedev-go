@@ -46,12 +46,29 @@ func NewConnectorV1Service(opts ...option.RequestOption) (r *ConnectorV1Service)
 	return
 }
 
+// Copy one provider file, named by an open_ref from browse, into a Vault
+// (vault_id) or to a presigned S3 PUT URL (upload_url). Runs synchronously; files
+// over 100 MB return 413 and belong in a transfer. A repeat for an unchanged
+// provider version returns the first copy with 200. Vault copies are stored as
+// uploaded: call POST /vault/{id}/ingest/{objectId} to index them. Fetched copies
+// are never exported by a link.
+func (r *ConnectorV1Service) Fetch(ctx context.Context, params ConnectorV1FetchParams, opts ...option.RequestOption) (err error) {
+	if params.XCaseConnectorSubject.Present {
+		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
+	}
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	path := "connectors/v1/fetch"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, nil, opts...)
+	return err
+}
+
 // Standing promise: backfill now, then stay current (the sync sweeper re-runs
 // synced links on a schedule). Direction both creates paired import/export links
 // and defaults export to a CaseMark Output subfolder. Same body as /transfer minus
-// run_mode. Upserts links by (connection_id, direction, remote, vault_id);
-// existing once-links are upgraded in place with their ledger and cursor
-// preserved. Downgrade or pause via PATCH /links/{id}.
+// run_mode. Upserts links by (connection_id, direction, remote, vault_id,
+// selection); existing once-links are upgraded in place with their ledger and
+// cursor preserved. Downgrade or pause via PATCH /links/{id}.
 func (r *ConnectorV1Service) SyncLink(ctx context.Context, params ConnectorV1SyncLinkParams, opts ...option.RequestOption) (res *ConnectorV1SyncLinkResponse, err error) {
 	if params.XCaseConnectorSubject.Present {
 		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
@@ -65,8 +82,8 @@ func (r *ConnectorV1Service) SyncLink(ctx context.Context, params ConnectorV1Syn
 // One-shot import (provider folder → vault), export (vault → provider folder), or
 // both. Direction both creates paired import/export links and defaults export to a
 // CaseMark Output subfolder. Upserts links by (connection_id, direction, remote,
-// vault_id): first call backfills, later calls move only new/changed files via the
-// ledger. Poll GET /links/{id} → active_run for progress.
+// vault_id, selection): first call backfills, later calls move only new/changed
+// files via the ledger. Poll GET /links/{id} → active_run for progress.
 func (r *ConnectorV1Service) Transfer(ctx context.Context, params ConnectorV1TransferParams, opts ...option.RequestOption) (res *ConnectorV1TransferResponse, err error) {
 	if params.XCaseConnectorSubject.Present {
 		opts = append(opts, option.WithHeader("x-case-connector-subject", fmt.Sprintf("%v", params.XCaseConnectorSubject)))
@@ -244,6 +261,8 @@ func (r TransferRunReason) IsKnown() bool {
 }
 
 type ConnectorV1SyncLinkResponse struct {
+	// Links created or re-triggered. Each echoes selection ({object_ids?, folder?},
+	// null for the whole vault).
 	Links []interface{} `json:"links"`
 	// Whether a provider scan started or was deferred.
 	Run SyncLinkRun `json:"run"`
@@ -271,6 +290,8 @@ func (r connectorV1SyncLinkResponseJSON) RawJSON() string {
 }
 
 type ConnectorV1TransferResponse struct {
+	// Links created or re-triggered. Each echoes selection ({object_ids?, folder?},
+	// null for the whole vault).
 	Links []interface{} `json:"links"`
 	// Whether a provider scan started or was deferred.
 	Run TransferRun `json:"run"`
@@ -297,6 +318,21 @@ func (r connectorV1TransferResponseJSON) RawJSON() string {
 	return r.raw
 }
 
+type ConnectorV1FetchParams struct {
+	// From a browse item, exactly as received
+	OpenRef param.Field[string] `json:"open_ref" api:"required"`
+	// Presigned HTTPS S3 PUT URL. Content-Type must not be a signed header. Exactly
+	// one destination.
+	UploadURL param.Field[string] `json:"upload_url"`
+	// Destination Vault. Exactly one destination.
+	VaultID               param.Field[string] `json:"vault_id"`
+	XCaseConnectorSubject param.Field[string] `header:"x-case-connector-subject"`
+}
+
+func (r ConnectorV1FetchParams) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 type ConnectorV1SyncLinkParams struct {
 	ConnectionID param.Field[string]                             `json:"connection_id" api:"required"`
 	Direction    param.Field[ConnectorV1SyncLinkParamsDirection] `json:"direction" api:"required"`
@@ -304,10 +340,20 @@ type ConnectorV1SyncLinkParams struct {
 	VaultID      param.Field[string]                             `json:"vault_id" api:"required"`
 	// Optional destination for direction both. Defaults to CaseMark Output under
 	// remote.
-	ExportDestination     param.Field[ConnectorV1SyncLinkParamsExportDestination] `json:"export_destination"`
-	MatterID              param.Field[string]                                     `json:"matter_id"`
-	Policy                param.Field[ConnectorV1SyncLinkParamsPolicy]            `json:"policy"`
-	XCaseConnectorSubject param.Field[string]                                     `header:"x-case-connector-subject"`
+	ExportDestination param.Field[ConnectorV1SyncLinkParamsExportDestination] `json:"export_destination"`
+	MatterID          param.Field[string]                                     `json:"matter_id"`
+	Policy            param.Field[ConnectorV1SyncLinkParamsPolicy]            `json:"policy"`
+	// Export only part of the vault (direction export only; 400
+	// selection_requires_export otherwise). Provide object_ids, folder, or both (their
+	// intersection). The selection is part of link identity: each distinct selection
+	// to the same destination is its own link, and repeating a selection re-runs that
+	// link. Exported objects still exclude files still processing and
+	// connector-imported or fetched copies. Destination paths: with folder, paths are
+	// relative to that folder, so its contents land directly in remote; with
+	// object_ids only, each object keeps its full vault path. Omit to export the whole
+	// vault.
+	Selection             param.Field[ConnectorV1SyncLinkParamsSelection] `json:"selection"`
+	XCaseConnectorSubject param.Field[string]                             `header:"x-case-connector-subject"`
 }
 
 func (r ConnectorV1SyncLinkParams) MarshalJSON() (data []byte, err error) {
@@ -356,6 +402,11 @@ func (r ConnectorV1SyncLinkParamsExportDestination) MarshalJSON() (data []byte, 
 }
 
 type ConnectorV1SyncLinkParamsPolicy struct {
+	// Export handling of a destination file with the same name that this export does
+	// not own. version keeps both: the export is written as name (CaseMark).ext, then
+	// name (CaseMark 2).ext, name (CaseMark 3).ext, using the first number the folder
+	// does not use (up to 100). overwrite replaces the existing file; skip leaves it.
+	// Any other value returns 400.
 	Collisions param.Field[ConnectorV1SyncLinkParamsPolicyCollisions] `json:"collisions"`
 	Deletes    param.Field[ConnectorV1SyncLinkParamsPolicyDeletes]    `json:"deletes"`
 	Filters    param.Field[ConnectorV1SyncLinkParamsPolicyFilters]    `json:"filters"`
@@ -365,6 +416,11 @@ func (r ConnectorV1SyncLinkParamsPolicy) MarshalJSON() (data []byte, err error) 
 	return apijson.MarshalRoot(r)
 }
 
+// Export handling of a destination file with the same name that this export does
+// not own. version keeps both: the export is written as name (CaseMark).ext, then
+// name (CaseMark 2).ext, name (CaseMark 3).ext, using the first number the folder
+// does not use (up to 100). overwrite replaces the existing file; skip leaves it.
+// Any other value returns 400.
 type ConnectorV1SyncLinkParamsPolicyCollisions string
 
 const (
@@ -397,6 +453,9 @@ func (r ConnectorV1SyncLinkParamsPolicyDeletes) IsKnown() bool {
 }
 
 type ConnectorV1SyncLinkParamsPolicyFilters struct {
+	// File extensions (e.g. ".exe") to import even though the engine skips Windows
+	// executables, libraries, installers and disc metadata by default.
+	AllowExtensions param.Field[[]string] `json:"allow_extensions"`
 	// Skip these stable document ids before download, including future versions.
 	ExcludeFileIDs param.Field[[]string] `json:"exclude_file_ids"`
 	// Skip these folders and all descendants during document imports.
@@ -409,6 +468,28 @@ func (r ConnectorV1SyncLinkParamsPolicyFilters) MarshalJSON() (data []byte, err 
 	return apijson.MarshalRoot(r)
 }
 
+// Export only part of the vault (direction export only; 400
+// selection_requires_export otherwise). Provide object_ids, folder, or both (their
+// intersection). The selection is part of link identity: each distinct selection
+// to the same destination is its own link, and repeating a selection re-runs that
+// link. Exported objects still exclude files still processing and
+// connector-imported or fetched copies. Destination paths: with folder, paths are
+// relative to that folder, so its contents land directly in remote; with
+// object_ids only, each object keeps its full vault path. Omit to export the whole
+// vault.
+type ConnectorV1SyncLinkParamsSelection struct {
+	// Vault folder path such as /Reports/Final; includes every subfolder. The vault
+	// root is not a selection.
+	Folder param.Field[string] `json:"folder"`
+	// Vault object ids from vault_id. Unknown ids return 400
+	// selection_objects_not_found with data.error.count.
+	ObjectIDs param.Field[[]string] `json:"object_ids"`
+}
+
+func (r ConnectorV1SyncLinkParamsSelection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
 type ConnectorV1TransferParams struct {
 	ConnectionID param.Field[string]                             `json:"connection_id" api:"required"`
 	Direction    param.Field[ConnectorV1TransferParamsDirection] `json:"direction" api:"required"`
@@ -416,11 +497,21 @@ type ConnectorV1TransferParams struct {
 	VaultID      param.Field[string]                             `json:"vault_id" api:"required"`
 	// Optional destination for direction both. Defaults to CaseMark Output under
 	// remote.
-	ExportDestination     param.Field[ConnectorV1TransferParamsExportDestination] `json:"export_destination"`
-	MatterID              param.Field[string]                                     `json:"matter_id"`
-	Policy                param.Field[ConnectorV1TransferParamsPolicy]            `json:"policy"`
-	RunMode               param.Field[ConnectorV1TransferParamsRunMode]           `json:"run_mode"`
-	XCaseConnectorSubject param.Field[string]                                     `header:"x-case-connector-subject"`
+	ExportDestination param.Field[ConnectorV1TransferParamsExportDestination] `json:"export_destination"`
+	MatterID          param.Field[string]                                     `json:"matter_id"`
+	Policy            param.Field[ConnectorV1TransferParamsPolicy]            `json:"policy"`
+	RunMode           param.Field[ConnectorV1TransferParamsRunMode]           `json:"run_mode"`
+	// Export only part of the vault (direction export only; 400
+	// selection_requires_export otherwise). Provide object_ids, folder, or both (their
+	// intersection). The selection is part of link identity: each distinct selection
+	// to the same destination is its own link, and repeating a selection re-runs that
+	// link. Exported objects still exclude files still processing and
+	// connector-imported or fetched copies. Destination paths: with folder, paths are
+	// relative to that folder, so its contents land directly in remote; with
+	// object_ids only, each object keeps its full vault path. Omit to export the whole
+	// vault.
+	Selection             param.Field[ConnectorV1TransferParamsSelection] `json:"selection"`
+	XCaseConnectorSubject param.Field[string]                             `header:"x-case-connector-subject"`
 }
 
 func (r ConnectorV1TransferParams) MarshalJSON() (data []byte, err error) {
@@ -469,6 +560,11 @@ func (r ConnectorV1TransferParamsExportDestination) MarshalJSON() (data []byte, 
 }
 
 type ConnectorV1TransferParamsPolicy struct {
+	// Export handling of a destination file with the same name that this export does
+	// not own. version keeps both: the export is written as name (CaseMark).ext, then
+	// name (CaseMark 2).ext, name (CaseMark 3).ext, using the first number the folder
+	// does not use (up to 100). overwrite replaces the existing file; skip leaves it.
+	// Any other value returns 400.
 	Collisions param.Field[ConnectorV1TransferParamsPolicyCollisions] `json:"collisions"`
 	Deletes    param.Field[ConnectorV1TransferParamsPolicyDeletes]    `json:"deletes"`
 	Filters    param.Field[ConnectorV1TransferParamsPolicyFilters]    `json:"filters"`
@@ -478,6 +574,11 @@ func (r ConnectorV1TransferParamsPolicy) MarshalJSON() (data []byte, err error) 
 	return apijson.MarshalRoot(r)
 }
 
+// Export handling of a destination file with the same name that this export does
+// not own. version keeps both: the export is written as name (CaseMark).ext, then
+// name (CaseMark 2).ext, name (CaseMark 3).ext, using the first number the folder
+// does not use (up to 100). overwrite replaces the existing file; skip leaves it.
+// Any other value returns 400.
 type ConnectorV1TransferParamsPolicyCollisions string
 
 const (
@@ -510,6 +611,9 @@ func (r ConnectorV1TransferParamsPolicyDeletes) IsKnown() bool {
 }
 
 type ConnectorV1TransferParamsPolicyFilters struct {
+	// File extensions (e.g. ".exe") to import even though the engine skips Windows
+	// executables, libraries, installers and disc metadata by default.
+	AllowExtensions param.Field[[]string] `json:"allow_extensions"`
 	// Skip these stable document ids before download, including future versions.
 	ExcludeFileIDs param.Field[[]string] `json:"exclude_file_ids"`
 	// Skip these folders and all descendants during document imports.
@@ -535,4 +639,26 @@ func (r ConnectorV1TransferParamsRunMode) IsKnown() bool {
 		return true
 	}
 	return false
+}
+
+// Export only part of the vault (direction export only; 400
+// selection_requires_export otherwise). Provide object_ids, folder, or both (their
+// intersection). The selection is part of link identity: each distinct selection
+// to the same destination is its own link, and repeating a selection re-runs that
+// link. Exported objects still exclude files still processing and
+// connector-imported or fetched copies. Destination paths: with folder, paths are
+// relative to that folder, so its contents land directly in remote; with
+// object_ids only, each object keeps its full vault path. Omit to export the whole
+// vault.
+type ConnectorV1TransferParamsSelection struct {
+	// Vault folder path such as /Reports/Final; includes every subfolder. The vault
+	// root is not a selection.
+	Folder param.Field[string] `json:"folder"`
+	// Vault object ids from vault_id. Unknown ids return 400
+	// selection_objects_not_found with data.error.count.
+	ObjectIDs param.Field[[]string] `json:"object_ids"`
+}
+
+func (r ConnectorV1TransferParamsSelection) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
 }
