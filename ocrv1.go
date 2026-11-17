@@ -322,7 +322,8 @@ func (r OcrV1DownloadParamsType) IsKnown() bool {
 }
 
 type OcrV1ProcessParams struct {
-	// URL or S3 path to the document to process
+	// HTTP(S) URL of the document to process, or the s3:// path of a vault object in
+	// your organization
 	DocumentURL param.Field[string] `json:"document_url" api:"required"`
 	// URL to receive completion webhook
 	CallbackURL param.Field[string] `json:"callback_url"`

@@ -219,7 +219,7 @@ type VoiceTranscriptionNewParams struct {
 	AudioURL param.Field[string] `json:"audio_url"`
 	// Automatically extract key phrases and topics
 	AutoHighlights param.Field[bool] `json:"auto_highlights"`
-	// How much to boost custom vocabulary
+	// Deprecated and ignored: current AssemblyAI models do not support boost strength.
 	BoostParam param.Field[VoiceTranscriptionNewParamsBoostParam] `json:"boost_param"`
 	// Enable content moderation and safety labeling
 	ContentSafety param.Field[bool] `json:"content_safety"`
@@ -229,6 +229,9 @@ type VoiceTranscriptionNewParams struct {
 	Format param.Field[VoiceTranscriptionNewParamsFormat] `json:"format"`
 	// Format text with proper capitalization
 	FormatText param.Field[bool] `json:"format_text"`
+	// Domain-specific words or phrases (max 6 words each) to improve recognition
+	// accuracy. Up to 1000 on universal-3-5-pro, 200 on universal-2.
+	KeytermsPrompt param.Field[[]string] `json:"keyterms_prompt"`
 	// Language code (e.g., 'en_us', 'es', 'fr'). If not specified, language will be
 	// auto-detected
 	LanguageCode param.Field[string] `json:"language_code"`
@@ -246,7 +249,8 @@ type VoiceTranscriptionNewParams struct {
 	SpeechModels param.Field[[]string] `json:"speech_models"`
 	// Vault ID containing the audio file (use with object_id)
 	VaultID param.Field[string] `json:"vault_id"`
-	// Custom vocabulary words to boost (e.g., legal terms)
+	// Legacy alias for `keyterms_prompt`. Entries are merged into `keyterms_prompt`
+	// before submission.
 	WordBoost param.Field[[]string] `json:"word_boost"`
 }
 
@@ -254,7 +258,7 @@ func (r VoiceTranscriptionNewParams) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
 
-// How much to boost custom vocabulary
+// Deprecated and ignored: current AssemblyAI models do not support boost strength.
 type VoiceTranscriptionNewParamsBoostParam string
 
 const (

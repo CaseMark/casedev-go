@@ -13,6 +13,33 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
+func TestConnectorV1FetchWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.Connectors.V1.Fetch(context.TODO(), githubcomcasemarkcasedevgo.ConnectorV1FetchParams{
+		OpenRef:               githubcomcasemarkcasedevgo.F("open_ref"),
+		UploadURL:             githubcomcasemarkcasedevgo.F("upload_url"),
+		VaultID:               githubcomcasemarkcasedevgo.F("vault_id"),
+		XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
+	})
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestConnectorV1SyncLinkWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -47,11 +74,16 @@ func TestConnectorV1SyncLinkWithOptionalParams(t *testing.T) {
 			Collisions: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1SyncLinkParamsPolicyCollisionsVersion),
 			Deletes:    githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1SyncLinkParamsPolicyDeletesMirror),
 			Filters: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1SyncLinkParamsPolicyFilters{
+				AllowExtensions:  githubcomcasemarkcasedevgo.F([]string{"string"}),
 				ExcludeFileIDs:   githubcomcasemarkcasedevgo.F([]string{"string"}),
 				ExcludeFolderIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
 				ExcludeMime:      githubcomcasemarkcasedevgo.F([]string{"string"}),
 				MaxSizeBytes:     githubcomcasemarkcasedevgo.F(int64(0)),
 			}),
+		}),
+		Selection: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1SyncLinkParamsSelection{
+			Folder:    githubcomcasemarkcasedevgo.F("folder"),
+			ObjectIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
 		}),
 		XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
 	})
@@ -98,13 +130,18 @@ func TestConnectorV1TransferWithOptionalParams(t *testing.T) {
 			Collisions: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1TransferParamsPolicyCollisionsVersion),
 			Deletes:    githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1TransferParamsPolicyDeletesMirror),
 			Filters: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1TransferParamsPolicyFilters{
+				AllowExtensions:  githubcomcasemarkcasedevgo.F([]string{"string"}),
 				ExcludeFileIDs:   githubcomcasemarkcasedevgo.F([]string{"string"}),
 				ExcludeFolderIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
 				ExcludeMime:      githubcomcasemarkcasedevgo.F([]string{"string"}),
 				MaxSizeBytes:     githubcomcasemarkcasedevgo.F(int64(0)),
 			}),
 		}),
-		RunMode:               githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1TransferParamsRunModeAuto),
+		RunMode: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1TransferParamsRunModeAuto),
+		Selection: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.ConnectorV1TransferParamsSelection{
+			Folder:    githubcomcasemarkcasedevgo.F("folder"),
+			ObjectIDs: githubcomcasemarkcasedevgo.F([]string{"string"}),
+		}),
 		XCaseConnectorSubject: githubcomcasemarkcasedevgo.F("x-case-connector-subject"),
 	})
 	if err != nil {

@@ -28,6 +28,8 @@ import (
 // the [NewVaultService] method instead.
 type VaultService struct {
 	Options []option.RequestOption
+	// Vault object management, content access, and document operations
+	Assemblies *VaultAssemblyService
 	// Secure document storage with semantic search
 	Folders *VaultFolderService
 	Events  *VaultEventService
@@ -47,6 +49,7 @@ type VaultService struct {
 func NewVaultService(opts ...option.RequestOption) (r *VaultService) {
 	r = &VaultService{}
 	r.Options = opts
+	r.Assemblies = NewVaultAssemblyService(opts...)
 	r.Folders = NewVaultFolderService(opts...)
 	r.Events = NewVaultEventService(opts...)
 	r.Groups = NewVaultGroupService(opts...)
@@ -688,8 +691,11 @@ type VaultIngestResponse struct {
 	// chunks/vectors created).
 	Status VaultIngestResponseStatus `json:"status" api:"required"`
 	// Workflow run ID for tracking progress. Null for file types that skip processing.
-	WorkflowID string                  `json:"workflowId" api:"required,nullable"`
-	JSON       vaultIngestResponseJSON `json:"-"`
+	WorkflowID string `json:"workflowId" api:"required,nullable"`
+	// True when the document is waiting for ingestion capacity. It starts
+	// automatically; workflowId is null until then.
+	Queued bool                    `json:"queued"`
+	JSON   vaultIngestResponseJSON `json:"-"`
 }
 
 // vaultIngestResponseJSON contains the JSON metadata for the struct
@@ -699,6 +705,7 @@ type vaultIngestResponseJSON struct {
 	ObjectID    apijson.Field
 	Status      apijson.Field
 	WorkflowID  apijson.Field
+	Queued      apijson.Field
 	raw         string
 	ExtraFields map[string]apijson.Field
 }

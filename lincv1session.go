@@ -38,9 +38,9 @@ func NewLincV1SessionService(opts ...option.RequestOption) (r *LincV1SessionServ
 	return
 }
 
-// Creates a Daytona-backed native Linc session with scoped Case.dev credentials.
-// This endpoint starts the sandbox actor only; messages and event replay use
-// separate endpoints.
+// Creates a native Linc session in a sandboxed runtime with scoped Case.dev
+// credentials. This endpoint starts the sandbox actor only; messages and event
+// replay use separate endpoints.
 func (r *LincV1SessionService) New(ctx context.Context, params LincV1SessionNewParams, opts ...option.RequestOption) (err error) {
 	if params.AIReportingTags.Present {
 		opts = append(opts, option.WithHeader("ai-reporting-tags", fmt.Sprintf("%v", params.AIReportingTags)))
@@ -191,14 +191,27 @@ type LincV1SessionNewParams struct {
 	IdleTimeoutMs param.Field[int64]                             `json:"idleTimeoutMs"`
 	// When true, inject all active org document templates into the
 	// using-document-templates skill.
-	IncludeDocumentTemplates param.Field[bool] `json:"includeDocumentTemplates"`
-	// Privileged C3-only hidden app instructions to append to the sandbox AGENTS.md.
-	Instructions param.Field[string] `json:"instructions"`
-	Model        param.Field[string] `json:"model"`
+	IncludeDocumentTemplates param.Field[bool]   `json:"includeDocumentTemplates"`
+	Model                    param.Field[string] `json:"model"`
 	// Optional ordered availability fallbacks for this session. Requires an explicit
 	// model. An empty array disables fallbacks; omission preserves existing runtime
 	// behavior. Linc switches within the same session, preserving context.
 	ModelFallbacks param.Field[[]string] `json:"modelFallbacks"`
+	// indefinite keeps the runtime and its saved state until the session (or, in
+	// workspace mode, its last conversation) is deleted, so a chat can resume after
+	// any idle gap. The default in workspace mode; standalone chats opt in with it,
+	// one-off runs leave it unset. Raises an existing workspace to indefinite.
+	// Mutually exclusive with runtimeRetentionDays.
+	RuntimeRetention param.Field[LincV1SessionNewParamsRuntimeRetention] `json:"runtimeRetention"`
+	// Days the runtime and its saved state are kept after the last activity. Defaults
+	// to 1 for standalone sessions; workspace-mode conversations (workspaceKey) and
+	// the C3 system key default to indefinite (see runtimeRetention). Once they are
+	// deleted, commands to the session answer 410 linc_runtime_expired; its events
+	// stay readable. A workspace keeps the value it was created with; a larger value
+	// on a later conversation raises it. Applies to Vercel Sandbox runtimes; accepted
+	// and stored on Daytona, where it has no effect. Mutually exclusive with
+	// runtimeRetention.
+	RuntimeRetentionDays param.Field[int64] `json:"runtimeRetentionDays"`
 	// Optional caller-provided scoped Case.dev API key for the runtime.
 	ScopedAPIKey param.Field[string] `json:"scopedApiKey"`
 	// Processing tier for eligible OpenAI GPT models. Priority provides lower latency
@@ -258,6 +271,25 @@ type LincV1SessionNewParamsExtension struct {
 
 func (r LincV1SessionNewParamsExtension) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+// indefinite keeps the runtime and its saved state until the session (or, in
+// workspace mode, its last conversation) is deleted, so a chat can resume after
+// any idle gap. The default in workspace mode; standalone chats opt in with it,
+// one-off runs leave it unset. Raises an existing workspace to indefinite.
+// Mutually exclusive with runtimeRetentionDays.
+type LincV1SessionNewParamsRuntimeRetention string
+
+const (
+	LincV1SessionNewParamsRuntimeRetentionIndefinite LincV1SessionNewParamsRuntimeRetention = "indefinite"
+)
+
+func (r LincV1SessionNewParamsRuntimeRetention) IsKnown() bool {
+	switch r {
+	case LincV1SessionNewParamsRuntimeRetentionIndefinite:
+		return true
+	}
+	return false
 }
 
 // Processing tier for eligible OpenAI GPT models. Priority provides lower latency

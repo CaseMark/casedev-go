@@ -33,6 +33,7 @@ func TestVoiceTranscriptionNewWithOptionalParams(t *testing.T) {
 		Disfluencies:      githubcomcasemarkcasedevgo.F(true),
 		Format:            githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VoiceTranscriptionNewParamsFormatJson),
 		FormatText:        githubcomcasemarkcasedevgo.F(true),
+		KeytermsPrompt:    githubcomcasemarkcasedevgo.F([]string{"string"}),
 		LanguageCode:      githubcomcasemarkcasedevgo.F("language_code"),
 		LanguageDetection: githubcomcasemarkcasedevgo.F(true),
 		ObjectID:          githubcomcasemarkcasedevgo.F("object_id"),
