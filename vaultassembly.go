@@ -143,14 +143,17 @@ func (r vaultAssemblyNewResponseVolumeJSON) RawJSON() string {
 }
 
 type VaultAssemblyGetResponse struct {
-	ID              string                           `json:"id"`
-	ClientReference string                           `json:"clientReference"`
-	Error           VaultAssemblyGetResponseError    `json:"error"`
-	Status          VaultAssemblyGetResponseStatus   `json:"status"`
-	Timings         VaultAssemblyGetResponseTimings  `json:"timings"`
-	VaultID         string                           `json:"vaultId"`
-	Volumes         []VaultAssemblyGetResponseVolume `json:"volumes"`
-	JSON            vaultAssemblyGetResponseJSON     `json:"-"`
+	ID              string `json:"id"`
+	ClientReference string `json:"clientReference"`
+	// What the assembly cost Case.dev, once it is completed or failed. Internal COGS,
+	// not a price.
+	Cogs    VaultAssemblyGetResponseCogs     `json:"cogs"`
+	Error   VaultAssemblyGetResponseError    `json:"error"`
+	Status  VaultAssemblyGetResponseStatus   `json:"status"`
+	Timings VaultAssemblyGetResponseTimings  `json:"timings"`
+	VaultID string                           `json:"vaultId"`
+	Volumes []VaultAssemblyGetResponseVolume `json:"volumes"`
+	JSON    vaultAssemblyGetResponseJSON     `json:"-"`
 }
 
 // vaultAssemblyGetResponseJSON contains the JSON metadata for the struct
@@ -158,6 +161,7 @@ type VaultAssemblyGetResponse struct {
 type vaultAssemblyGetResponseJSON struct {
 	ID              apijson.Field
 	ClientReference apijson.Field
+	Cogs            apijson.Field
 	Error           apijson.Field
 	Status          apijson.Field
 	Timings         apijson.Field
@@ -172,6 +176,43 @@ func (r *VaultAssemblyGetResponse) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (r vaultAssemblyGetResponseJSON) RawJSON() string {
+	return r.raw
+}
+
+// What the assembly cost Case.dev, once it is completed or failed. Internal COGS,
+// not a price.
+type VaultAssemblyGetResponseCogs struct {
+	ComputeMicros  int64                            `json:"computeMicros"`
+	CPU            float64                          `json:"cpu"`
+	MemoryMib      int64                            `json:"memoryMib"`
+	OutputBytes    int64                            `json:"outputBytes"`
+	RateVersion    string                           `json:"rateVersion"`
+	SourceBytes    int64                            `json:"sourceBytes"`
+	TransferMicros int64                            `json:"transferMicros"`
+	WorkerSeconds  float64                          `json:"workerSeconds"`
+	JSON           vaultAssemblyGetResponseCogsJSON `json:"-"`
+}
+
+// vaultAssemblyGetResponseCogsJSON contains the JSON metadata for the struct
+// [VaultAssemblyGetResponseCogs]
+type vaultAssemblyGetResponseCogsJSON struct {
+	ComputeMicros  apijson.Field
+	CPU            apijson.Field
+	MemoryMib      apijson.Field
+	OutputBytes    apijson.Field
+	RateVersion    apijson.Field
+	SourceBytes    apijson.Field
+	TransferMicros apijson.Field
+	WorkerSeconds  apijson.Field
+	raw            string
+	ExtraFields    map[string]apijson.Field
+}
+
+func (r *VaultAssemblyGetResponseCogs) UnmarshalJSON(data []byte) (err error) {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func (r vaultAssemblyGetResponseCogsJSON) RawJSON() string {
 	return r.raw
 }
 
@@ -285,7 +326,9 @@ func (r vaultAssemblyGetResponseVolumeJSON) RawJSON() string {
 }
 
 type VaultAssemblyNewParams struct {
-	// Source PDFs. Page ranges refer to a source by its index in this list.
+	// Source PDFs, or ingested office files (spreadsheets, CSV/TSV, Word), which are
+	// assembled from the PDF version ingestion saved for them. Page ranges refer to a
+	// source by its index in this list.
 	Sources        param.Field[[]VaultAssemblyNewParamsSource] `json:"sources" api:"required"`
 	Volumes        param.Field[[]VaultAssemblyNewParamsVolume] `json:"volumes" api:"required"`
 	IdempotencyKey param.Field[string]                         `header:"Idempotency-Key" api:"required"`

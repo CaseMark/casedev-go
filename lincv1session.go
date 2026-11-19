@@ -439,6 +439,11 @@ type LincV1SessionGetEventsParams struct {
 	ExcludeEventTypes param.Field[[]string] `query:"excludeEventTypes"`
 	// Maximum number of events to return.
 	Limit param.Field[int64] `query:"limit"`
+	// asc (default) replays oldest first. desc returns the newest events first, still
+	// after the cursor, so a small limit reads only the latest events.
+	Order param.Field[LincV1SessionGetEventsParamsOrder] `query:"order"`
+	// Comma-separated Linc event types to return; other types are omitted.
+	Types param.Field[[]string] `query:"types"`
 }
 
 // URLQuery serializes [LincV1SessionGetEventsParams]'s query parameters as
@@ -448,6 +453,23 @@ func (r LincV1SessionGetEventsParams) URLQuery() (v url.Values) {
 		ArrayFormat:  apiquery.ArrayQueryFormatComma,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+// asc (default) replays oldest first. desc returns the newest events first, still
+// after the cursor, so a small limit reads only the latest events.
+type LincV1SessionGetEventsParamsOrder string
+
+const (
+	LincV1SessionGetEventsParamsOrderAsc  LincV1SessionGetEventsParamsOrder = "asc"
+	LincV1SessionGetEventsParamsOrderDesc LincV1SessionGetEventsParamsOrder = "desc"
+)
+
+func (r LincV1SessionGetEventsParamsOrder) IsKnown() bool {
+	switch r {
+	case LincV1SessionGetEventsParamsOrderAsc, LincV1SessionGetEventsParamsOrderDesc:
+		return true
+	}
+	return false
 }
 
 type LincV1SessionGetMessagesParams struct {
