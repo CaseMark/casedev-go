@@ -37,8 +37,7 @@ type VaultService struct {
 	Groups *VaultGroupService
 	// Secure document storage with semantic search
 	Multipart *VaultMultipartService
-	// Vault object management, content access, and document operations
-	Objects *VaultObjectService
+	Objects   *VaultObjectService
 	// Vault-scoped persistent memory and semantic retrieval
 	Memory *VaultMemoryService
 }

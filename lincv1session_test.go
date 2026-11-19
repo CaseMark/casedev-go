@@ -204,6 +204,8 @@ func TestLincV1SessionGetEventsWithOptionalParams(t *testing.T) {
 			Cursor:            githubcomcasemarkcasedevgo.F(int64(0)),
 			ExcludeEventTypes: githubcomcasemarkcasedevgo.F([]string{"string"}),
 			Limit:             githubcomcasemarkcasedevgo.F(int64(1)),
+			Order:             githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.LincV1SessionGetEventsParamsOrderAsc),
+			Types:             githubcomcasemarkcasedevgo.F([]string{"string"}),
 		},
 	)
 	if err != nil {
