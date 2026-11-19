@@ -18,8 +18,6 @@ import (
 	"github.com/CaseMark/casedev-go/option"
 )
 
-// Vault object management, content access, and document operations
-//
 // VaultObjectService contains methods and other services that help with
 // interacting with the casedev API.
 //
@@ -152,8 +150,10 @@ func (r *VaultObjectService) NewPresignedURL(ctx context.Context, id string, obj
 
 // Downloads a file from a vault by redirecting to a short-lived presigned S3 URL.
 // Useful for retrieving contracts, depositions, case files, and other legal
-// documents stored in your vault.
-func (r *VaultObjectService) Download(ctx context.Context, id string, objectID string, opts ...option.RequestOption) (res *http.Response, err error) {
+// documents stored in your vault. With format=pdf, a spreadsheet downloads as its
+// PDF version (see POST /vault/{id}/objects/{objectId}/pdf); a PDF downloads as
+// usual.
+func (r *VaultObjectService) Download(ctx context.Context, id string, objectID string, query VaultObjectDownloadParams, opts ...option.RequestOption) (res *http.Response, err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/octet-stream")}, opts...)
 	if id == "" {
@@ -165,7 +165,7 @@ func (r *VaultObjectService) Download(ctx context.Context, id string, objectID s
 		return nil, err
 	}
 	path := fmt.Sprintf("vault/%s/objects/%s/download", id, objectID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return res, err
 }
 
@@ -302,6 +302,31 @@ func (r *VaultObjectService) Organize(ctx context.Context, id string, body Vault
 	path := fmt.Sprintf("vault/%s/objects/organize", id)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return res, err
+}
+
+// Starts making the PDF version of a spreadsheet object (.xlsx, .xlsm, .xlsb,
+// .xls, .ods, .numbers, .csv, .tsv). Spreadsheets get one automatically when they
+// are ingested; call this for objects stored without ingestion, or with force=true
+// to make it again. Each visible sheet prints on landscape Letter at 100% scale,
+// down the rows and then across the columns, with no repeated header rows; hidden
+// sheets, rows and columns are left out and listed. The PDF is a copy: the object,
+// its text and its search index are unchanged. Completion is reported through
+// vault.object.pdf.completed or vault.object.pdf.failed; download it with GET
+// /vault/{id}/objects/{objectId}/download?format=pdf.
+func (r *VaultObjectService) ToPdf(ctx context.Context, id string, objectID string, body VaultObjectToPdfParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if id == "" {
+		err = errors.New("missing required id parameter")
+		return err
+	}
+	if objectID == "" {
+		err = errors.New("missing required objectId parameter")
+		return err
+	}
+	path := fmt.Sprintf("vault/%s/objects/%s/pdf", id, objectID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	return err
 }
 
 type VaultObjectGetResponse struct {
@@ -720,6 +745,8 @@ type VaultObjectNewPresignedURLResponse struct {
 	PresignedURL string `json:"presignedUrl"`
 	// S3 object key
 	S3Key string `json:"s3Key"`
+	// Which file the URL points at
+	Variant VaultObjectNewPresignedURLResponseVariant `json:"variant"`
 	// The vault identifier
 	VaultID string                                 `json:"vaultId"`
 	JSON    vaultObjectNewPresignedURLResponseJSON `json:"-"`
@@ -737,6 +764,7 @@ type vaultObjectNewPresignedURLResponseJSON struct {
 	Operation    apijson.Field
 	PresignedURL apijson.Field
 	S3Key        apijson.Field
+	Variant      apijson.Field
 	VaultID      apijson.Field
 	raw          string
 	ExtraFields  map[string]apijson.Field
@@ -751,11 +779,12 @@ func (r vaultObjectNewPresignedURLResponseJSON) RawJSON() string {
 }
 
 type VaultObjectNewPresignedURLResponseMetadata struct {
-	Bucket      string                                         `json:"bucket"`
-	ContentType string                                         `json:"contentType"`
-	Region      string                                         `json:"region"`
-	SizeBytes   int64                                          `json:"sizeBytes"`
-	JSON        vaultObjectNewPresignedURLResponseMetadataJSON `json:"-"`
+	Bucket      string `json:"bucket"`
+	ContentType string `json:"contentType"`
+	Region      string `json:"region"`
+	// Size of the file the URL points at
+	SizeBytes int64                                          `json:"sizeBytes"`
+	JSON      vaultObjectNewPresignedURLResponseMetadataJSON `json:"-"`
 }
 
 // vaultObjectNewPresignedURLResponseMetadataJSON contains the JSON metadata for
@@ -775,6 +804,22 @@ func (r *VaultObjectNewPresignedURLResponseMetadata) UnmarshalJSON(data []byte) 
 
 func (r vaultObjectNewPresignedURLResponseMetadataJSON) RawJSON() string {
 	return r.raw
+}
+
+// Which file the URL points at
+type VaultObjectNewPresignedURLResponseVariant string
+
+const (
+	VaultObjectNewPresignedURLResponseVariantOriginal VaultObjectNewPresignedURLResponseVariant = "original"
+	VaultObjectNewPresignedURLResponseVariantView     VaultObjectNewPresignedURLResponseVariant = "view"
+)
+
+func (r VaultObjectNewPresignedURLResponseVariant) IsKnown() bool {
+	switch r {
+	case VaultObjectNewPresignedURLResponseVariantOriginal, VaultObjectNewPresignedURLResponseVariantView:
+		return true
+	}
+	return false
 }
 
 type VaultObjectGetChunksResponse struct {
@@ -1370,6 +1415,10 @@ type VaultObjectNewPresignedURLParams struct {
 	// File size in bytes (optional, max 5GB for single PUT uploads). When provided for
 	// PUT operations, enforces exact file size at S3 level.
 	SizeBytes param.Field[int64] `json:"sizeBytes"`
+	// Which file to sign for GET and HEAD. 'view' returns the PDF's fast-opening
+	// viewing copy when it has one, and the original otherwise. Use it only to display
+	// a PDF; downloads and exports should use the original.
+	Variant param.Field[VaultObjectNewPresignedURLParamsVariant] `json:"variant"`
 }
 
 func (r VaultObjectNewPresignedURLParams) MarshalJSON() (data []byte, err error) {
@@ -1389,6 +1438,56 @@ const (
 func (r VaultObjectNewPresignedURLParamsOperation) IsKnown() bool {
 	switch r {
 	case VaultObjectNewPresignedURLParamsOperationGet, VaultObjectNewPresignedURLParamsOperationPut, VaultObjectNewPresignedURLParamsOperationDelete, VaultObjectNewPresignedURLParamsOperationHead:
+		return true
+	}
+	return false
+}
+
+// Which file to sign for GET and HEAD. 'view' returns the PDF's fast-opening
+// viewing copy when it has one, and the original otherwise. Use it only to display
+// a PDF; downloads and exports should use the original.
+type VaultObjectNewPresignedURLParamsVariant string
+
+const (
+	VaultObjectNewPresignedURLParamsVariantOriginal VaultObjectNewPresignedURLParamsVariant = "original"
+	VaultObjectNewPresignedURLParamsVariantView     VaultObjectNewPresignedURLParamsVariant = "view"
+)
+
+func (r VaultObjectNewPresignedURLParamsVariant) IsKnown() bool {
+	switch r {
+	case VaultObjectNewPresignedURLParamsVariantOriginal, VaultObjectNewPresignedURLParamsVariantView:
+		return true
+	}
+	return false
+}
+
+type VaultObjectDownloadParams struct {
+	// original (default) returns the file as uploaded. pdf returns a spreadsheet's PDF
+	// version, or a PDF as usual.
+	Format param.Field[VaultObjectDownloadParamsFormat] `query:"format"`
+}
+
+// URLQuery serializes [VaultObjectDownloadParams]'s query parameters as
+// `url.Values`.
+func (r VaultObjectDownloadParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// original (default) returns the file as uploaded. pdf returns a spreadsheet's PDF
+// version, or a PDF as usual.
+type VaultObjectDownloadParamsFormat string
+
+const (
+	VaultObjectDownloadParamsFormatOriginal VaultObjectDownloadParamsFormat = "original"
+	VaultObjectDownloadParamsFormatPdf      VaultObjectDownloadParamsFormat = "pdf"
+)
+
+func (r VaultObjectDownloadParamsFormat) IsKnown() bool {
+	switch r {
+	case VaultObjectDownloadParamsFormatOriginal, VaultObjectDownloadParamsFormatPdf:
 		return true
 	}
 	return false
@@ -1580,4 +1679,17 @@ type VaultObjectOrganizeParamsBodyMovesMove struct {
 
 func (r VaultObjectOrganizeParamsBodyMovesMove) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
+}
+
+type VaultObjectToPdfParams struct {
+	// Make the PDF version again even when one is ready
+	Force param.Field[bool] `query:"force"`
+}
+
+// URLQuery serializes [VaultObjectToPdfParams]'s query parameters as `url.Values`.
+func (r VaultObjectToPdfParams) URLQuery() (v url.Values) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatComma,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }

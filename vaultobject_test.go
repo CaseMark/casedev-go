@@ -199,6 +199,7 @@ func TestVaultObjectNewPresignedURLWithOptionalParams(t *testing.T) {
 			ExpiresIn:   githubcomcasemarkcasedevgo.F(int64(60)),
 			Operation:   githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectNewPresignedURLParamsOperationGet),
 			SizeBytes:   githubcomcasemarkcasedevgo.F(int64(1)),
+			Variant:     githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectNewPresignedURLParamsVariantOriginal),
 		},
 	)
 	if err != nil {
@@ -210,7 +211,7 @@ func TestVaultObjectNewPresignedURLWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestVaultObjectDownload(t *testing.T) {
+func TestVaultObjectDownloadWithOptionalParams(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		w.Write([]byte("abc"))
@@ -225,6 +226,9 @@ func TestVaultObjectDownload(t *testing.T) {
 		context.TODO(),
 		"id",
 		"objectId",
+		githubcomcasemarkcasedevgo.VaultObjectDownloadParams{
+			Format: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultObjectDownloadParamsFormatOriginal),
+		},
 	)
 	if err != nil {
 		var apierr *githubcomcasemarkcasedevgo.Error
@@ -458,6 +462,35 @@ func TestVaultObjectOrganizeWithOptionalParams(t *testing.T) {
 					"foo": "string",
 				}),
 			},
+		},
+	)
+	if err != nil {
+		var apierr *githubcomcasemarkcasedevgo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestVaultObjectToPdfWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcomcasemarkcasedevgo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAPIKey("My API Key"),
+	)
+	err := client.Vault.Objects.ToPdf(
+		context.TODO(),
+		"id",
+		"objectId",
+		githubcomcasemarkcasedevgo.VaultObjectToPdfParams{
+			Force: githubcomcasemarkcasedevgo.F(true),
 		},
 	)
 	if err != nil {
