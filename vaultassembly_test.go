@@ -29,9 +29,9 @@ func TestVaultAssemblyNewWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"id",
 		githubcomcasemarkcasedevgo.VaultAssemblyNewParams{
-			Sources: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.VaultAssemblyNewParamsSource{{
+			Sources: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.VaultAssemblyNewParamsSourceUnion{githubcomcasemarkcasedevgo.VaultAssemblyNewParamsSourcesObject{
 				ObjectID:  githubcomcasemarkcasedevgo.F("objectId"),
-				Rendition: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultAssemblyNewParamsSourcesRenditionSearchablePdf),
+				Rendition: githubcomcasemarkcasedevgo.F(githubcomcasemarkcasedevgo.VaultAssemblyNewParamsSourcesObjectRenditionSearchablePdf),
 			}}),
 			Volumes: githubcomcasemarkcasedevgo.F([]githubcomcasemarkcasedevgo.VaultAssemblyNewParamsVolume{{
 				Filename: githubcomcasemarkcasedevgo.F("filename"),

@@ -327,11 +327,12 @@ func (r vaultAssemblyGetResponseVolumeJSON) RawJSON() string {
 
 type VaultAssemblyNewParams struct {
 	// Source PDFs, or ingested office files (spreadsheets, CSV/TSV, Word), which are
-	// assembled from the PDF version ingestion saved for them. Page ranges refer to a
-	// source by its index in this list.
-	Sources        param.Field[[]VaultAssemblyNewParamsSource] `json:"sources" api:"required"`
-	Volumes        param.Field[[]VaultAssemblyNewParamsVolume] `json:"volumes" api:"required"`
-	IdempotencyKey param.Field[string]                         `header:"Idempotency-Key" api:"required"`
+	// assembled from the PDF version ingestion saved for them. A source can also be a
+	// PDF you made, such as a cover or notice letter, sent inline. Page ranges refer
+	// to a source by its index in this list.
+	Sources        param.Field[[]VaultAssemblyNewParamsSourceUnion] `json:"sources" api:"required"`
+	Volumes        param.Field[[]VaultAssemblyNewParamsVolume]      `json:"volumes" api:"required"`
+	IdempotencyKey param.Field[string]                              `header:"Idempotency-Key" api:"required"`
 	// Bates numbering that continues across every volume without its own series. Text
 	// must be printable ASCII.
 	Bates           param.Field[VaultAssemblyNewParamsBates] `json:"bates"`
@@ -341,8 +342,8 @@ type VaultAssemblyNewParams struct {
 	Compression param.Field[VaultAssemblyNewParamsCompression] `json:"compression"`
 	// Optimize volumes for web viewing
 	Linearize param.Field[bool] `json:"linearize"`
-	// Put every page upright on a US Letter portrait sheet: landscape pages turn a
-	// quarter turn, other sizes are scaled to fit
+	// Put every page upright on a US Letter sheet: portrait pages on a portrait sheet,
+	// landscape pages on a landscape sheet, other sizes scaled to fit
 	PageSize param.Field[VaultAssemblyNewParamsPageSize] `json:"pageSize"`
 }
 
@@ -351,13 +352,62 @@ func (r VaultAssemblyNewParams) MarshalJSON() (data []byte, err error) {
 }
 
 type VaultAssemblyNewParamsSource struct {
-	ObjectID  param.Field[string]                                 `json:"objectId" api:"required"`
+	ObjectID param.Field[string] `json:"objectId"`
+	// A base64 PDF of up to 10 pages and 1 MB, assembled as given. Up to 10 per
+	// request.
+	Pdf       param.Field[string]                                 `json:"pdf" format:"byte"`
 	Rendition param.Field[VaultAssemblyNewParamsSourcesRendition] `json:"rendition"`
 }
 
 func (r VaultAssemblyNewParamsSource) MarshalJSON() (data []byte, err error) {
 	return apijson.MarshalRoot(r)
 }
+
+func (r VaultAssemblyNewParamsSource) implementsVaultAssemblyNewParamsSourceUnion() {}
+
+// Satisfied by [VaultAssemblyNewParamsSourcesObject],
+// [VaultAssemblyNewParamsSourcesPdf], [VaultAssemblyNewParamsSource].
+type VaultAssemblyNewParamsSourceUnion interface {
+	implementsVaultAssemblyNewParamsSourceUnion()
+}
+
+type VaultAssemblyNewParamsSourcesObject struct {
+	ObjectID  param.Field[string]                                       `json:"objectId" api:"required"`
+	Rendition param.Field[VaultAssemblyNewParamsSourcesObjectRendition] `json:"rendition"`
+}
+
+func (r VaultAssemblyNewParamsSourcesObject) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r VaultAssemblyNewParamsSourcesObject) implementsVaultAssemblyNewParamsSourceUnion() {}
+
+type VaultAssemblyNewParamsSourcesObjectRendition string
+
+const (
+	VaultAssemblyNewParamsSourcesObjectRenditionSearchablePdf VaultAssemblyNewParamsSourcesObjectRendition = "searchable_pdf"
+	VaultAssemblyNewParamsSourcesObjectRenditionOriginal      VaultAssemblyNewParamsSourcesObjectRendition = "original"
+)
+
+func (r VaultAssemblyNewParamsSourcesObjectRendition) IsKnown() bool {
+	switch r {
+	case VaultAssemblyNewParamsSourcesObjectRenditionSearchablePdf, VaultAssemblyNewParamsSourcesObjectRenditionOriginal:
+		return true
+	}
+	return false
+}
+
+type VaultAssemblyNewParamsSourcesPdf struct {
+	// A base64 PDF of up to 10 pages and 1 MB, assembled as given. Up to 10 per
+	// request.
+	Pdf param.Field[string] `json:"pdf" api:"required" format:"byte"`
+}
+
+func (r VaultAssemblyNewParamsSourcesPdf) MarshalJSON() (data []byte, err error) {
+	return apijson.MarshalRoot(r)
+}
+
+func (r VaultAssemblyNewParamsSourcesPdf) implementsVaultAssemblyNewParamsSourceUnion() {}
 
 type VaultAssemblyNewParamsSourcesRendition string
 
@@ -577,8 +627,8 @@ func (r VaultAssemblyNewParamsCompressionQuality) IsKnown() bool {
 	return false
 }
 
-// Put every page upright on a US Letter portrait sheet: landscape pages turn a
-// quarter turn, other sizes are scaled to fit
+// Put every page upright on a US Letter sheet: portrait pages on a portrait sheet,
+// landscape pages on a landscape sheet, other sizes scaled to fit
 type VaultAssemblyNewParamsPageSize string
 
 const (
